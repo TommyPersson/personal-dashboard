@@ -1,7 +1,7 @@
 
 .NotificationsAppWidget {
   min-width: 450px;
-  max-width: 450px;// TODO media queries to get reasonable size for different screens
+  max-width: 450px; // TODO media queries to get reasonable size for different screens
   height: 100vh;
 }
 
@@ -11,9 +11,9 @@
 }
 
 .ToggleMinimizedButton {
-  margin: -8px !important;
+  margin: calc(var(--mui-sp-1) * -1) !important;
 
   svg {
-    font-size: 1.25rem !important;
+    font-size: var(--mui-icon-size-small) !important;
   }
 }

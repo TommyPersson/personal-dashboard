@@ -4,14 +4,13 @@
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 20px;
-  border-right: 1px solid rgba(0,0,0,0.12);
-  //scrollbar-width: auto;
-  //scrollbar-gutter: stable both-edges;
+  padding: var(--mui-sp-2);
+  border-right: var(--mui-divider-border);
+  border-right: var(--mui-divider-border);
 }
 
 .AppWidgetHeader {
   svg {
-    font-size: 1.25rem; // The mui "small" size
+    font-size: var(--mui-icon-size-small);
   }
 }

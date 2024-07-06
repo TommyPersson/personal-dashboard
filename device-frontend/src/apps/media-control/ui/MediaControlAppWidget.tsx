@@ -5,7 +5,7 @@ import {
   SkipNextOutlined,
   SkipPreviousOutlined,
 } from "@mui/icons-material"
-import { Card, CardContent, IconButton, Stack, Typography } from "@mui/material"
+import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material"
 import { PauseOrPlayAction, SkipNextAction, SkipPreviousAction } from "@src/apps/media-control/actions"
 import { MediaControlStatusEntity } from "@src/apps/media-control/entities/MediaControlStatusEntity.ts"
 import { MediaControlStatus, PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
@@ -54,23 +54,19 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
   const backgroundImage = getThumbnailImageSrc(state.status)
 
   return (
-    <CardContent style={{
-      position: "relative",
-      background: "#0a0a0a",
-      backgroundImage: backgroundImage,
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      padding: 0,
-    }}>
-      <Stack spacing={1} style={{
-        color: "white",
-        minHeight: 130,
-        padding: 16,
-        backdropFilter: "blur(3px)",
-        alignItems: "flex-start"
-      }}>
-        <Typography variant={"subtitle1"} style={{ background: "#000000aa", padding: 8, lineHeight: 1.3 }}>{state.status?.mediaInfo?.title}</Typography>
-        <Typography variant={"caption"} style={{ background: "#000000aa", padding: 8, lineHeight: 1.3 }}>{state.status?.mediaInfo?.artist}</Typography>
+    <CardContent
+      className={classes.OverlayCardContainer}
+      style={{ backgroundImage: backgroundImage }}
+    >
+      <Stack className={classes.OverlayContainer}>
+        <Typography
+          variant={"subtitle1"}
+          className={classes.OverlayText}
+          children={state.status?.mediaInfo?.title} />
+        <Typography
+          variant={"caption"}
+          className={classes.OverlayText}
+          children={state.status?.mediaInfo?.artist} />
       </Stack>
     </CardContent>
   )

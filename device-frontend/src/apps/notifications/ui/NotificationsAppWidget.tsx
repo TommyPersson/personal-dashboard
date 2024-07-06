@@ -60,13 +60,6 @@ export const NotificationsAppWidget = () => {
           rightContent={rightContent}
         />
         <NotificationsList notifications={state.notifications} />
-
-        {/*
-          <>
-            <Button onClick={notifications.add}>Add</Button>
-            <Button onClick={notifications.remove}>Remove</Button>
-          </>
-        */}
         <Box flex={1} />
         <Stack direction={"row"}>
           <ToggleMinimizedButton state={state} />

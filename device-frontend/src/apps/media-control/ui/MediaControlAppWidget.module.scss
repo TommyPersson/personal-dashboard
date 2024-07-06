@@ -3,3 +3,27 @@
   min-width: 360px;
   max-width: 360px;
 }
+
+
+.OverlayCardContainer {
+  position: relative;
+  background: #0a0a0a;
+  background-position: center;
+  background-size: cover;
+}
+
+.OverlayContainer {
+  color: white;
+  min-height: 130px;
+  backdrop-filter: blur(3px);
+  align-items: flex-start;
+  gap: var(--mui-sp-1);
+  display: block;
+  line-height: 1.4;
+}
+
+.OverlayText {
+  background: #000000aa;
+  padding: calc(var(--mui-sp-1) / 2);
+  line-height: 200% !important;
+}

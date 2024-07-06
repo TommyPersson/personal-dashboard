@@ -11,27 +11,27 @@
     width: 150px;
     height: 150px;
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: var(--mui-sp-2);
+    right: var(--mui-sp-2);
   }
 }
 
 .DailyForecastTable {
   td {
-    padding: 4px 4px;
+    padding: var(--mui-sp-1s) var(--mui-sp-1s);
   }
 
   td:first-child {
-    padding-left: 16px;
+    padding-left: var(--mui-sp-2);
   }
 
   td:last-child {
-    padding-left: 16px;
+    padding-left: var(--mui-sp-2);
   }
 }
 
 .WeatherIcon {
-  margin: -10px;
+  margin: calc(-1  * var(--mui-sp-1));
 }
 
 .DailyForecastRow {
@@ -42,9 +42,9 @@
 }
 
 .HourlyForecastColumns {
-  gap: 16px;
+  gap: var(--mui-sp-2);
   overflow-x: auto;
-  padding: 0 16px 16px;
+  padding: 0 var(--mui-sp-2) var(--mui-sp-2);
 }
 
 .HourlyForecastColumn {
@@ -59,7 +59,7 @@
 }
 
 .HumidityIcon {
-  font-size: 0.8em !important;
+  font-size: small !important;
   color: var(--mui-palette-text-secondary)
 }
 
