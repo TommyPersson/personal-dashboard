@@ -1,0 +1,54 @@
+
+.ShellScreen {
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-rows: [status-bar-slot] auto [rest] 1fr;
+  grid-template-columns: [notification-area-slot] auto [app-area-slot] 4fr [app-selected-slot] auto;
+  background: #fafafa;
+}
+
+.StatusBarSlot {
+  grid-column: 1 / span 3;
+  grid-row: 1;
+  //height: 50px;
+  background: indianred;
+}
+
+.NotificationAreaSlot {
+  grid-column: notification-area-slot;
+  grid-row: rest;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.AppAreaSlot {
+  grid-column: app-area-slot;
+  grid-row: rest;
+  overflow-y: hidden;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.AppSelectorSlot {
+  grid-column: app-selected-slot;
+  grid-row: rest;
+  width: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-left: 1px solid rgba(0,0,0,0.12);
+  border-collapse: collapse;
+  padding: 20px;
+  background: white;
+}

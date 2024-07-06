@@ -1,0 +1,43 @@
+
+.RunDeckAppWidget {
+  min-width: 360px;
+}
+
+.ItemButton {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-start !important;
+  font-size: 10px !important;
+  position: relative;
+  padding: 0 !important;
+  height: 95px;
+
+  .ItemImageContainer {
+    position: relative;
+    width: 75px;
+    height: 75px;
+
+    img {
+      width: 32px;
+      aspect-ratio: 1 / 1;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  .ItemText {
+    background: #00000033;
+    min-height: 20px;
+    width: 75px;
+    display: flex;
+    place-items: center;
+    place-content: center;
+
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+}

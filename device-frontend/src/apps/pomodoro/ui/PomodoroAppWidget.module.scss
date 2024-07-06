@@ -1,0 +1,12 @@
+
+.PomodoroAppWidget {
+  min-width: 360px;
+}
+
+.TimerProgress {
+  transform: scaleX(-1) rotate(-90deg) !important;
+  border-radius: 100%;
+  background: #fafafa;
+  margin: auto;
+  width: 100px;
+}

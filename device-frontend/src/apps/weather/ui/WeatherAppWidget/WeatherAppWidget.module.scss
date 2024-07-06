@@ -1,0 +1,68 @@
+.WeatherAppWidget {
+  min-width: 400px;
+  max-width: 400px;
+}
+
+
+.TodayForecastCard {
+  position: relative;
+
+  img {
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+}
+
+.DailyForecastTable {
+  td {
+    padding: 4px 4px;
+  }
+
+  td:first-child {
+    padding-left: 16px;
+  }
+
+  td:last-child {
+    padding-left: 16px;
+  }
+}
+
+.WeatherIcon {
+  margin: -10px;
+}
+
+.DailyForecastRow {
+  .WeatherIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.HourlyForecastColumns {
+  gap: 16px;
+  overflow-x: auto;
+  padding: 0 16px 16px;
+}
+
+.HourlyForecastColumn {
+  align-items: center;
+
+  .WeatherIcon {
+    width: 48px;
+    height: 48px;
+    margin: 0 -24px;
+    pointer-events: none;
+  }
+}
+
+.HumidityIcon {
+  font-size: 0.8em !important;
+  color: var(--mui-palette-text-secondary)
+}
+
+.LastRefreshedAtText {
+  align-self: center;
+}
