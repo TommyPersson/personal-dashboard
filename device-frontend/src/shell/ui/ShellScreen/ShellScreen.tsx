@@ -1,6 +1,6 @@
-import { Divider, Stack } from "@mui/material"
+import { Stack } from "@mui/material"
 import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
-import { MediaControlAppWidget } from "@src/apps/media-control/ui/MediaControlAppWidget.tsx"
+import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
 import { PomodoroAppWidget } from "@src/apps/pomodoro/ui/PomodoroAppWidget.tsx"
 import { RunDeckAppWidget } from "@src/apps/run-deck/ui/RunDeckAppWidget.tsx"
@@ -31,7 +31,7 @@ const appWidgets: AppWidgetProvider[] = [
   {
     id: "media-control-app",
     title: "Media Control",
-    factory: () => <MediaControlAppWidget />,
+    factory: () => <MediaControlUI />,
   },
   {
     id: "hot-keys-app",
@@ -61,8 +61,8 @@ export const ShellScreen = () => {
           {appWidgets.map(it => <React.Fragment key={it.id}>{it.factory()}</React.Fragment>)}
         </Stack>
       </div>
-      <div className={classes.AppSelectorSlot}>
-        apps bar
+      <div id={"appBarSelector"} className={classes.AppSelectorSlot}>
+        <div id={"appBarPortal"} className={classes.AppBarPortal}></div>
       </div>
     </div>
   )

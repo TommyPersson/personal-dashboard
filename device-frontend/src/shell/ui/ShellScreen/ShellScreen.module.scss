@@ -40,6 +40,7 @@
   align-items: stretch;
   justify-content: flex-start;
   position: relative;
+  padding-right: 400px;
 }
 
 .AppAreaPortal {
@@ -55,11 +56,18 @@
 .AppSelectorSlot {
   grid-column: app-selected-slot;
   grid-row: rest;
-  width: 100px;
   overflow-y: auto;
   overflow-x: hidden;
   border-left: 1px solid rgba(0,0,0,0.12);
   border-collapse: collapse;
-  padding: 20px;
+  padding: var(--mui-sp-2);
+  width: 80px;
   background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.AppBarPortal {
+
 }

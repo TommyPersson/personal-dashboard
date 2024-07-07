@@ -4,49 +4,54 @@ import {
   PlayArrowOutlined,
   SkipNextOutlined,
   SkipPreviousOutlined,
+  SouthEastOutlined,
 } from "@mui/icons-material"
-import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material"
+import { Badge, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
 import { PauseOrPlayAction, SkipNextAction, SkipPreviousAction } from "@src/apps/media-control/actions"
 import { MediaControlStatusEntity } from "@src/apps/media-control/entities/MediaControlStatusEntity.ts"
 import { MediaControlStatus, PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
-import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
+import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { delay } from "@src/infrastructure/utils"
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 
-import classes from "./MediaControlAppWidget.module.scss"
+import classes from "./MediaControlUI.module.scss"
 
 
-export const MediaControlAppWidget = () => {
+export const MediaControlUI = () => {
   const state = useMediaControlState({ refreshIntervalMs: 5000 })
 
-  const cardContent = state.status
-    ? <MediaInfoView state={state} />
-    : <EmptyView />
-
   return (
-    <AppWidget className={classes.MediaControlAppWidget}>
-      <Stack spacing={2}>
-        <AppWidgetHeader
-          title={"Media Control"}
-          icon={<MusicNoteOutlined />}
-        />
-        <Card>
-          {cardContent}
-          <PlaybackControlsView state={state} />
-        </Card>
-      </Stack>
-    </AppWidget>
+    <>
+      <MediaControlOverlay state={state} />
+      <AppBarIconPortal appIconId={"media-control"}>
+        <MediaControlAppBarButton state={state} />
+      </AppBarIconPortal>
+    </>
   )
 }
 
-const EmptyView = () => (
-  <CardContent>
-    <Typography variant={"subtitle1"} textAlign={"center"}>Nothing is being played</Typography>
-  </CardContent>
-)
+export const MediaControlOverlay = (props: { state: MediaControlState }) => {
+  const { state } = props
+
+  if (!state.status) {
+    return
+  }
+
+  return (
+    <AppAreaOverlayPortal>
+      <Slide direction={"up"} in={!state.isMinimized}>
+        <Card raised className={classes.MediaControlOverlay}>
+          <MediaInfoView state={state} />
+          <PlaybackControlsView state={state} />
+        </Card>
+      </Slide>
+    </AppAreaOverlayPortal>
+  )
+}
 
 const MediaInfoView = (props: { state: MediaControlState }) => {
   const { state } = props
@@ -55,17 +60,17 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
 
   return (
     <CardContent
-      className={classes.OverlayCardContainer}
+      className={classes.ThumbnailCardContainer}
       style={{ backgroundImage: backgroundImage }}
     >
-      <Stack className={classes.OverlayContainer}>
+      <Stack className={classes.ThumbnailContainer}>
         <Typography
           variant={"subtitle1"}
-          className={classes.OverlayText}
+          className={classes.ThumbnailText}
           children={state.status?.mediaInfo?.title} />
         <Typography
           variant={"caption"}
-          className={classes.OverlayText}
+          className={classes.ThumbnailText}
           children={state.status?.mediaInfo?.artist} />
       </Stack>
     </CardContent>
@@ -73,37 +78,41 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
 }
 
 const PlaybackControlsView = (props: { state: MediaControlState }) => {
-  const { status, controls } = props.state
+  const { status, controls, toggleMinimized } = props.state
 
   const pauseOrPlayIcon = status?.state === PlaybackState.Playing
     ? <PauseOutlined />
     : <PlayArrowOutlined />
 
-  return <CardContent component={Stack} style={{ padding: 0 }}>
-    <Stack direction={"row"} alignSelf={"center"} spacing={2}>
+  return (
+    <CardContent component={Stack} className={classes.PlaybackControlsView}>
+      <Stack direction={"row"} spacing={2}>
+        <IconButton
+          size={"large"}
+          children={<SkipPreviousOutlined />}
+          disabled={!controls.canSkipPrevious}
+          onClick={controls.skipPrevious}
+        />
+        <IconButton
+          size={"large"}
+          children={pauseOrPlayIcon}
+          disabled={!controls.canPauseOrPlay}
+          onClick={controls.pauseOrPlay}
+        />
+        <IconButton
+          size={"large"}
+          children={<SkipNextOutlined />}
+          disabled={!controls.canSkipNext}
+          onClick={controls.skipNext}
+        />
+      </Stack>
       <IconButton
         size={"large"}
-        children={<SkipPreviousOutlined />}
-        disabled={!controls.canSkipPrevious}
-        onClick={controls.skipPrevious}
-        style={{ transform: "scale(1.2)" }}
+        children={<SouthEastOutlined />}
+        onClick={toggleMinimized}
       />
-      <IconButton
-        size={"large"}
-        children={pauseOrPlayIcon}
-        disabled={!controls.canPauseOrPlay}
-        onClick={controls.pauseOrPlay}
-        style={{ transform: "scale(1.2)" }}
-      />
-      <IconButton
-        size={"large"}
-        children={<SkipNextOutlined />}
-        disabled={!controls.canSkipNext}
-        onClick={controls.skipNext}
-        style={{ transform: "scale(1.2)" }}
-      />
-    </Stack>
-  </CardContent>
+    </CardContent>
+  )
 }
 
 function getThumbnailImageSrc(status: MediaControlStatus | null) {
@@ -112,9 +121,31 @@ function getThumbnailImageSrc(status: MediaControlStatus | null) {
   return `url("/api/apps/media-control/thumbnail?cache-buster=${encodedTitle}")`
 }
 
+const MediaControlAppBarButton = (props: { state: MediaControlState }) => {
+  const { state } = props
+
+  if (!state.isMinimized) {
+    return null
+  }
+
+  return (
+    <IconButton
+      size={"large"}
+      children={(
+        <Badge color="secondary" variant={"dot"}>
+          <MusicNoteOutlined />
+        </Badge>
+      )}
+      onClick={state.toggleMinimized}
+    />
+  )
+}
+
 type MediaControlState = {
   status: MediaControlStatus | null
   controls: PlaybackControls
+  isMinimized: boolean
+  toggleMinimized: () => void
 }
 
 type PlaybackControls = {
@@ -159,9 +190,13 @@ function useMediaControlState(options: { refreshIntervalMs: number }): MediaCont
     refreshEntity()
   }, [executePauseOrPlay, refreshEntity])
 
-  useInterval(refreshEntity, options.refreshIntervalMs)
+  const [isMinimized, setIsMinimized] = useState(false)
 
-  const backgroundImage = getThumbnailImageSrc(entity.value)
+  const toggleMinimized = useCallback(() => {
+    setIsMinimized(s => !s)
+  }, [setIsMinimized])
+
+  useInterval(refreshEntity, options.refreshIntervalMs)
 
   return useMemo((): MediaControlState => ({
     status,
@@ -173,5 +208,7 @@ function useMediaControlState(options: { refreshIntervalMs: number }): MediaCont
       canPauseOrPlay: Boolean(status?.controls?.isSkipNextEnabled) && !pauseOrPlayAction.isInProgress,
       pauseOrPlay: handlePauseOrPlay,
     },
-  }), [entity, handleSkipNext, handleSkipPrevious, handlePauseOrPlay])
+    isMinimized,
+    toggleMinimized,
+  }), [entity, handleSkipNext, handleSkipPrevious, handlePauseOrPlay, isMinimized, toggleMinimized])
 }

@@ -1,0 +1,52 @@
+
+.ThumbnailCardContainer {
+  position: relative;
+  background: #0a0a0a;
+  background-position: center;
+  background-size: cover;
+  padding: 0 !important;
+}
+
+.ThumbnailContainer {
+  color: white;
+  width: 300px;
+  backdrop-filter: blur(3px);
+  align-items: flex-start;
+  gap: var(--mui-sp-1);
+  padding: var(--mui-sp-2);
+  display: block;
+  line-height: 1.4;
+}
+
+.ThumbnailText {
+  background: #000000aa;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1 !important;
+  padding: var(--mui-sp-1);
+  max-width: calc(300px - var(--mui-sp-2) * 2);
+  display: inline;
+}
+
+.MediaControlOverlay {
+  pointer-events: auto;
+  position: absolute;
+  right: var(--mui-sp-2);
+  bottom: var(--mui-sp-2);
+}
+
+.PlaybackControlsView {
+  padding: 0 !important;
+  flex-direction: row;
+  position: relative;
+
+  button {
+    transform: scale(1.2);
+  }
+
+  > button:last-child {
+    position: absolute;
+    right: 0;
+  }
+}
