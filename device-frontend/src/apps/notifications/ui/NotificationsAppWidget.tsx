@@ -8,9 +8,8 @@ import {
 import { Badge, Box, Button, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
 import { DismissNotificationAction } from "@src/apps/notifications/actions"
 import { NotificationsEntity } from "@src/apps/notifications/entities/NotificationsEntity.ts"
-import { NewNotificationMessage } from "@src/apps/notifications/models/NewNotificationMessage.ts"
+import { NewNotificationMessage, NotificationDismissedMessage } from "@src/apps/notifications/messages"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
-import { NotificationDismissedMessage } from "@src/apps/notifications/models/NotificationDismissedMessage.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
@@ -216,8 +215,8 @@ function useNotificationsState(): NotificationsState {
 
   useInterval(entity.fetchAsync, 5000)
 
-  useMessageListener<NewNotificationMessage>("NewNotification", entity.fetchAsync)
-  useMessageListener<NotificationDismissedMessage>("NotificationDismissed", entity.fetchAsync)
+  useMessageListener(NewNotificationMessage, entity.fetchAsync)
+  useMessageListener(NotificationDismissedMessage, entity.fetchAsync)
 
   return {
     notifications: items,

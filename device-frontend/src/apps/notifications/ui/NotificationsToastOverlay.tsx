@@ -1,7 +1,11 @@
 import { Card, CardContent, Slide, Stack, Typography } from "@mui/material"
-import { NewNotificationMessage } from "@src/apps/notifications/models/NewNotificationMessage.ts"
+import {
+  NewNotificationMessage,
+  NewNotificationMessageData,
+  NotificationDismissedMessage,
+  NotificationDismissedMessageData,
+} from "@src/apps/notifications/messages"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
-import { NotificationDismissedMessage } from "@src/apps/notifications/models/NotificationDismissedMessage.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
 import { useCallback, useState } from "react"
@@ -72,11 +76,11 @@ type NotificationToastsState = {
 function useNotificationsToastState(): NotificationToastsState {
   const [notifications, setNotifications] = useState<Notification[]>([])
 
-  const handleNewNotification = useCallback((message: NewNotificationMessage) => {
+  const handleNewNotification = useCallback((message: NewNotificationMessageData) => {
     setNotifications(s => [message.notification, ...s])
   }, [setNotifications])
 
-  const handleNotificationDismissed = useCallback((message: NotificationDismissedMessage) => {
+  const handleNotificationDismissed = useCallback((message: NotificationDismissedMessageData) => {
     setNotifications(s => s.filter(it => it.id !== message.notificationId))
   }, [setNotifications])
 
@@ -84,8 +88,8 @@ function useNotificationsToastState(): NotificationToastsState {
     setNotifications(s => s.filter(it => it.id !== notification.id))
   }, [setNotifications])
 
-  useMessageListener<NewNotificationMessage>("NewNotification", handleNewNotification)
-  useMessageListener<NotificationDismissedMessage>("NotificationDismissed", handleNotificationDismissed)
+  useMessageListener(NewNotificationMessage, handleNewNotification)
+  useMessageListener(NotificationDismissedMessage, handleNotificationDismissed)
 
   return {
     notifications,

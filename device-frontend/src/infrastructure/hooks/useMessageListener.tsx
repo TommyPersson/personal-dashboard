@@ -1,10 +1,10 @@
+import { MessageType } from "@src/infrastructure/framework/messages/MessageType.ts"
 import { useEffect } from "react"
-import { Message } from "../framework/messages/Message"
 
-export function useMessageListener<T extends Message>(type: string, fn: (message: T) => void) {
+export function useMessageListener<T>(type: MessageType<T>, fn: (message: T) => void) {
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      if (e.data.type === type) {
+      if (e.data.type === type.type) {
         fn(e.data)
       }
     }
