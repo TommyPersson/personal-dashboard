@@ -42,7 +42,7 @@ export const MediaControlOverlay = (props: { state: MediaControlState }) => {
   }
 
   return (
-    <AppAreaOverlayPortal>
+    <AppAreaOverlayPortal appOverlayId={"media-control"}>
       <Slide direction={"up"} in={!state.isMinimized}>
         <Card raised className={classes.MediaControlOverlay}>
           <MediaInfoView state={state} />

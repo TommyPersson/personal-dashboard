@@ -1,4 +1,5 @@
-import { Stack } from "@mui/material"
+import { Divider, Stack } from "@mui/material"
+import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
 import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
@@ -63,6 +64,8 @@ export const ShellScreen = () => {
       </div>
       <div id={"appBarSelector"} className={classes.AppSelectorSlot}>
         <div id={"appBarPortal"} className={classes.AppBarPortal}></div>
+        <Divider />
+        <ClockAppBarWidget />
       </div>
     </div>
   )

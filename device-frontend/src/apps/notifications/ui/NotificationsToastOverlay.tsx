@@ -17,7 +17,7 @@ export const NotificationsToastOverlay = () => {
   const state = useNotificationsToastState()
 
   return (
-    <AppAreaOverlayPortal>
+    <AppAreaOverlayPortal appOverlayId={"notification-toasts"}>
       <Stack className={classes.NotificationsToastOverlay}>
         <TransitionGroup component={Stack} spacing={2}>
           {state.notifications.map(it => (
