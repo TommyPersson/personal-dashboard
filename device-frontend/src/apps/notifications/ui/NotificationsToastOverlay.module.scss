@@ -1,0 +1,16 @@
+
+.NotificationsToastOverlay {
+  position: absolute;
+  left: var(--mui-sp-2);
+  bottom: var(--mui-sp-2);
+  gap: var(--mui-sp-2);
+
+  * {
+    pointer-events: auto;
+  }
+}
+
+.NotificationToastCard {
+  min-width: 400px;
+  max-width: 400px;
+}

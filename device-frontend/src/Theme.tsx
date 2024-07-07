@@ -39,5 +39,15 @@ export const theme = createTheme({
   },
 })
 
+export const darkTheme = createTheme({
+  palette: {
+    mode: "dark"
+  }
+})
+
 export const cssVarsTheme = extendTheme({
 }, theme)
+
+
+export const cssVarsDarkTheme = extendTheme({
+}, darkTheme)

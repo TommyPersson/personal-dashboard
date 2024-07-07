@@ -1,10 +1,9 @@
-import { AppsOutlined, KeyboardOutlined } from "@mui/icons-material"
-import { Button, Card, CardContent, Divider, ListItemText, MenuItem, MenuList, Stack, Typography } from "@mui/material"
-import { PerformHotKeyAction } from "@src/apps/hot-keys/actions"
-import { HotKeysDataEntity } from "@src/apps/hot-keys/entities/HotKeysDataEntity.ts"
+import { AppsOutlined } from "@mui/icons-material"
+import { Button, Stack, Typography } from "@mui/material"
+import { NotificationsToastOverlay } from "@src/apps/notifications/ui/NotificationsToastOverlay.tsx"
 import { RunItemActionAction } from "@src/apps/run-deck/actions"
-import { Item, Section } from "@src/apps/run-deck/models/RunDeckData.ts"
 import { RunDeckDataEntity } from "@src/apps/run-deck/entities/RunDeckDataEntity.ts"
+import { Item, Section } from "@src/apps/run-deck/models/RunDeckData.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
@@ -42,15 +41,18 @@ export const RunDeckAppWidget = () => {
   )
 
   return (
-    <AppWidget className={classes.RunDeckAppWidget}>
-      <Stack spacing={2}>
-        <AppWidgetHeader
-          title={"Run Deck"}
-          icon={<AppsOutlined />}
-        />
-        {content}
-      </Stack>
-    </AppWidget>
+    <>
+      <AppWidget className={classes.RunDeckAppWidget}>
+        <Stack spacing={2}>
+          <AppWidgetHeader
+            title={"Run Deck"}
+            icon={<AppsOutlined />}
+          />
+          {content}
+        </Stack>
+      </AppWidget>
+      <NotificationsToastOverlay />
+    </>
   )
 }
 

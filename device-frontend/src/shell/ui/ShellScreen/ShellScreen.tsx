@@ -52,6 +52,7 @@ export const ShellScreen = () => {
       <div className={classes.NotificationAreaSlot}>
         <NotificationsAppWidget />
       </div>
+      <div id={"appAreaPortal"} className={classes.AppAreaPortal} />
       <div className={classes.AppAreaSlot}>
         <Stack
           direction={"row"}

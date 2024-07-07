@@ -39,6 +39,17 @@
   flex-direction: row;
   align-items: stretch;
   justify-content: flex-start;
+  position: relative;
+}
+
+.AppAreaPortal {
+  grid-column: app-area-slot;
+  grid-row: rest;
+  background: transparent;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+  position: relative;
 }
 
 .AppSelectorSlot {

@@ -1,14 +1,23 @@
 import {
   Close,
-  ExpandLessOutlined, ExpandMore, ExpandMoreOutlined,
+  ExpandLessOutlined,
+  ExpandMoreOutlined,
   NotificationsOffOutlined,
   NotificationsOutlined,
-  TimerOutlined,
 } from "@mui/icons-material"
 import { Badge, Box, Button, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
+import { DismissNotificationAction } from "@src/apps/notifications/actions"
+import { NotificationsEntity } from "@src/apps/notifications/entities/NotificationsEntity.ts"
+import { NewNotificationMessage } from "@src/apps/notifications/models/NewNotificationMessage.ts"
+import { Notification } from "@src/apps/notifications/models/Notification.ts"
+import { NotificationDismissedMessage } from "@src/apps/notifications/models/NotificationDismissedMessage.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
+import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
+import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
+import { EmptyArray } from "@src/infrastructure/utils"
 import classNames from "classnames"
 import React, { CSSProperties, useCallback, useEffect, useState } from "react"
 import { TransitionGroup } from "react-transition-group"
@@ -59,7 +68,10 @@ export const NotificationsAppWidget = () => {
           icon={widgetIcon}
           rightContent={rightContent}
         />
-        <NotificationsList notifications={state.notifications} />
+        <NotificationsList
+          notifications={state.notifications}
+          onDismiss={state.dismiss}
+        />
         <Box flex={1} />
         <Stack direction={"row"}>
           <ToggleMinimizedButton state={state} />
@@ -90,8 +102,11 @@ const ToggleMinimizedButton = (props: { state: NotificationsState }) => {
   )
 }
 
-const NotificationsList = (props: { notifications: Notification[] }) => {
-  const { notifications } = props
+const NotificationsList = (props: {
+  notifications: Notification[]
+  onDismiss: (notification: Notification) => void
+}) => {
+  const { notifications, onDismiss } = props
 
   if (notifications.length === 0) {
     return (
@@ -107,20 +122,32 @@ const NotificationsList = (props: { notifications: Notification[] }) => {
     <TransitionGroup component={Stack} spacing={2}>
       {notifications.map(it => (
         <Slide direction={"right"} key={it.id}>
-          <NotificationCard notification={it} />
+          <NotificationCard notification={it} onDismiss={onDismiss} />
         </Slide>
       ))}
     </TransitionGroup>
   )
 }
 
-const NotificationCard = React.forwardRef((props: { notification: Notification, style?: CSSProperties }, ref) => {
-  const { notification, style } = props
+const NotificationCard = React.forwardRef((props: {
+  notification: Notification
+  onDismiss: (notification: Notification) => void,
+  style?: CSSProperties
+}, ref) => {
+  const { notification, style, onDismiss } = props
+
+  const handleDismissClicked = useCallback(() => {
+    onDismiss(notification)
+  }, [notification, onDismiss])
 
   return (
     <Card ref={ref as any} style={style}>
       <CardContent style={{ position: "relative" }}>
-        <IconButton style={{ position: "absolute", right: 4, top: 4 }}><Close /></IconButton>
+        <IconButton
+          style={{ position: "absolute", right: 4, top: 4 }}
+          onClick={handleDismissClicked}
+          children={<Close />}
+        />
         <Typography
           children={notification.source}
           variant={"caption"}
@@ -129,14 +156,14 @@ const NotificationCard = React.forwardRef((props: { notification: Notification, 
           children={notification.title}
           variant={"subtitle2"}
         />
-        {notification.body &&
+        {notification.description &&
           <Typography
-            children={notification.body}
+            children={notification.description}
             variant={"caption"}
             style={{ display: "block" }}
           />}
         <Typography
-          children={notification.timestamp.toLocaleString("sv-SE")}
+          children={new Date(notification.timestamp).toLocaleString("sv-SE")}
           variant={"caption"}
           color={"text.secondary"}
         />
@@ -145,67 +172,41 @@ const NotificationCard = React.forwardRef((props: { notification: Notification, 
   )
 })
 
-const exampleData: Notification[] = [
-  {
-    id: "25251f45-d10a-4588-a7f0-5bba74066ea5",
-    title: "New Pull Request Available",
-    body: "ASDF-1234: Fix things in the fnord",
-    timestamp: new Date(),
-    source: "Bitbucket",
-  },
-  {
-    id: "51e31b3a-3c54-47c4-8436-e08599718d62",
-    title: "Build failed: WQER-4321 #1",
-    timestamp: new Date(),
-    source: "Jenkins",
-  },
-  {
-    id: "2b92575b-ca07-4e95-a5e7-912a6df72bde",
-    title: "RWK job failed: the-best-service/the-queue-id",
-    timestamp: new Date(),
-    source: "the-best-service",
-  },
-]
-
-export type Notification = {
-  id: string
-  title: string
-  body?: string
-  timestamp: Date
-  source: string
-}
-
 export type NotificationsState = {
   notifications: Notification[]
   isMinimized: boolean
   toggleMinimized: () => void
-  add: () => void
-  remove: () => void
+  dismiss: (notification: Notification) => void
   clear: () => void
 }
 
 function useNotificationsState(): NotificationsState {
-  const [count, setCount] = useState(1)
+  const entity = useEntity(NotificationsEntity, {
+    fetchOnMount: true,
+    clearOnFetch: false,
+  })
+
+  const dismissAction = useAction(DismissNotificationAction)
 
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const items = exampleData.slice(0, Math.min(count, exampleData.length))
+  const items = entity.value ?? EmptyArray
+  const count = items.length
 
-  const add = useCallback(() => {
-    setCount(s => Math.min(exampleData.length, s + 1))
-  }, [setCount])
-
-  const remove = useCallback(() => {
-    setCount(s => Math.max(0, s - 1))
-  }, [setCount])
-
-  const clear = useCallback(() => {
-    setCount(0)
-  }, [setCount])
 
   const toggleMinimized = useCallback(() => {
     setIsMinimized(s => !s)
   }, [setIsMinimized])
+
+  const dismiss = useCallback((notification: Notification) => {
+    dismissAction.executeAsync({ notificationId: notification.id })
+  }, [dismissAction])
+
+  const clear = useCallback(() => {
+    for (const item of items) {
+      dismiss(item)
+    }
+  }, [items, dismiss])
 
   useEffect(() => {
     if (count <= 0) {
@@ -213,12 +214,16 @@ function useNotificationsState(): NotificationsState {
     }
   }, [count, setIsMinimized])
 
+  useInterval(entity.fetchAsync, 5000)
+
+  useMessageListener<NewNotificationMessage>("NewNotification", entity.fetchAsync)
+  useMessageListener<NotificationDismissedMessage>("NotificationDismissed", entity.fetchAsync)
+
   return {
     notifications: items,
     isMinimized: isMinimized,
     toggleMinimized,
-    add,
-    remove,
+    dismiss,
     clear,
   }
 }

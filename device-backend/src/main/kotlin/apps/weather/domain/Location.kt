@@ -5,13 +5,3 @@ data class Location(
     val latitude: Double,
     val longitude: Double,
 )
-
-object Locations {
-    object SE {
-        val Linkoping = Location(
-            name = "Linköping",
-            latitude = 58.4098135,
-            longitude = 15.6245252,
-        )
-    }
-}

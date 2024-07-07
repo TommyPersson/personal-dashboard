@@ -10,6 +10,7 @@ import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import React, { useCallback, useMemo } from "react"
 
 import classes from "./HotKeysAppWidget.module.scss"
+import { EmptyArray } from "@src/infrastructure/utils"
 
 
 export const HotKeysAppWidget = () => {
@@ -74,7 +75,6 @@ type HotKeysState = {
   execute: (hotKey: HotKey) => void
 }
 
-const EmptyArray: any[] = []
 
 function useHotKeysState(): HotKeysState {
   const entity = useEntity(HotKeysDataEntity, {

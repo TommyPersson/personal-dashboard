@@ -6,7 +6,11 @@ const timerWorker = new TimerWorker()
 const listeners: Set<() => void> = new Set()
 
 timerWorker.addEventListener("message", (e) => {
-  listeners.forEach(it => it())
+  if (e.data.type === "second-timer") {
+    listeners.forEach(it => it())
+  } else {
+    window.postMessage(e.data)
+  }
 })
 
 export function useSecondTimer(callback: () => void) {

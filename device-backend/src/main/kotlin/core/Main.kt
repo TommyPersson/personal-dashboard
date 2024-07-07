@@ -4,10 +4,12 @@ import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
 import apps.weather.application.WeatherGuiceModule
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
+import common.services.WebSocketService
+import core.notifications.infrastructure.JSON
+import core.notifications.infrastructure.configureJackson
 import framework.AppModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -19,17 +21,18 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.util.logging.*
-import kotlinx.coroutines.runBlocking
+import io.ktor.websocket.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import java.text.SimpleDateFormat
+import java.time.Duration
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
 
-    val baseInjector = Guice.createInjector(
+    val injector = Guice.createInjector(
         CoreGuiceModule(),
         WeatherGuiceModule(),
         RunDeckGuiceModule(),
@@ -37,18 +40,46 @@ fun main() {
         HotKeysGuiceModule(),
     )
 
-    val appModules = baseInjector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
+    val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
+
+    val webSocketService = injector.getInstance(WebSocketService::class.java)
 
     embeddedServer(Netty, port = 8080) {
         configureContentNegotiations()
         configureCallLogging()
         configureStatusPages(logger)
         configureRouting()
+        configureWebSockets(webSocketService)
 
         appModules.forEach {
             it.setup(this)
         }
     }.start(wait = true)
+}
+
+private fun Application.configureWebSockets(webSocketService: WebSocketService) {
+    install(WebSockets) {
+        pingPeriod = Duration.ofSeconds(10)
+        timeout = Duration.ofSeconds(60)
+        contentConverter = JacksonWebsocketContentConverter(JSON.objectMapper)
+    }
+
+    routing {
+        webSocket("/api/websocket") {
+            webSocketService.startSession(this)
+
+            // TODO move into service
+            for (frame in incoming) {
+                if (frame is Frame.Text) {
+                    val readText = frame.readText()
+                    if (readText.contains("\"ping\""))
+                        send(Frame.Text("{ \"type\": \"pong\" }"))
+                } else {
+                    println("Ignoring frame: ${frame.frameType}")
+                }
+            }
+        }
+    }
 }
 
 private fun Application.configureRouting() {
@@ -61,10 +92,8 @@ private fun Application.configureRouting() {
 
 private fun Application.configureContentNegotiations() {
     install(ContentNegotiation) {
-        jackson() {
-            configure(SerializationFeature.INDENT_OUTPUT, true)
-            findAndRegisterModules()
-            dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        jackson {
+            configureJackson(this)
         }
     }
 }
@@ -77,11 +106,10 @@ private fun Application.configureCallLogging() {
 
 private fun Application.configureStatusPages(logger: Logger) {
     install(StatusPages) {
-        exception<Throwable>() { call, cause ->
+        exception<Throwable> { call, cause ->
             call.respond(HttpStatusCode.InternalServerError)
             logger.error(cause)
             throw cause
         }
     }
 }
-

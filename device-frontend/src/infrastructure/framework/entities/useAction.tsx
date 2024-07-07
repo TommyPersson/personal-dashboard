@@ -1,6 +1,5 @@
-import { apiClient } from "@src/infrastructure/framework/api/apiClient.ts"
 import { useObjectState } from "@src/infrastructure/framework/entities/internal/useObjectState.tsx"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 export type ActionStateValue<TArgs, TResult> = {
   readonly key: string

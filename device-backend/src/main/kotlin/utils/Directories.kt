@@ -16,4 +16,8 @@ object Directories {
     val Cache = File(base, "cache").also {
         it.mkdirs()
     }
+
+    val Data = File(base, "data").also {
+        it.mkdirs()
+    }
 }
