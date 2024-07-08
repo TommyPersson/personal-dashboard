@@ -5,6 +5,7 @@ import apps.weather.application.contracts.WeatherAppDataResponseDTO
 import apps.weather.domain.Location
 import apps.weather.infrastructure.openweathermap.contracts.OneCallResponseDTO
 import apps.weather.domain.WeatherAppDataProvider
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -13,9 +14,10 @@ import kotlin.math.roundToInt
 
 class OpenWeatherWeatherAppDataProvider(
     config: WeatherAppConfig.Source.OpenWeather,
+    objectMapper: ObjectMapper,
 ) : WeatherAppDataProvider {
 
-    private val client = OpenWeatherMapApiClient(config)
+    private val client = OpenWeatherMapApiClient(config, objectMapper)
 
     override suspend fun get(location: Location): WeatherAppDataResponseDTO {
         val oneCallResponse = client.oneCall(location)

@@ -4,6 +4,7 @@ import apps.weather.application.config.WeatherAppConfig
 import apps.weather.domain.Location
 import apps.weather.infrastructure.openweathermap.contracts.OneCallResponseDTO
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.future.await
@@ -14,12 +15,8 @@ import java.net.http.HttpResponse.BodyHandlers
 
 class OpenWeatherMapApiClient(
     private val config: WeatherAppConfig.Source.OpenWeather,
+    private val objectMapper: ObjectMapper,
 ) {
-
-    private val objectMapper = jacksonObjectMapper().also {
-        it.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    }
-
     private val oneCallApiUriFormat =
         "https://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&units=metric&appid=${config.apiKey}"
 

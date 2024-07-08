@@ -1,4 +1,5 @@
 import { Divider, Stack } from "@mui/material"
+import { BitbucketAppUI } from "@src/apps/bitbucket/ui/BitbucketAppUI.tsx"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
 import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
@@ -44,6 +45,11 @@ const appWidgets: AppWidgetProvider[] = [
     title: "Run Deck",
     factory: () => <RunDeckAppWidget />,
   },
+  {
+    id: "bitbucket-app",
+    title: "Bitbucket",
+    factory: () => <BitbucketAppUI />
+  }
 ]
 
 export const ShellScreen = () => {

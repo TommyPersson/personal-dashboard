@@ -1,0 +1,12 @@
+services:
+  bitbucket:
+    image: atlassian/bitbucket
+    ports:
+      - 7990:7990
+      - 7999:7999
+    volumes:
+      - bitbucket-data:/var/atlassian/application-data/bitbucket
+
+
+volumes:
+  bitbucket-data:

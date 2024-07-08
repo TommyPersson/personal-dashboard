@@ -1,5 +1,6 @@
 package core
 
+import apps.bitbucket.application.BitbucketGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
@@ -8,8 +9,8 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import common.services.WebSocketService
-import core.notifications.infrastructure.JSON
-import core.notifications.infrastructure.configureJackson
+import utils.JSON
+import utils.configureJackson
 import framework.AppModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -38,6 +39,7 @@ fun main() {
         RunDeckGuiceModule(),
         MediaControlGuiceModule(),
         HotKeysGuiceModule(),
+        BitbucketGuiceModule(),
     )
 
     val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))

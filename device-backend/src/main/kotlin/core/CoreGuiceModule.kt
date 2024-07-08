@@ -7,7 +7,7 @@ import core.notifications.application.commands.DismissNotificationCommandHandler
 import core.notifications.application.commands.PostNotificationCommandHandler
 import core.notifications.application.queries.GetNotificationsQueryHandler
 import core.notifications.domain.NotificationRepository
-import core.notifications.infrastructure.JSON
+import utils.JSON
 import core.notifications.infrastructure.NotificationRepositoryImpl
 import framework.config.ConfigProvider
 import framework.guice.bindAppModule

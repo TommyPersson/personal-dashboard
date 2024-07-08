@@ -2,6 +2,7 @@ package common.winctrl
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import core.CoreConfig
@@ -13,12 +14,8 @@ import kotlin.reflect.KClass
 @Singleton
 class WinCtrlCommandExecutor @Inject constructor(
     private val config: CoreConfig,
+    private val objectMapper: ObjectMapper,
 ) {
-
-    private val objectMapper = jacksonObjectMapper().also {
-        it.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        it.enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION)
-    }
 
     private val executablePath = config.winCtrl.executablePath
 

@@ -1,0 +1,31 @@
+
+.BitbucketAppWidget {
+  min-width: 900px;
+  max-width: 900px;
+}
+
+.PullRequestListCard {
+}
+
+.PullRequestListItem {
+  :global(.MuiListItemText) {
+    flex: 1;
+  }
+
+  :global(.MuiListItemText-primary), :global(.MuiListItemText-secondary) {
+    width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ItemStatusIcons {
+    padding-left: var(--mui-sp-2);
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    gap: var(--mui-sp-2);
+    white-space: nowrap;
+    justify-content: flex-end;
+  }
+}

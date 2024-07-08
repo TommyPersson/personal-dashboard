@@ -16,7 +16,7 @@ import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { delay } from "@src/infrastructure/utils"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import classes from "./MediaControlUI.module.scss"
 
@@ -37,10 +37,6 @@ export const MediaControlUI = () => {
 export const MediaControlOverlay = (props: { state: MediaControlState }) => {
   const { state } = props
 
-  if (!state.status) {
-    return
-  }
-
   return (
     <AppAreaOverlayPortal appOverlayId={"media-control"}>
       <Slide direction={"up"} in={!state.isMinimized}>
@@ -58,20 +54,28 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
 
   const backgroundImage = getThumbnailImageSrc(state.status)
 
+  const content = state.status ? (
+    <>
+      <Typography
+        variant={"subtitle1"}
+        className={classes.ThumbnailText}
+        children={state.status?.mediaInfo?.title} />
+      <Typography
+        variant={"caption"}
+        className={classes.ThumbnailText}
+        children={state.status?.mediaInfo?.artist} />
+    </>
+  ) : (
+      <Typography>Nothing is being played</Typography>
+  )
+
   return (
     <CardContent
       className={classes.ThumbnailCardContainer}
       style={{ backgroundImage: backgroundImage }}
     >
       <Stack className={classes.ThumbnailContainer}>
-        <Typography
-          variant={"subtitle1"}
-          className={classes.ThumbnailText}
-          children={state.status?.mediaInfo?.title} />
-        <Typography
-          variant={"caption"}
-          className={classes.ThumbnailText}
-          children={state.status?.mediaInfo?.artist} />
+      {content}
       </Stack>
     </CardContent>
   )
@@ -124,15 +128,13 @@ function getThumbnailImageSrc(status: MediaControlStatus | null) {
 const MediaControlAppBarButton = (props: { state: MediaControlState }) => {
   const { state } = props
 
-  if (!state.isMinimized) {
-    return null
-  }
+  const variant = state.status ? "dot" : "standard"
 
   return (
     <IconButton
       size={"large"}
       children={(
-        <Badge color="secondary" variant={"dot"}>
+        <Badge color="secondary" variant={variant}>
           <MusicNoteOutlined />
         </Badge>
       )}
@@ -166,6 +168,8 @@ function useMediaControlState(options: { refreshIntervalMs: number }): MediaCont
   })
 
   const status = entity.value
+  const previousStatusRef = useRef(status)
+
   const refreshEntity = entity.fetchAsync
 
   const { execute: executeSkipNext, ...skipNextAction } = useAction(SkipNextAction)
@@ -197,6 +201,15 @@ function useMediaControlState(options: { refreshIntervalMs: number }): MediaCont
   }, [setIsMinimized])
 
   useInterval(refreshEntity, options.refreshIntervalMs)
+
+  useEffect(() => {
+    if (!status) {
+      setIsMinimized(true)
+    } else if (status && previousStatusRef.current === null) {
+      setIsMinimized(false)
+    }
+    previousStatusRef.current = status
+  }, [status, setIsMinimized])
 
   return useMemo((): MediaControlState => ({
     status,
