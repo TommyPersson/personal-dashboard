@@ -1,5 +1,6 @@
+import { CurrentTimeEntity } from "@src/apps/clock/entities/CurrentTimeEntity.ts"
+import { useEntity } from "@src/infrastructure/framework/entities"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { useCallback, useState } from "react"
 
 
 export type ClockAppState = {
@@ -7,15 +8,14 @@ export type ClockAppState = {
 }
 
 export function useClockAppState(): ClockAppState {
-  const [time, setTime] = useState(new Date())
+  const entity = useEntity(CurrentTimeEntity, {
+    fetchOnMount: true,
+    clearOnFetch: false,
+  })
 
-  const refreshTime = useCallback(() => {
-    setTime(new Date())
-  }, [])
-
-  useInterval(refreshTime, 5000)
+  useInterval(entity.fetchAsync, 5000)
 
   return {
-    time
+    time: entity.value ?? new Date()
   }
 }

@@ -1,6 +1,7 @@
 package core
 
 import apps.bitbucket.application.BitbucketGuiceModule
+import apps.clock.application.ClockGuiceModule
 import apps.github.application.GithubGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
@@ -10,8 +11,6 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import common.services.WebSocketService
-import utils.JSON
-import utils.configureJackson
 import framework.AppModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -29,6 +28,8 @@ import io.ktor.websocket.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import utils.JSON
+import utils.configureJackson
 import java.time.Duration
 
 fun main() {
@@ -36,6 +37,7 @@ fun main() {
 
     val injector = Guice.createInjector(
         CoreGuiceModule(),
+        ClockGuiceModule(),
         WeatherGuiceModule(),
         RunDeckGuiceModule(),
         MediaControlGuiceModule(),
