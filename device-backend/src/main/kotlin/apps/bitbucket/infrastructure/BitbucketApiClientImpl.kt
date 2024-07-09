@@ -6,10 +6,10 @@ import apps.bitbucket.domain.models.PaginatedBitbucketResponseDTO
 import apps.bitbucket.domain.models.PullRequestBitbucketDTO
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.util.*
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.future.await
+import utils.withBasicAuth
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -41,10 +41,4 @@ class BitbucketApiClientImpl @Inject constructor(
 
         return objectMapper.readValue(response.body())
     }
-}
-
-fun HttpRequest.Builder.withBasicAuth(username: String, password: String): HttpRequest.Builder {
-    val secret = "$username:$password".encodeBase64()
-    val headerValue = "Basic $secret"
-    return header("Authorization", headerValue)
 }

@@ -1,6 +1,7 @@
 import { Divider, Stack } from "@mui/material"
 import { BitbucketAppUI } from "@src/apps/bitbucket/ui/BitbucketAppUI.tsx"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
+import { GithubAppUI } from "@src/apps/github/ui/GithubAppUI.tsx"
 import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
@@ -48,8 +49,13 @@ const appWidgets: AppWidgetProvider[] = [
   {
     id: "bitbucket-app",
     title: "Bitbucket",
-    factory: () => <BitbucketAppUI />
-  }
+    factory: () => <BitbucketAppUI />,
+  },
+  {
+    id: "github-app",
+    title: "Github",
+    factory: () => <GithubAppUI />,
+  },
 ]
 
 export const ShellScreen = () => {
