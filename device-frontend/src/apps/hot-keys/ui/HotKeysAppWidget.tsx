@@ -14,7 +14,7 @@ export const HotKeysAppWidget = (props: { state: HotKeysAppState }) => {
   const content = state.sections.length > 0 ? (
     state.sections.map(section => (
       <List key={section.name} component={Paper}>
-        <ListSubheader>{section.name}</ListSubheader>
+        <ListSubheader disableSticky>{section.name}</ListSubheader>
         {section.hotKeys.map(hotKey =>
           <HotKeyMenuItem key={hotKey.name} state={state} hotKey={hotKey} />,
         )}

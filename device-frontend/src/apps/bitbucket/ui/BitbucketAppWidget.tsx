@@ -77,7 +77,7 @@ const PullRequestListCard = (props: {
 
   return (
     <List className={classes.PullRequestListCard} component={Paper}>
-      <ListSubheader>
+      <ListSubheader disableSticky>
         {title}
       </ListSubheader>
       {content}

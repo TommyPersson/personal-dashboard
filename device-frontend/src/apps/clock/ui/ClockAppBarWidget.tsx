@@ -37,7 +37,15 @@ function formatTime(date: Date): string {
 }
 
 function formatWeek(date: Date): string {
-  // TODO test this more thoroughly
-  const firstDay = new Date(date.getFullYear(), 0, 4)
-  return Math.floor((((date.valueOf() - firstDay.valueOf()) / 86400000) + firstDay.getDay() + 1) / 7).toString()
+  // https://www.epochconverter.com/weeknumbers
+  const target  = new Date(date.valueOf());
+  const dayNr   = (date.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() != 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  const weekNumber = 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000)
+  return weekNumber.toString();
 }
