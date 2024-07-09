@@ -21,10 +21,16 @@
     --mui-icon-size-small: 1.25rem;
     --mui-icon-size-medium: 1.5rem;
     --mui-icon-size-large: 2.1875rem;
+    --mui-font-size-caption: 0.75rem;
 
     --mui-divider-color: rgba(0,0,0,0.12);
     --mui-divider-border: 1px solid var(--mui-divider-color);
+
 }
 
 #root {
+}
+
+.MuiListSubheader-root {
+    font-size: var(--mui-font-size-caption) !important;
 }

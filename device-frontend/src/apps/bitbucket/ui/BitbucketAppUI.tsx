@@ -1,22 +1,28 @@
 import {
-  AccountTreeOutlined, ArrowForwardOutlined,
-  ArrowRight,
-  ArrowRightOutlined, CancelOutlined, CheckBoxOutlineBlank,
-  CheckBoxOutlined, CheckCircleOutlined, CircleOutlined,
-  CommentOutlined, PersonOutlined, RefreshOutlined, ThumbDownOutlined, ThumbUpOutlined,
+  AccountTreeOutlined,
+  ArrowForwardOutlined,
+  CancelOutlined,
+  CheckBoxOutlineBlank,
+  CheckBoxOutlined,
+  CheckCircleOutlined,
+  CircleOutlined,
+  CommentOutlined,
+  PersonOutlined,
+  RefreshOutlined,
+  ThumbDownOutlined,
+  ThumbUpOutlined,
 } from "@mui/icons-material"
 import {
   Button,
-  Card,
-  CardContent, Chip, IconProps,
+  Chip,
   List,
-  ListItem, ListItemButton, ListItemIcon, ListItemText,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+  Paper,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Typography, TypographyProps,
+  Typography,
 } from "@mui/material"
 import { BitbucketPullRequestsEntity } from "@src/apps/bitbucket/entities/BitbucketPullRequestsEntity.ts"
 import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
@@ -72,28 +78,22 @@ const PullRequestListCard = (props: {
   const hasRows = pullRequests.length > 0
 
   const content = hasRows ? (
-    <CardContent style={{ padding: 0 }}>
-      <List>
-        {pullRequests.map(it =>
-          <PullRequestItemRow key={it.id} pullRequest={it} />,
-        )}
-      </List>
-    </CardContent>
+    pullRequests.map(it =>
+      <PullRequestItemRow key={it.id} pullRequest={it} />,
+    )
   ) : (
-    <CardContent>
-      <Stack alignItems={"center"}>
-        <Typography variant={"body2"} children={"None"} fontStyle={"italic"} />
-      </Stack>
-    </CardContent>
+    <Stack alignItems={"center"}>
+      <Typography variant={"body2"} children={"None"} fontStyle={"italic"} />
+    </Stack>
   )
 
   return (
-    <Card className={classes.PullRequestListCard}>
-      <CardContent>
-        <Typography variant={"caption"} children={title} />
-      </CardContent>
+    <List className={classes.PullRequestListCard} component={Paper}>
+      <ListSubheader>
+        {title}
+      </ListSubheader>
       {content}
-    </Card>
+    </List>
   )
 }
 
@@ -110,7 +110,7 @@ const PullRequestItemRow = (props: { pullRequest: BitbucketPullRequest }) => {
   const numNeedsWork = pullRequest.reviewers.filter(it => it.status === "NEEDS_WORK").length
 
   return (
-    <ListItemButton className={classes.PullRequestListItem}>
+    <ListItemButton className={classes.PullRequestListItem} divider={true}>
       <ListItemIcon>
         <PullRequestStatusIcon pullRequest={pullRequest} />
       </ListItemIcon>

@@ -1,5 +1,5 @@
 import { KeyboardOutlined } from "@mui/icons-material"
-import { Card, CardContent, Divider, ListItemText, MenuItem, MenuList, Stack, Typography } from "@mui/material"
+import { List, ListItemButton, ListItemText, ListSubheader, Paper, Stack, Typography } from "@mui/material"
 import { PerformHotKeyAction } from "@src/apps/hot-keys/actions"
 import { HotKeysDataEntity } from "@src/apps/hot-keys/entities/HotKeysDataEntity.ts"
 import { HotKey, HotKeySection } from "@src/apps/hot-keys/models/HotKeysData.ts"
@@ -7,10 +7,10 @@ import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/App
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { EmptyArray } from "@src/infrastructure/utils"
 import React, { useCallback, useMemo } from "react"
 
 import classes from "./HotKeysAppWidget.module.scss"
-import { EmptyArray } from "@src/infrastructure/utils"
 
 
 export const HotKeysAppWidget = () => {
@@ -19,16 +19,12 @@ export const HotKeysAppWidget = () => {
 
   const content = state.sections.length > 0 ? (
     state.sections.map(section => (
-      <Card key={section.name}>
-        <CardContent>
-          <Typography variant={"caption"}>{section.name}</Typography>
-        </CardContent>
-        <MenuList>
-          {section.hotKeys.map(hotKey =>
-            <HotKeyMenuItem key={hotKey.name} state={state} hotKey={hotKey} />,
-          )}
-        </MenuList>
-      </Card>
+      <List key={section.name} component={Paper}>
+        <ListSubheader>{section.name}</ListSubheader>
+        {section.hotKeys.map(hotKey =>
+          <HotKeyMenuItem key={hotKey.name} state={state} hotKey={hotKey} />,
+        )}
+      </List>
     ))
   ) : (
     <Typography
@@ -61,11 +57,10 @@ const HotKeyMenuItem = (props: { state: HotKeysState, hotKey: HotKey }) => {
 
   return (
     <>
-      <MenuItem onClick={execute}>
+      <ListItemButton onClick={execute} divider={true}>
         <ListItemText>{hotKey.name}</ListItemText>
         <Typography variant={"body2"} color={"text.secondary"}>{hotKey.keys}</Typography>
-      </MenuItem>
-      <Divider className={classes.Divider} />
+      </ListItemButton>
     </>
   )
 }
