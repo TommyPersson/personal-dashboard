@@ -20,17 +20,13 @@ import {
   RepoIcon,
   TagIcon,
 } from "@primer/octicons-react"
-import { MarkAllNotificationsAsRead } from "@src/apps/github/actions/MarkAllNotificationsAsRead.ts"
-import { GithubNotificationsEntity } from "@src/apps/github/entities/GithubNotificationsEntity.ts"
 import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
+import { GithubAppState, useGithubState } from "@src/apps/github/state/GithubAppState.ts"
 import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { EmptyArray } from "@src/infrastructure/utils"
-import React, { useCallback } from "react"
+import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
+import React from "react"
 
 import classes from "./GithubAppUI.module.scss"
 
@@ -129,9 +125,7 @@ const GithubAppBarIcon = (props: {
 }) => {
   const { state } = props
 
-  const handleClick = useCallback(() => {
-    document.getElementById("githubAppWidget")?.scrollIntoView({ behavior: "smooth" })
-  }, [])
+  const handleClick = useScrollIntoView("githubAppWidget")
 
   return (
     <AppBarIconPortal appIconId={"bitbucket"} order={950}>
@@ -142,34 +136,4 @@ const GithubAppBarIcon = (props: {
       </IconButton>
     </AppBarIconPortal>
   )
-}
-
-type GithubAppState = {
-  notifications: GithubNotification[]
-  markAllAsRead: () => void
-  refresh: () => void
-}
-
-function useGithubState(): GithubAppState {
-  const entity = useEntity(GithubNotificationsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  const markAllAsReadAction = useAction(MarkAllNotificationsAsRead)
-
-  const markAllAsRead = useCallback(async () => {
-    await markAllAsReadAction.execute()
-    entity.fetchAsync
-  }, [markAllAsReadAction.execute, entity.fetchAsync])
-
-  useInterval(entity.fetchAsync, 5 * 60_000)
-
-  const notifications: GithubNotification[] = entity.value ?? EmptyArray
-
-  return {
-    notifications,
-    markAllAsRead,
-    refresh: entity.fetchAsync,
-  }
 }

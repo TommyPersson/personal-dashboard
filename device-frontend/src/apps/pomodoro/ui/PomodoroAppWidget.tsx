@@ -1,16 +1,32 @@
-import { Close, NotificationsOutlined, Pause, PlayArrow, Replay, TimerOutlined } from "@mui/icons-material"
-import { Box, Button, Card, CardContent, CircularProgress, IconButton, Stack, Typography } from "@mui/material"
-import { PomodoroTimerHook, usePomodoroTimer } from "@src/apps/pomodoro/hooks/usePomodoroTimer.ts"
+import { Pause, PlayArrow, Replay, TimerOutlined } from "@mui/icons-material"
+import { Badge, Button, Card, CardContent, CircularProgress, IconButton, Stack, Typography } from "@mui/material"
+import {
+  PomodoroAppState,
+  PomodoroDurationSeconds,
+  usePomodoroAppState,
+} from "@src/apps/pomodoro/state/PomodoroAppState.ts"
+import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import React from "react"
+import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
+import React, { useCallback } from "react"
 import classes from "./PomodoroAppWidget.module.scss"
 
-
-export const PomodoroAppWidget = () => {
-  const timer = usePomodoroTimer()
+export const PomodoroAppUI = () => {
+  const state = usePomodoroAppState()
 
   return (
-    <AppWidget className={classes.PomodoroAppWidget}>
+    <>
+      <PomodoroAppWidget state={state} />
+      <PomodoroTimerAppBarIcon state={state} />
+    </>
+  )
+}
+
+export const PomodoroAppWidget = (props: { state: PomodoroAppState }) => {
+  const { state } = props
+
+  return (
+    <AppWidget className={classes.PomodoroAppWidget} id={"pomodoroTimerAppWidget"}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Pomodoro Timer"}
@@ -19,10 +35,9 @@ export const PomodoroAppWidget = () => {
         <Card>
           <CardContent>
             <Stack spacing={4}>
-              {/*<Typography variant={"h5"} component={"h1"} textAlign={"center"}>Pomodoro Timer</Typography>*/}
-              <AnalogProgressTimer timer={timer} />
-              <TextualProgressTimer timer={timer} />
-              <ActionButtons timer={timer} />
+              <AnalogProgressTimer state={state} />
+              <TextualProgressTimer state={state} />
+              <ActionButtons state={state} />
             </Stack>
           </CardContent>
         </Card>
@@ -31,8 +46,8 @@ export const PomodoroAppWidget = () => {
   )
 }
 
-const AnalogProgressTimer = (props: { timer: PomodoroTimerHook }) => {
-  const { timer } = props
+const AnalogProgressTimer = (props: { state: PomodoroAppState }) => {
+  const { state } = props
 
   return (
     <CircularProgress
@@ -40,13 +55,13 @@ const AnalogProgressTimer = (props: { timer: PomodoroTimerHook }) => {
       variant="determinate"
       size={"50%"}
       thickness={22}
-      value={timer.percentRemaining}
+      value={state.percentRemaining}
     />
   )
 }
 
-const TextualProgressTimer = (props: { timer: PomodoroTimerHook }) => {
-  const { timer } = props
+const TextualProgressTimer = (props: { state: PomodoroAppState }) => {
+  const { state } = props
 
   return (
     <Typography
@@ -55,14 +70,14 @@ const TextualProgressTimer = (props: { timer: PomodoroTimerHook }) => {
       fontWeight={"bold"}
       textAlign={"center"}
     >
-      {timer.remainingTimeText}
+      {state.remainingTimeText}
       <Typography variant={"body1"}>remaining</Typography>
     </Typography>
   )
 }
 
-const ActionButtons = (props: { timer: PomodoroTimerHook }) => {
-  const { timer } = props
+const ActionButtons = (props: { state: PomodoroAppState }) => {
+  const { state } = props
 
   return (
     <Stack
@@ -71,19 +86,19 @@ const ActionButtons = (props: { timer: PomodoroTimerHook }) => {
       justifyContent={"center"}
       alignItems={"center"}
     >
-      {!timer.isRunning &&
+      {!state.isRunning &&
         <Button
           color={"primary"}
-          onClick={timer.startOrResume}
+          onClick={state.startOrResume}
           size="large"
           startIcon={<PlayArrow />}
           children={"Start"}
           variant={"contained"}
         />}
-      {timer.isRunning &&
+      {state.isRunning &&
         <Button
           color={"primary"}
-          onClick={timer.pause}
+          onClick={state.pause}
           size="large"
           startIcon={<Pause />}
           children={"Pause"}
@@ -91,10 +106,32 @@ const ActionButtons = (props: { timer: PomodoroTimerHook }) => {
         />}
       <Button
         children={"Reset"}
-        onClick={timer.reset}
+        onClick={state.reset}
         size="large"
         startIcon={<Replay />}
       />
     </Stack>
+  )
+}
+
+const PomodoroTimerAppBarIcon = (props: { state: PomodoroAppState }) => {
+  const { state } = props
+
+  const badgeContent = state.remainingSeconds !== PomodoroDurationSeconds ? state.remainingTimeText : null
+
+  const handleClick = useScrollIntoView("pomodoroTimerAppWidget")
+
+  return (
+    <AppBarIconPortal appIconId={"pomodoro-timer"} order={800}>
+      <IconButton size={"large"} onClick={handleClick}>
+        <Badge
+          badgeContent={badgeContent}
+          color={"info"}
+          anchorOrigin={{ horizontal: "right", vertical: "top" }}
+        >
+          <TimerOutlined />
+        </Badge>
+      </IconButton>
+    </AppBarIconPortal>
   )
 }

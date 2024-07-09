@@ -12,47 +12,45 @@ import {
   TableRow,
   Typography,
 } from "@mui/material"
-import { WeatherDataEntity } from "@src/apps/weather/entities/WeatherDataEntity.ts"
 import { CurrentWeather, DailyForecast, HourlyForecast } from "@src/apps/weather/modes/WeatherData.ts"
+import { useWeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import React, { useMemo } from "react"
 
 import classes from "./WeatherAppWidget.module.scss"
 
 
 export const WeatherAppWidget = () => {
-  const data = useWeatherData()
+  const state = useWeatherAppState()
 
   const refreshButton = (
     <Button
       children={"Refresh"}
       startIcon={<RefreshOutlined />}
-      onClick={data.fetchAsync}
+      onClick={state.refresh}
     />
   )
 
-  const content = data.isLoading || !data.value ? (
+  const content = state.isLoading || !state.data ? (
     <Stack alignItems={"center"} padding={10}>
       <CircularProgress />
     </Stack>
   ) : (
     <>
       <CurrentWeatherCard
-        cityName={data.value?.cityName}
-        current={data.value?.currentWeather}
+        cityName={state.data?.cityName}
+        current={state.data?.currentWeather}
       />
       <Typography
         variant={"caption"}
         className={classes.LastRefreshedAtText}
-        children={`Last refreshed at ${formatTime(data.lastFetchedAt!)}`}
+        children={`Last refreshed at ${formatTime(state.lastFetchedAt!)}`}
       />
       <Next48HoursCard
-        forecasts={data.value?.hourlyForecasts ?? []}
+        forecasts={state.data?.hourlyForecasts ?? []}
       />
       <ComingDaysForecastCard
-        forecasts={data.value?.dailyForecasts ?? []}
+        forecasts={state.data?.dailyForecasts ?? []}
       />
     </>
   )
@@ -196,16 +194,4 @@ function formatDay(date: Date): string {
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" })
-}
-
-
-function useWeatherData() {
-  const data = useEntity(WeatherDataEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  useInterval(data.fetchAsync, 5 * 60 * 1000) // 5 minutes
-
-  return data
 }

@@ -7,22 +7,17 @@ import {
   SouthEastOutlined,
 } from "@mui/icons-material"
 import { Badge, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
-import { PauseOrPlayAction, SkipNextAction, SkipPreviousAction } from "@src/apps/media-control/actions"
-import { MediaControlStatusEntity } from "@src/apps/media-control/entities/MediaControlStatusEntity.ts"
 import { MediaControlStatus, PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
+import { MediaControlAppState, useMediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
 import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { delay } from "@src/infrastructure/utils"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React from "react"
 
 import classes from "./MediaControlUI.module.scss"
 
 
 export const MediaControlUI = () => {
-  const state = useMediaControlState({ refreshIntervalMs: 5000 })
+  const state = useMediaControlAppState()
 
   return (
     <>
@@ -34,7 +29,7 @@ export const MediaControlUI = () => {
   )
 }
 
-export const MediaControlOverlay = (props: { state: MediaControlState }) => {
+export const MediaControlOverlay = (props: { state: MediaControlAppState }) => {
   const { state } = props
 
   return (
@@ -49,7 +44,7 @@ export const MediaControlOverlay = (props: { state: MediaControlState }) => {
   )
 }
 
-const MediaInfoView = (props: { state: MediaControlState }) => {
+const MediaInfoView = (props: { state: MediaControlAppState }) => {
   const { state } = props
 
   const backgroundImage = getThumbnailImageSrc(state.status)
@@ -66,7 +61,7 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
         children={state.status?.mediaInfo?.artist} />
     </>
   ) : (
-      <Typography>Nothing is being played</Typography>
+    <Typography>Nothing is being played</Typography>
   )
 
   return (
@@ -75,13 +70,13 @@ const MediaInfoView = (props: { state: MediaControlState }) => {
       style={{ backgroundImage: backgroundImage }}
     >
       <Stack className={classes.ThumbnailContainer}>
-      {content}
+        {content}
       </Stack>
     </CardContent>
   )
 }
 
-const PlaybackControlsView = (props: { state: MediaControlState }) => {
+const PlaybackControlsView = (props: { state: MediaControlAppState }) => {
   const { status, controls, toggleMinimized } = props.state
 
   const pauseOrPlayIcon = status?.state === PlaybackState.Playing
@@ -125,7 +120,7 @@ function getThumbnailImageSrc(status: MediaControlStatus | null) {
   return `url("/api/apps/media-control/thumbnail?cache-buster=${encodedTitle}")`
 }
 
-const MediaControlAppBarButton = (props: { state: MediaControlState }) => {
+const MediaControlAppBarButton = (props: { state: MediaControlAppState }) => {
   const { state } = props
 
   const variant = state.status ? "dot" : "standard"
@@ -141,87 +136,4 @@ const MediaControlAppBarButton = (props: { state: MediaControlState }) => {
       onClick={state.toggleMinimized}
     />
   )
-}
-
-type MediaControlState = {
-  status: MediaControlStatus | null
-  controls: PlaybackControls
-  isMinimized: boolean
-  toggleMinimized: () => void
-}
-
-type PlaybackControls = {
-  canSkipNext: boolean
-  skipNext: () => void
-  canSkipPrevious: boolean
-  skipPrevious: () => void
-  canPauseOrPlay: boolean
-  pauseOrPlay: () => void
-}
-
-const refreshAfterActionDelayMs = 1000
-
-function useMediaControlState(options: { refreshIntervalMs: number }): MediaControlState {
-  const entity = useEntity(MediaControlStatusEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  const status = entity.value
-  const previousStatusRef = useRef(status)
-
-  const refreshEntity = entity.fetchAsync
-
-  const { execute: executeSkipNext, ...skipNextAction } = useAction(SkipNextAction)
-  const { execute: executeSkipPrevious, ...skipPreviousAction } = useAction(SkipPreviousAction)
-  const { execute: executePauseOrPlay, ...pauseOrPlayAction } = useAction(PauseOrPlayAction)
-
-  const handleSkipNext = useCallback(async () => {
-    await executeSkipNext()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executeSkipNext, refreshEntity])
-
-  const handleSkipPrevious = useCallback(async () => {
-    await executeSkipPrevious()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executeSkipPrevious, refreshEntity])
-
-  const handlePauseOrPlay = useCallback(async () => {
-    await executePauseOrPlay()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executePauseOrPlay, refreshEntity])
-
-  const [isMinimized, setIsMinimized] = useState(false)
-
-  const toggleMinimized = useCallback(() => {
-    setIsMinimized(s => !s)
-  }, [setIsMinimized])
-
-  useInterval(refreshEntity, options.refreshIntervalMs)
-
-  useEffect(() => {
-    if (!status) {
-      setIsMinimized(true)
-    } else if (status && previousStatusRef.current === null) {
-      setIsMinimized(false)
-    }
-    previousStatusRef.current = status
-  }, [status, setIsMinimized])
-
-  return useMemo((): MediaControlState => ({
-    status,
-    controls: {
-      canSkipNext: Boolean(status?.controls?.isSkipNextEnabled) && !skipNextAction.isInProgress,
-      skipNext: handleSkipNext,
-      canSkipPrevious: Boolean(status?.controls?.isSkipNextEnabled) && !skipPreviousAction.isInProgress,
-      skipPrevious: handleSkipPrevious,
-      canPauseOrPlay: Boolean(status?.controls?.isSkipNextEnabled) && !pauseOrPlayAction.isInProgress,
-      pauseOrPlay: handlePauseOrPlay,
-    },
-    isMinimized,
-    toggleMinimized,
-  }), [entity, handleSkipNext, handleSkipPrevious, handlePauseOrPlay, isMinimized, toggleMinimized])
 }

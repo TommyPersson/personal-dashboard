@@ -15,7 +15,8 @@ import {
 import {
   Badge,
   Button,
-  Chip, IconButton,
+  Chip,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -25,14 +26,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material"
-import { BitbucketPullRequestsEntity } from "@src/apps/bitbucket/entities/BitbucketPullRequestsEntity.ts"
 import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
+import { BitbucketAppState, useBitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
 import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { EmptyArray } from "@src/infrastructure/utils"
-import React, { useCallback } from "react"
+import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
+import React from "react"
 
 import classes from "./BitbucketAppUI.module.scss"
 
@@ -206,38 +205,15 @@ const BitbucketAppBarIcon = (props: {
     .filter(it => it.state === "OPEN" && !it.belongsToUser && !it.userHasApproved)
     .length
 
-  const handleClick = useCallback(() => {
-    document.getElementById("bitbucketAppWidget")?.scrollIntoView({ behavior: "smooth" })
-  }, [])
+  const handleClick = useScrollIntoView("bitbucketAppWidget")
 
   return (
     <AppBarIconPortal appIconId={"bitbucket"} order={900}>
       <IconButton size={"large"} onClick={handleClick}>
-        <Badge badgeContent={numPullRequestsToApprove} color={"secondary"}>
+        <Badge badgeContent={numPullRequestsToApprove} color={"warning"}>
           <AccountTreeOutlined />
         </Badge>
       </IconButton>
     </AppBarIconPortal>
   )
-}
-
-type BitbucketAppState = {
-  pullRequests: BitbucketPullRequest[]
-  refresh: () => void
-}
-
-function useBitbucketAppState(): BitbucketAppState {
-  const entity = useEntity(BitbucketPullRequestsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  useInterval(entity.fetchAsync, 60_000)
-
-  const pullRequests: BitbucketPullRequest[] = entity.value ?? EmptyArray
-
-  return {
-    pullRequests,
-    refresh: entity.fetchAsync,
-  }
 }

@@ -1,21 +1,16 @@
 import { AppsOutlined } from "@mui/icons-material"
 import { Button, Stack, Typography } from "@mui/material"
-import { NotificationsToastOverlay } from "@src/apps/notifications/ui/NotificationsToastOverlay.tsx"
-import { RunItemActionAction } from "@src/apps/run-deck/actions"
-import { RunDeckDataEntity } from "@src/apps/run-deck/entities/RunDeckDataEntity.ts"
-import { Item, Section } from "@src/apps/run-deck/models/RunDeckData.ts"
+import { Item } from "@src/apps/run-deck/models/RunDeckData.ts"
+import { useRunDeckAppState } from "@src/apps/run-deck/state/RunDeckAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useState } from "react"
 
 import classes from "./RunDeckAppWidget.module.scss"
 
 
 export const RunDeckAppWidget = () => {
 
-  const state = useRunDeckState()
+  const state = useRunDeckAppState()
 
   const content = state.sections.length > 0 ? (
     state.sections.map(section => (
@@ -51,7 +46,6 @@ export const RunDeckAppWidget = () => {
           {content}
         </Stack>
       </AppWidget>
-      <NotificationsToastOverlay />
     </>
   )
 }
@@ -60,7 +54,6 @@ const RunDeckItemButton = (props: { item: Item, runItemAction: (item: Item) => v
   const { item, runItemAction } = props
 
   const [hideImage, setHideImage] = useState(false)
-  const onlyText = hideImage
 
   const handleImageError = useCallback(() => {
     setHideImage(true)
@@ -85,35 +78,4 @@ const RunDeckItemButton = (props: { item: Item, runItemAction: (item: Item) => v
       <span className={classes.ItemText} children={item.text} />
     </Button>
   )
-}
-
-
-type RunDeckState = {
-  sections: Section[]
-  runItemAction: (item: Item) => void
-}
-
-const EmptyArray: any[] = []
-
-function useRunDeckState(): RunDeckState {
-  const entity = useEntity(RunDeckDataEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  const runItemActionAction = useAction(RunItemActionAction)
-
-  useInterval(entity.fetchAsync, 5000)
-
-  const sections = entity.value?.sections ?? EmptyArray
-
-  const runItemAction = useCallback((item: Item) => {
-    runItemActionAction.executeAsync({ itemId: item.id })
-  }, [runItemActionAction])
-
-
-  return useMemo(() => ({
-    sections,
-    runItemAction: runItemAction,
-  }), [sections, runItemAction])
 }

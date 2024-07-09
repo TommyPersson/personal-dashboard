@@ -5,7 +5,7 @@ import { GithubAppUI } from "@src/apps/github/ui/GithubAppUI.tsx"
 import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
-import { PomodoroAppWidget } from "@src/apps/pomodoro/ui/PomodoroAppWidget.tsx"
+import { PomodoroAppUI, PomodoroAppWidget } from "@src/apps/pomodoro/ui/PomodoroAppWidget.tsx"
 import { RunDeckAppWidget } from "@src/apps/run-deck/ui/RunDeckAppWidget.tsx"
 import { WeatherAppWidget } from "@src/apps/weather/ui/WeatherAppWidget/WeatherAppWidget.tsx"
 import React from "react"
@@ -24,7 +24,7 @@ const appWidgets: AppWidgetProvider[] = [
   {
     id: "pomodoro-app",
     title: "Pomodoro Timer",
-    factory: () => <PomodoroAppWidget />,
+    factory: () => <PomodoroAppUI />,
   },
   {
     id: "weather-app",

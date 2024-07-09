@@ -1,23 +1,16 @@
 import { Stack, Typography } from "@mui/material"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import React, { useCallback, useMemo, useState } from "react"
+import { useClockAppState } from "@src/apps/clock/state/ClockAppState.ts"
+import React, { useMemo } from "react"
 
 import classes from "./ClockAppBarWidget.module.scss"
 
 export const ClockAppBarWidget = () => {
+  const state = useClockAppState()
 
-  const [time, setTime] = useState(new Date())
-
-  const refreshTime = useCallback(() => {
-    setTime(new Date())
-  }, [])
-
-  useInterval(refreshTime, 5000)
-
-  const timeText = useMemo(() => formatTime(time), [time.getMinutes()])
-  const dayText = useMemo(() => formatDay(time), [time.getDay()])
-  const dateText = useMemo(() => formatDate(time), [time.getDay()])
-  const weekText = useMemo(() => formatWeek(time), [time.getDay()])
+  const timeText = useMemo(() => formatTime(state.time), [state.time.getMinutes()])
+  const dayText = useMemo(() => formatDay(state.time), [state.time.getDay()])
+  const dateText = useMemo(() => formatDate(state.time), [state.time.getDay()])
+  const weekText = useMemo(() => formatWeek(state.time), [state.time.getDay()])
 
   return (
     <Stack className={classes.ClockAppBarWidget}>

@@ -1,14 +1,7 @@
 import { Card, CardContent, Slide, Stack, Typography } from "@mui/material"
-import {
-  NewNotificationMessage,
-  NewNotificationMessageData,
-  NotificationDismissedMessage,
-  NotificationDismissedMessageData,
-} from "@src/apps/notifications/messages"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
+import { useNotificationsToastState } from "@src/apps/notifications/state/NotificationToastsState.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
-import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
-import { useCallback, useState } from "react"
 import { TransitionGroup } from "react-transition-group"
 
 import classes from "./NotificationsToastOverlay.module.scss"
@@ -67,33 +60,3 @@ const NotificationToastCardContent = (props: {
     </div>
   )
 }
-
-type NotificationToastsState = {
-  notifications: Notification[]
-  removeNotification: (notification: Notification) => void
-}
-
-function useNotificationsToastState(): NotificationToastsState {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-
-  const handleNewNotification = useCallback((message: NewNotificationMessageData) => {
-    setNotifications(s => [message.notification, ...s])
-  }, [setNotifications])
-
-  const handleNotificationDismissed = useCallback((message: NotificationDismissedMessageData) => {
-    setNotifications(s => s.filter(it => it.id !== message.notificationId))
-  }, [setNotifications])
-
-  const removeNotification = useCallback((notification: Notification) => {
-    setNotifications(s => s.filter(it => it.id !== notification.id))
-  }, [setNotifications])
-
-  useMessageListener(NewNotificationMessage, handleNewNotification)
-  useMessageListener(NotificationDismissedMessage, handleNotificationDismissed)
-
-  return {
-    notifications,
-    removeNotification,
-  }
-}
-
