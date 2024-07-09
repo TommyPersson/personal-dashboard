@@ -1,7 +1,6 @@
 import { AccountTreeOutlined } from "@mui/icons-material"
-import { Badge, IconButton } from "@mui/material"
 import { BitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
-import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
+import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
@@ -17,12 +16,16 @@ export const BitbucketAppBarIcon = (props: {
   const handleClick = useScrollIntoView("bitbucketAppWidget")
 
   return (
-    <AppBarIconPortal appIconId={"bitbucket"} order={900}>
-      <IconButton size={"large"} onClick={handleClick}>
-        <Badge badgeContent={numPullRequestsToApprove} color={"warning"}>
-          <AccountTreeOutlined />
-        </Badge>
-      </IconButton>
-    </AppBarIconPortal>
+    <AppBarIcon
+      id={"bitbucket"}
+      order={900}
+      icon={<AccountTreeOutlined />}
+      badgeProps={{
+        badgeContent: numPullRequestsToApprove,
+        color: "warning"
+      }}
+      onClick={handleClick}
+    />
   )
 }
+

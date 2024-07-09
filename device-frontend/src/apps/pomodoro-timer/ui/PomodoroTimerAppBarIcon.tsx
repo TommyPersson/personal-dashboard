@@ -1,7 +1,6 @@
 import { TimerOutlined } from "@mui/icons-material"
-import { Badge, IconButton } from "@mui/material"
-import { PomodoroTimerAppState, PomodoroDurationSeconds } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
-import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
+import { PomodoroDurationSeconds, PomodoroTimerAppState } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
+import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
@@ -13,16 +12,16 @@ export const PomodoroTimerAppBarIcon = (props: { state: PomodoroTimerAppState })
   const handleClick = useScrollIntoView("pomodoroTimerAppWidget")
 
   return (
-    <AppBarIconPortal appIconId={"pomodoro-timer"} order={100}>
-      <IconButton size={"large"} onClick={handleClick}>
-        <Badge
-          badgeContent={badgeContent}
-          color={"info"}
-          anchorOrigin={{ horizontal: "right", vertical: "top" }}
-        >
-          <TimerOutlined />
-        </Badge>
-      </IconButton>
-    </AppBarIconPortal>
+    <AppBarIcon
+      id={"pomodoro-timer"}
+      order={100}
+      icon={<TimerOutlined />}
+      badgeProps={{
+        badgeContent: badgeContent,
+        color: "info",
+        anchorOrigin: { horizontal: "right", vertical: "top" },
+      }}
+      onClick={handleClick}
+    />
   )
 }

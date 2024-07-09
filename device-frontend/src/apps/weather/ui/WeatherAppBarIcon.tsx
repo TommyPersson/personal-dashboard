@@ -1,7 +1,6 @@
 import { WbSunnyOutlined } from "@mui/icons-material"
-import { Badge, IconButton } from "@mui/material"
 import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
-import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
+import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
@@ -13,12 +12,15 @@ export const WeatherAppBarIcon = (props: { state: WeatherAppState }) => {
   const handleClick = useScrollIntoView("weatherAppWidget")
 
   return (
-    <AppBarIconPortal appIconId={"weather"} order={2000}>
-      <IconButton size={"large"} onClick={handleClick}>
-        <Badge badgeContent={badgeContent} color={"info"}>
-          <WbSunnyOutlined />
-        </Badge>
-      </IconButton>
-    </AppBarIconPortal>
+    <AppBarIcon
+      id={"weather"}
+      order={2000}
+      icon={<WbSunnyOutlined />}
+      badgeProps={{
+        badgeContent: badgeContent,
+        color: "info",
+      }}
+      onClick={handleClick}
+    />
   )
 }

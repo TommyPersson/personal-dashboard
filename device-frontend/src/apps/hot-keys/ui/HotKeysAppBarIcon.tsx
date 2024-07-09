@@ -1,7 +1,6 @@
 import { KeyboardOutlined } from "@mui/icons-material"
-import { IconButton } from "@mui/material"
 import { HotKeysAppState } from "@src/apps/hot-keys/state/HotKeysAppState.ts"
-import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
+import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
@@ -11,10 +10,11 @@ export const HotKeysAppBarIcon = (props: { state: HotKeysAppState }) => {
   const handleClick = useScrollIntoView("hotKeysAppWidget")
 
   return (
-    <AppBarIconPortal appIconId={"hot-keys"} order={600}>
-      <IconButton size={"large"} onClick={handleClick}>
-        <KeyboardOutlined />
-      </IconButton>
-    </AppBarIconPortal>
+    <AppBarIcon
+      id={"hot-keys"}
+      order={600}
+      icon={<KeyboardOutlined />}
+      onClick={handleClick}
+    />
   )
 }
