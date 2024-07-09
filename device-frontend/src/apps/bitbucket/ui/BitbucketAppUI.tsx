@@ -13,8 +13,9 @@ import {
   ThumbUpOutlined,
 } from "@mui/icons-material"
 import {
+  Badge,
   Button,
-  Chip,
+  Chip, IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -26,37 +27,41 @@ import {
 } from "@mui/material"
 import { BitbucketPullRequestsEntity } from "@src/apps/bitbucket/entities/BitbucketPullRequestsEntity.ts"
 import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
+import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
-import React from "react"
+import React, { useCallback } from "react"
 
 import classes from "./BitbucketAppUI.module.scss"
 
 export const BitbucketAppUI = () => {
-
-  const entity = useEntity(BitbucketPullRequestsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  useInterval(entity.fetchAsync, 60_000)
-
-  const pullRequests: BitbucketPullRequest[] = entity.value ?? EmptyArray
-
-  const openPullRequests = pullRequests.filter(it => it.state === "OPEN" && !it.belongsToUser)
-  const usersPullRequests = pullRequests.filter(it => it.state === "OPEN" && it.belongsToUser)
-  const declinedPullRequests = pullRequests.filter(it => it.state === "DECLINED")
-  const mergedPullRequests = pullRequests.filter(it => it.state === "MERGED")
+  const state = useBitbucketAppState()
 
   return (
-    <AppWidget className={classes.BitbucketAppWidget}>
+    <>
+      <BitbucketAppWidget state={state} />
+      <BitbucketAppBarIcon state={state} />
+    </>
+  )
+}
+
+const BitbucketAppWidget = (props: { state: BitbucketAppState }) => {
+  const { state } = props
+
+  const openPullRequests = state.pullRequests.filter(it => it.state === "OPEN" && !it.belongsToUser)
+  const usersPullRequests = state.pullRequests.filter(it => it.state === "OPEN" && it.belongsToUser)
+  const declinedPullRequests = state.pullRequests.filter(it => it.state === "DECLINED")
+  const mergedPullRequests = state.pullRequests.filter(it => it.state === "MERGED")
+
+  return (
+    <AppWidget className={classes.BitbucketAppWidget} id={"bitbucketAppWidget"}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Bitbucket Pull Requests"}
           icon={<AccountTreeOutlined />}
-          rightContent={<Button startIcon={<RefreshOutlined />} children={"Refresh"} onClick={entity.fetchAsync} />}
+          rightContent={<Button startIcon={<RefreshOutlined />} children={"Refresh"} onClick={state.refresh} />}
         />
         <PullRequestListCard title={"Open"} pullRequests={openPullRequests} />
         <PullRequestListCard title={"Your pull requests"} pullRequests={usersPullRequests} />
@@ -64,7 +69,6 @@ export const BitbucketAppUI = () => {
         <PullRequestListCard title={"Declined"} pullRequests={declinedPullRequests} />
         <PullRequestListCard title={"Merged"} pullRequests={mergedPullRequests} />
       </Stack>
-
     </AppWidget>
   )
 }
@@ -191,4 +195,49 @@ const IconWithText = (props: {
       <Typography variant={"subtitle2"} children={props.text} />
     </Stack>
   )
+}
+
+const BitbucketAppBarIcon = (props: {
+  state: BitbucketAppState
+}) => {
+  const { state } = props
+
+  const numPullRequestsToApprove = state.pullRequests
+    .filter(it => it.state === "OPEN" && !it.belongsToUser && !it.userHasApproved)
+    .length
+
+  const handleClick = useCallback(() => {
+    document.getElementById("bitbucketAppWidget")?.scrollIntoView({ behavior: "smooth" })
+  }, [])
+
+  return (
+    <AppBarIconPortal appIconId={"bitbucket"} order={900}>
+      <IconButton size={"large"} onClick={handleClick}>
+        <Badge badgeContent={numPullRequestsToApprove} color={"secondary"}>
+          <AccountTreeOutlined />
+        </Badge>
+      </IconButton>
+    </AppBarIconPortal>
+  )
+}
+
+type BitbucketAppState = {
+  pullRequests: BitbucketPullRequest[]
+  refresh: () => void
+}
+
+function useBitbucketAppState(): BitbucketAppState {
+  const entity = useEntity(BitbucketPullRequestsEntity, {
+    fetchOnMount: true,
+    clearOnFetch: false,
+  })
+
+  useInterval(entity.fetchAsync, 60_000)
+
+  const pullRequests: BitbucketPullRequest[] = entity.value ?? EmptyArray
+
+  return {
+    pullRequests,
+    refresh: entity.fetchAsync,
+  }
 }

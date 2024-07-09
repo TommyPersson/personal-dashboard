@@ -27,7 +27,7 @@ export const MediaControlUI = () => {
   return (
     <>
       <MediaControlOverlay state={state} />
-      <AppBarIconPortal appIconId={"media-control"}>
+      <AppBarIconPortal appIconId={"media-control"} order={1000}>
         <MediaControlAppBarButton state={state} />
       </AppBarIconPortal>
     </>

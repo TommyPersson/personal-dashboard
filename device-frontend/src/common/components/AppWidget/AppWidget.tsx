@@ -4,6 +4,7 @@ import React, { useMemo } from "react"
 import classes from "./AppWidget.module.scss"
 
 export const AppWidget = (props: {
+  id?: string
   className?: string
   style?: React.CSSProperties
   children: any
@@ -11,7 +12,7 @@ export const AppWidget = (props: {
   const className = classNames(props.className, classes.AppWidget)
 
   return (
-    <div style={props.style} className={className}>
+    <div style={props.style} className={className} id={props.id}>
       {props.children}
     </div>
   )

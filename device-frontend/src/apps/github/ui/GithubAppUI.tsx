@@ -1,5 +1,17 @@
 import { MarkEmailReadOutlined, RefreshOutlined } from "@mui/icons-material"
-import { Button, Chip, List, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography } from "@mui/material"
+import {
+  Badge,
+  Button,
+  Chip,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material"
 import {
   CommentDiscussionIcon,
   GitPullRequestIcon,
@@ -11,6 +23,7 @@ import {
 import { MarkAllNotificationsAsRead } from "@src/apps/github/actions/MarkAllNotificationsAsRead.ts"
 import { GithubNotificationsEntity } from "@src/apps/github/entities/GithubNotificationsEntity.ts"
 import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
+import { AppBarIconPortal } from "@src/common/components/AppBarIconPortal/AppBarIconPortal.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import { useEntity } from "@src/infrastructure/framework/entities"
@@ -23,24 +36,24 @@ import classes from "./GithubAppUI.module.scss"
 
 
 export const GithubAppUI = () => {
-  const entity = useEntity(GithubNotificationsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  const markAllAsReadAction = useAction(MarkAllNotificationsAsRead)
-
-  const handleMarkAllAsReadClicked = useCallback(async () => {
-    await markAllAsReadAction.execute()
-    entity.fetchAsync
-  }, [markAllAsReadAction.execute, entity.fetchAsync])
-
-  useInterval(entity.fetchAsync, 5 * 60_000)
-
-  const notifications: GithubNotification[] = entity.value ?? EmptyArray
+  const state = useGithubState()
 
   return (
-    <AppWidget className={classes.GithubAppWidget}>
+    <>
+      <GithubAppWidget state={state} />
+      <GithubAppBarIcon state={state} />
+    </>
+  )
+}
+
+const GithubAppWidget = (props: {
+  state: GithubAppState
+}) => {
+  const { state } = props
+
+  return (
+    <AppWidget
+      className={classes.GithubAppWidget} id={"githubAppWidget"}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Github Notifications"}
@@ -49,20 +62,20 @@ export const GithubAppUI = () => {
             <>
               <Button
                 startIcon={<RefreshOutlined />}
-                onClick={entity.fetchAsync}
+                onClick={state.refresh}
                 children={"Refresh"}
               />
               <Button
                 startIcon={<MarkEmailReadOutlined />}
-                onClick={handleMarkAllAsReadClicked}
+                onClick={state.markAllAsRead}
                 children={"Mark all as read"}
               />
             </>
           )}
         />
-        {notifications.length > 0 ? (
+        {state.notifications.length > 0 ? (
           <List component={Paper}>
-            {notifications.map(it => <NotificationListItem key={it.id} notification={it} />)}
+            {state.notifications.map(it => <NotificationListItem key={it.id} notification={it} />)}
           </List>
         ) : (
           <EmptyState description={"No notifications available"} />
@@ -71,7 +84,6 @@ export const GithubAppUI = () => {
     </AppWidget>
   )
 }
-
 const NotificationListItem = (props: { notification: GithubNotification }) => {
   const { notification } = props
 
@@ -109,5 +121,55 @@ function getTypeIcon(notification: GithubNotification): any {
       return <TagIcon />
     default:
       return <QuestionIcon />
+  }
+}
+
+const GithubAppBarIcon = (props: {
+  state: GithubAppState
+}) => {
+  const { state } = props
+
+  const handleClick = useCallback(() => {
+    document.getElementById("githubAppWidget")?.scrollIntoView({ behavior: "smooth" })
+  }, [])
+
+  return (
+    <AppBarIconPortal appIconId={"bitbucket"} order={950}>
+      <IconButton size={"large"} onClick={handleClick}>
+        <Badge badgeContent={state.notifications.length} color={"secondary"}>
+          <MarkGithubIcon size={24} />
+        </Badge>
+      </IconButton>
+    </AppBarIconPortal>
+  )
+}
+
+type GithubAppState = {
+  notifications: GithubNotification[]
+  markAllAsRead: () => void
+  refresh: () => void
+}
+
+function useGithubState(): GithubAppState {
+  const entity = useEntity(GithubNotificationsEntity, {
+    fetchOnMount: true,
+    clearOnFetch: false,
+  })
+
+  const markAllAsReadAction = useAction(MarkAllNotificationsAsRead)
+
+  const markAllAsRead = useCallback(async () => {
+    await markAllAsReadAction.execute()
+    entity.fetchAsync
+  }, [markAllAsReadAction.execute, entity.fetchAsync])
+
+  useInterval(entity.fetchAsync, 5 * 60_000)
+
+  const notifications: GithubNotification[] = entity.value ?? EmptyArray
+
+  return {
+    notifications,
+    markAllAsRead,
+    refresh: entity.fetchAsync,
   }
 }

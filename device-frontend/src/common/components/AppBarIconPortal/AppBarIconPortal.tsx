@@ -1,8 +1,8 @@
 import { Portal } from "@mui/material"
 import { useEffect, useState } from "react"
 
-export const AppBarIconPortal = (props: { children: any, appIconId: string }) => {
-  const { children, appIconId } = props
+export const AppBarIconPortal = (props: { children: any, appIconId: string, order: number }) => {
+  const { children, appIconId, order } = props
 
   const [iconContainer, setIconContainer] = useState<HTMLDivElement | null>(null)
 
@@ -26,7 +26,9 @@ export const AppBarIconPortal = (props: { children: any, appIconId: string }) =>
   }
 
   if (!iconContainer) {
-    setIconContainer(document.createElement("div"))
+    const htmlDivElement = document.createElement("div")
+    htmlDivElement.style.cssText = `order: ${order}`
+    setIconContainer(htmlDivElement)
     return null
   }
 
