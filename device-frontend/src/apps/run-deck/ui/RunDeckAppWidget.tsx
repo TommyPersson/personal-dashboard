@@ -1,16 +1,14 @@
 import { AppsOutlined } from "@mui/icons-material"
 import { Button, Stack, Typography } from "@mui/material"
 import { Item } from "@src/apps/run-deck/models/RunDeckData.ts"
-import { useRunDeckAppState } from "@src/apps/run-deck/state/RunDeckAppState.ts"
+import { RunDeckAppState } from "@src/apps/run-deck/state/RunDeckAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import React, { useCallback, useState } from "react"
 
 import classes from "./RunDeckAppWidget.module.scss"
 
-
-export const RunDeckAppWidget = () => {
-
-  const state = useRunDeckAppState()
+export const RunDeckAppWidget = (props: { state: RunDeckAppState }) => {
+  const { state } = props
 
   const content = state.sections.length > 0 ? (
     state.sections.map(section => (
@@ -37,7 +35,7 @@ export const RunDeckAppWidget = () => {
 
   return (
     <>
-      <AppWidget className={classes.RunDeckAppWidget}>
+      <AppWidget className={classes.RunDeckAppWidget} id={"runDeckAppWidget"}>
         <Stack spacing={2}>
           <AppWidgetHeader
             title={"Run Deck"}

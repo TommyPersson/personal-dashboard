@@ -2,12 +2,12 @@ import { Divider, Stack } from "@mui/material"
 import { BitbucketAppUI } from "@src/apps/bitbucket/ui/BitbucketAppUI.tsx"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
 import { GithubAppUI } from "@src/apps/github/ui/GithubAppUI.tsx"
-import { HotKeysAppWidget } from "@src/apps/hot-keys/ui/HotKeysAppWidget.tsx"
+import { HotKeysAppUI } from "@src/apps/hot-keys/ui/HotKeysAppUI.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
-import { PomodoroAppUI, PomodoroAppWidget } from "@src/apps/pomodoro/ui/PomodoroAppWidget.tsx"
-import { RunDeckAppWidget } from "@src/apps/run-deck/ui/RunDeckAppWidget.tsx"
-import { WeatherAppWidget } from "@src/apps/weather/ui/WeatherAppWidget/WeatherAppWidget.tsx"
+import { PomodoroTimerAppUI } from "@src/apps/pomodoro-timer/ui/PomodoroTimerAppUI.tsx"
+import { RunDeckAppUI } from "@src/apps/run-deck/ui/RunDeckAppUI.tsx"
+import { WeatherAppUI } from "@src/apps/weather/ui/WeatherAppUI.tsx"
 import React from "react"
 
 import "../../infrastructure/Timer"
@@ -24,12 +24,12 @@ const appWidgets: AppWidgetProvider[] = [
   {
     id: "pomodoro-app",
     title: "Pomodoro Timer",
-    factory: () => <PomodoroAppUI />,
+    factory: () => <PomodoroTimerAppUI />,
   },
   {
     id: "weather-app",
     title: "Weather",
-    factory: () => <WeatherAppWidget />,
+    factory: () => <WeatherAppUI />,
   },
   {
     id: "media-control-app",
@@ -39,12 +39,12 @@ const appWidgets: AppWidgetProvider[] = [
   {
     id: "hot-keys-app",
     title: "Hot Keys",
-    factory: () => <HotKeysAppWidget />,
+    factory: () => <HotKeysAppUI />,
   },
   {
     id: "run-deck-app",
     title: "Run Deck",
-    factory: () => <RunDeckAppWidget />,
+    factory: () => <RunDeckAppUI />,
   },
   {
     id: "bitbucket-app",

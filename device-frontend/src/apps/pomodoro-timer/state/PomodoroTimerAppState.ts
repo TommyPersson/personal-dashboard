@@ -2,7 +2,7 @@ import { useSecondTimer } from "@src/shell/infrastructure/Timer.ts"
 import { useCallback, useEffect, useState } from "react"
 
 
-export type PomodoroAppState = {
+export type PomodoroTimerAppState = {
   isRunning: boolean
   remainingSeconds: number
   remainingTimeText: string
@@ -14,7 +14,7 @@ export type PomodoroAppState = {
 
 export const PomodoroDurationSeconds = 60 * 25
 
-export function usePomodoroAppState(): PomodoroAppState {
+export function usePomodoroTimerAppState(): PomodoroTimerAppState {
   const [isRunning, setIsRunning] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState<number>(PomodoroDurationSeconds)
 

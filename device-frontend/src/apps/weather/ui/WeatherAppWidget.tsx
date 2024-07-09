@@ -13,15 +13,14 @@ import {
   Typography,
 } from "@mui/material"
 import { CurrentWeather, DailyForecast, HourlyForecast } from "@src/apps/weather/modes/WeatherData.ts"
-import { useWeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
+import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import React, { useMemo } from "react"
 
 import classes from "./WeatherAppWidget.module.scss"
 
-
-export const WeatherAppWidget = () => {
-  const state = useWeatherAppState()
+export const WeatherAppWidget = (props: { state: WeatherAppState }) => {
+  const { state } = props
 
   const refreshButton = (
     <Button
@@ -56,7 +55,7 @@ export const WeatherAppWidget = () => {
   )
 
   return (
-    <AppWidget className={classes.WeatherAppWidget}>
+    <AppWidget className={classes.WeatherAppWidget} id={"weatherAppWidget"}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Weather"}

@@ -1,16 +1,15 @@
 import { KeyboardOutlined } from "@mui/icons-material"
 import { List, ListItemButton, ListItemText, ListSubheader, Paper, Stack, Typography } from "@mui/material"
 import { HotKey } from "@src/apps/hot-keys/models/HotKeysData.ts"
-import { HotKeysAppState, useHotKeysAppState } from "@src/apps/hot-keys/state/HotKeysAppState.ts"
+import { HotKeysAppState } from "@src/apps/hot-keys/state/HotKeysAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import React, { useCallback } from "react"
 
 import classes from "./HotKeysAppWidget.module.scss"
 
 
-export const HotKeysAppWidget = () => {
-
-  const state = useHotKeysAppState()
+export const HotKeysAppWidget = (props: { state: HotKeysAppState }) => {
+  const { state } = props
 
   const content = state.sections.length > 0 ? (
     state.sections.map(section => (
@@ -30,7 +29,7 @@ export const HotKeysAppWidget = () => {
   )
 
   return (
-    <AppWidget className={classes.HotKeysAppWidget}>
+    <AppWidget className={classes.HotKeysAppWidget} id={"hotKeysAppWidget"}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Hot Keys"}
