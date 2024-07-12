@@ -1,0 +1,30 @@
+.UnlockKeyPad {
+  gap: var(--mui-sp-4)
+}
+
+.PinDisplay {
+  gap: var(--mui-sp-2);  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.DigitDisplay {
+  margin-top: var(--mui-sp-2);
+  //border: 1px solid white;
+}
+
+.ButtonPanel {
+  place-self: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--mui-sp-2);
+  justify-items: center;
+  pointer-events: auto;
+}
+
+.DigitButton {
+  height: 100px;
+  width: 100px;
+  font-size: xxx-large !important;
+  pointer-events: auto;
+}

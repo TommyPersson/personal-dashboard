@@ -10,7 +10,7 @@ export const AppBarIcon = (props: {
   onClick?: () => void
 }) => {
   return (
-    <AppBarIconPortal appIconId={props.id} order={props.order}>
+    <AppBarIconPortal id={props.id} order={props.order}>
       <IconButton size={"large"} onClick={props.onClick}>
         <Badge {...props.badgeProps}>
           {props.icon}

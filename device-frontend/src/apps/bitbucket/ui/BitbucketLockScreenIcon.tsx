@@ -1,10 +1,10 @@
+import { AccountTreeOutlined } from "@mui/icons-material"
 import { GitPullRequestIcon } from "@primer/octicons-react"
 import { BitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
-import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
-import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
+import { LockScreenIcon } from "@src/common/components/LockScreenIcon/LockScreenIcon.tsx"
 import React from "react"
 
-export const BitbucketAppBarIcon = (props: {
+export const BitbucketLockScreenIcon = (props: {
   state: BitbucketAppState
 }) => {
   const { state } = props
@@ -13,18 +13,15 @@ export const BitbucketAppBarIcon = (props: {
     .filter(it => it.state === "OPEN" && !it.belongsToUser && !it.userHasApproved)
     .length
 
-  const handleClick = useScrollIntoView("bitbucketAppWidget")
-
   return (
-    <AppBarIcon
-      id={"bitbucket"}
+    <LockScreenIcon
+      id={"bitbucket-lock-screen-icon"}
       order={900}
       icon={<GitPullRequestIcon size={24} />}
       badgeProps={{
         badgeContent: numPullRequestsToApprove,
         color: "warning"
       }}
-      onClick={handleClick}
     />
   )
 }

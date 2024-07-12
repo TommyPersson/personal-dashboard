@@ -24,6 +24,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material"
+import { GitPullRequestIcon } from "@primer/octicons-react"
 import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
 import { BitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
 
@@ -44,7 +45,7 @@ export const BitbucketAppWidget = (props: { state: BitbucketAppState }) => {
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Bitbucket Pull Requests"}
-          icon={<AccountTreeOutlined />}
+          icon={<GitPullRequestIcon />}
           rightContent={<Button startIcon={<RefreshOutlined />} children={"Refresh"} onClick={state.refresh} />}
         />
         <PullRequestListCard title={"Open"} pullRequests={openPullRequests} />

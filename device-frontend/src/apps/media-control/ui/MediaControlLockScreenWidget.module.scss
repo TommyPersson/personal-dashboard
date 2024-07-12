@@ -1,0 +1,48 @@
+
+.ThumbnailContainer {
+  position: relative;
+  background: #0a0a0a;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 2px 2px 2px #000000aa;
+
+  .ThumbnailTextContainer {
+    flex: 1;
+    padding: var(--mui-sp-2);
+    gap: var(--mui-sp-1);
+    align-items: flex-start;
+    max-width: calc(100% - 240px); // 240 = width of the buttons
+  }
+
+  .ThumbnailText {
+    background: #000000aa;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1 !important;
+    padding: var(--mui-sp-1);
+    max-width: 100%;
+    display: inline;
+  }
+}
+
+.ThumbnailContent {
+  backdrop-filter: blur(5px);
+}
+
+.PlaybackControlsView {
+  flex: 0;
+  gap: var(--mui-sp-4);
+  filter: drop-shadow(2px 2px 2px #000000aa);
+  margin: var(--mui-sp-2);
+  align-items: center;
+
+  :global(.MuiSvgIcon-root) {
+    transform: scale(2);
+  }
+
+  * {
+    color: white;
+    fill: white;
+  }
+}

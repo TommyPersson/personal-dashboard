@@ -1,6 +1,7 @@
 import { useWeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { WeatherAppBarIcon } from "@src/apps/weather/ui/WeatherAppBarIcon.tsx"
 import { WeatherAppWidget } from "@src/apps/weather/ui/WeatherAppWidget.tsx"
+import { WeatherLockScreenWidget } from "@src/apps/weather/ui/WeatherLockScreenWidget.tsx"
 import React from "react"
 
 export const WeatherAppUI = () => {
@@ -10,6 +11,7 @@ export const WeatherAppUI = () => {
     <>
       <WeatherAppWidget state={state} />
       <WeatherAppBarIcon state={state} />
+      <WeatherLockScreenWidget state={state} />
     </>
   )
 }

@@ -14,6 +14,7 @@ import {
 } from "@mui/material"
 import { CurrentWeather, DailyForecast, HourlyForecast } from "@src/apps/weather/modes/WeatherData.ts"
 import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
+import { WeatherIcon } from "@src/apps/weather/ui/components/WeatherIcon.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import React, { useMemo } from "react"
 
@@ -97,7 +98,7 @@ const CurrentWeatherCard = (props: { cityName: string, current: CurrentWeather }
         </CardContent>
         <Box sx={{ flex: 1 }} />
         <CardContent>
-          <WeatherIcon iconName={current.weatherIconName} />
+          <WeatherIcon iconName={current.weatherIconName} className={classes.WeatherIcon} />
         </CardContent>
       </Stack>
     </Card>
@@ -127,7 +128,7 @@ const HourlyForecastColumn = (props: { forecast: HourlyForecast }) => {
   return (
     <Stack className={classes.HourlyForecastColumn}>
       <Typography variant={"caption"}>{forecast.time.substring(0, 5)}</Typography>
-      <WeatherIcon iconName={forecast.weatherIconName} />
+      <WeatherIcon iconName={forecast.weatherIconName} className={classes.WeatherIcon} />
       <Typography variant={"body2"}>{forecast.temperature}°</Typography>
       <WaterDropOutlined className={classes.HumidityIcon} sx={{ mt: 1 }} />
       <Typography variant={"body2"} color={"text.secondary"}>{forecast.humidityPercent}%</Typography>
@@ -171,26 +172,17 @@ const DailyForecastRow = (props: WeeklyForecastRowProps) => {
           <WaterDropOutlined className={classes.HumidityIcon} /> {forecast.humidityPercent}%
         </Stack>
       </TableCell>
-      <TableCell><WeatherIcon iconName={forecast.weatherIconName} /></TableCell>
+      <TableCell><WeatherIcon iconName={forecast.weatherIconName} className={classes.WeatherIcon} /></TableCell>
       <TableCell>{forecast.temperatureHigh}°</TableCell>
       <TableCell>{forecast.temperatureLow}°</TableCell>
     </TableRow>
   )
 }
 
-const WeatherIcon = (props: { iconName: string }) => {
-  const src = formatIconUrl(props.iconName)
-  return <img className={classes.WeatherIcon} src={src} alt={""} />
-}
-
-function formatIconUrl(iconName: string): string {
-  return `/assets/apps/weather/icons/${iconName}@4x.png`
-}
-
-function formatDay(date: Date): string {
+export function formatDay(date: Date): string {
   return date.toLocaleDateString("en-US", { weekday: "long" })
 }
 
-function formatTime(date: Date): string {
+export function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" })
 }

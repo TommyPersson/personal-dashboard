@@ -1,6 +1,8 @@
-import { Divider, Stack } from "@mui/material"
+import { Lock } from "@mui/icons-material"
+import { Box, Divider, Icon, IconButton, Stack } from "@mui/material"
 import { BitbucketAppUI } from "@src/apps/bitbucket/ui/BitbucketAppUI.tsx"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
+import { ClockAppUI } from "@src/apps/clock/ui/ClockAppUI.tsx"
 import { GithubAppUI } from "@src/apps/github/ui/GithubAppUI.tsx"
 import { HotKeysAppUI } from "@src/apps/hot-keys/ui/HotKeysAppUI.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
@@ -8,7 +10,8 @@ import { NotificationsAppWidget } from "@src/apps/notifications/ui/Notifications
 import { PomodoroTimerAppUI } from "@src/apps/pomodoro-timer/ui/PomodoroTimerAppUI.tsx"
 import { RunDeckAppUI } from "@src/apps/run-deck/ui/RunDeckAppUI.tsx"
 import { WeatherAppUI } from "@src/apps/weather/ui/WeatherAppUI.tsx"
-import React from "react"
+import { AppContext } from "@src/shell/state/ShellState.tsx"
+import React, { useContext } from "react"
 
 import "../../infrastructure/Timer"
 
@@ -21,6 +24,11 @@ type AppWidgetProvider = {
 }
 
 const appWidgets: AppWidgetProvider[] = [
+  {
+    id: "clock-app",
+    title: "Clock",
+    factory: () => <ClockAppUI />,
+  },
   {
     id: "pomodoro-app",
     title: "Pomodoro Timer",
@@ -59,6 +67,7 @@ const appWidgets: AppWidgetProvider[] = [
 ]
 
 export const ShellScreen = () => {
+  const appContext = useContext(AppContext)
   return (
     <div className={classes.ShellScreen}>
       <div className={classes.StatusBarSlot}></div>
@@ -74,7 +83,11 @@ export const ShellScreen = () => {
           {appWidgets.map(it => <React.Fragment key={it.id}>{it.factory()}</React.Fragment>)}
         </Stack>
       </div>
-      <div id={"appBarSelector"} className={classes.AppSelectorSlot}>
+      <div className={classes.AppBarSlot}>
+        <IconButton size={"large"} onClick={appContext.lock}>
+          <Lock />
+        </IconButton>
+        <Box flex={1} />
         <div id={"appBarPortal"} className={classes.AppBarPortal}></div>
         <Divider />
         <ClockAppBarWidget />

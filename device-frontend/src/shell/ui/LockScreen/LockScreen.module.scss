@@ -1,0 +1,37 @@
+.LockScreen {
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--mui-palette-primary-dark);
+  color: var(--mui-palette-primary-contrastText);
+  display: flex;
+  padding: 50px;
+  gap: 100px;
+}
+
+.LeftColumn {
+  flex: 1;
+  gap: 100px;
+  max-width: calc(50% - 50px);
+}
+
+.RightColumn {
+  flex: 1;
+  //border: 1px solid white;
+  max-width: calc(50% - 50px);
+}
+
+.WidgetPanel {
+  flex: 1;
+  gap: var(--mui-sp-2);
+}
+
+.IconBar {
+  height: 80px;
+  align-items: center;
+  pointer-events: none;
+}

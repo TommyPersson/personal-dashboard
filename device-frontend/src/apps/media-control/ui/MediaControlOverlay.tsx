@@ -8,6 +8,7 @@ import {
 import { Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
 import { MediaControlStatus, PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
 import { MediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
+import { getThumbnailImageSrc } from "@src/apps/media-control/utils/mediaControlUtils.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
 import React from "react"
 
@@ -27,6 +28,7 @@ export const MediaControlOverlay = (props: { state: MediaControlAppState }) => {
     </AppAreaOverlayPortal>
   )
 }
+
 const MediaInfoView = (props: { state: MediaControlAppState }) => {
   const { state } = props
 
@@ -95,10 +97,4 @@ const PlaybackControlsView = (props: { state: MediaControlAppState }) => {
       />
     </CardContent>
   )
-}
-
-function getThumbnailImageSrc(status: MediaControlStatus | null) {
-  const title = status?.mediaInfo?.title ?? "unknown"
-  const encodedTitle = encodeURIComponent(title)
-  return `url("/api/apps/media-control/thumbnail?cache-buster=${encodedTitle}")`
 }

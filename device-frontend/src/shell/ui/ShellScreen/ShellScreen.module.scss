@@ -9,7 +9,7 @@
   left: 0;
   display: grid;
   grid-template-rows: [status-bar-slot] auto [rest] 1fr;
-  grid-template-columns: [notification-area-slot] auto [app-area-slot] 4fr [app-selected-slot] auto;
+  grid-template-columns: [notification-area-slot] auto [app-area-slot] 4fr [app-bar-slot] auto;
   background: #fafafa;
 }
 
@@ -53,8 +53,8 @@
   position: relative;
 }
 
-.AppSelectorSlot {
-  grid-column: app-selected-slot;
+.AppBarSlot {
+  grid-column: app-bar-slot;
   grid-row: rest;
   overflow-y: auto;
   overflow-x: hidden;

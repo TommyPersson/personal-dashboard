@@ -9,7 +9,6 @@
 
 .ThumbnailContainer {
   color: white;
-  width: 300px;
   backdrop-filter: blur(3px);
   align-items: flex-start;
   gap: var(--mui-sp-1);
@@ -25,13 +24,14 @@
   overflow: hidden;
   line-height: 1 !important;
   padding: var(--mui-sp-1);
-  max-width: calc(300px - var(--mui-sp-2) * 2);
+  max-width: 100%;
   display: inline;
 }
 
 .MediaControlOverlay {
   pointer-events: auto;
   position: absolute;
+  width: 300px;
   right: var(--mui-sp-2);
   bottom: var(--mui-sp-2);
 }
