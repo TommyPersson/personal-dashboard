@@ -3,6 +3,7 @@ package core
 import apps.bitbucket.application.BitbucketGuiceModule
 import apps.clock.application.ClockGuiceModule
 import apps.github.application.GithubGuiceModule
+import apps.google.application.GoogleGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
@@ -28,10 +29,16 @@ import io.ktor.websocket.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import utils.HttpErrorResponseDTO
 import utils.HttpException
 import utils.JSON
 import utils.configureJackson
+import java.awt.Menu
+import java.awt.PopupMenu
+import java.awt.SystemTray
+import java.awt.TrayIcon
 import java.time.Duration
+import javax.imageio.ImageIO
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
@@ -45,11 +52,14 @@ fun main() {
         HotKeysGuiceModule(),
         BitbucketGuiceModule(),
         GithubGuiceModule(),
+        GoogleGuiceModule(),
     )
 
     val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
 
     val webSocketService = injector.getInstance(WebSocketService::class.java)
+
+    setupTrayIcon(appModules.mapNotNull { it.trayIconMenu })
 
     embeddedServer(Netty, port = 8080) {
         configureContentNegotiations()
@@ -113,8 +123,8 @@ private fun Application.configureCallLogging() {
 
 private fun Application.configureStatusPages(logger: Logger) {
     install(StatusPages) {
-        exception<HttpException> {call, cause ->
-            call.respond(cause.status)
+        exception<HttpException> { call, cause ->
+            call.respond(cause.status, HttpErrorResponseDTO(cause.errorCode, cause.errorMessage))
         }
         exception<Throwable> { call, cause ->
             call.respond(HttpStatusCode.InternalServerError)
@@ -122,4 +132,16 @@ private fun Application.configureStatusPages(logger: Logger) {
             throw cause
         }
     }
+}
+
+
+fun setupTrayIcon(appSubMenus: List<Menu>) {
+    val iconImage = ImageIO.read(object {}::class.java.getResource("/tray-icon.png"))
+    val trayIcon = TrayIcon(iconImage, "Desktop Dashboard").also { trayIcon ->
+        trayIcon.popupMenu = PopupMenu().also { menu ->
+            appSubMenus.forEach { menu.add(it) }
+        }
+    }
+
+    SystemTray.getSystemTray().add(trayIcon)
 }

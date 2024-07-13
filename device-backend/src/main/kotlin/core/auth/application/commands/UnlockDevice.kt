@@ -18,7 +18,7 @@ class UnlockDeviceCommandHandler @Inject constructor(
 ) : CommandHandler<UnlockDevice, DeviceSessionJWT> {
     override suspend fun handle(command: UnlockDevice): DeviceSessionJWT {
         if (command.pin != config.auth.pinCode) {
-            throw AuthErrors.Unauthorized()
+            throw AuthErrors.InvalidPinCode()
         }
 
         return DeviceSessionJWT(JWT.create()
