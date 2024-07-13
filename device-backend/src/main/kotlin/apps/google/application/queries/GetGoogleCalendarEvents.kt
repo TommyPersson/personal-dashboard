@@ -34,6 +34,7 @@ class GetGoogleCalendarEventsQueryHandler @Inject constructor(
 
             response.items.map {
                 GetGoogleCalendarEventsResponseDTO.Event(
+                    id = it.id,
                     calendarName = response.summary,
                     summary = it.summary,
                     startTime = Instant.ofEpochMilli(it.start.dateTime.value),
