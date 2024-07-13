@@ -8,7 +8,7 @@ export const LockScreen = () => {
   const appContext = useContext(AppContext)
 
   return (
-    <Slide in={appContext.isLocked}>
+    <Slide in={!appContext.isUnlocked}>
       <LockScreenView />
     </Slide>
   )

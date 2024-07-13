@@ -11,6 +11,7 @@ export type EntityStateValue<TValue> = {
 }
 
 export type EntityState<TValue> = EntityStateValue<TValue> & {
+  readonly fetch: () => Promise<TValue>
   readonly fetchAsync: () => void
   readonly clear: () => void
 }
@@ -37,7 +38,8 @@ export function useEntity<TValue, TPayload = any>(
 
   const { state, set } = useObjectState<EntityStateValue<TValue>>(key)
 
-  const fetchAsync = useCallback(async () => {
+
+  const fetch = useCallback(async () => {
     const clearOnFetch = options.clearOnFetch !== false
 
     try {
@@ -62,6 +64,7 @@ export function useEntity<TValue, TPayload = any>(
         value: value,
         lastFetchedAt: new Date(),
       })
+      return value
     } catch (e) {
       set({
         key,
@@ -70,8 +73,14 @@ export function useEntity<TValue, TPayload = any>(
         value: null,
         lastFetchedAt: null,
       })
+      throw e
     }
   }, [key, fetchUrl, transform, set])
+
+  const fetchAsync = useCallback(async () => {
+    fetch().then().catch(() => {
+    })
+  }, [fetch])
 
   const clear = useCallback(() => {
     set({
@@ -97,12 +106,13 @@ export function useEntity<TValue, TPayload = any>(
   }, [fetchUrl])
 
   return useMemo(() => ({
+    fetch: fetch,
     fetchAsync: fetchAsync,
     clear: clear,
     key: key,
     value: state?.value ?? null,
     isLoading: state?.isLoading ?? false,
     error: state?.error ?? null,
-    lastFetchedAt: state?.lastFetchedAt ?? null
+    lastFetchedAt: state?.lastFetchedAt ?? null,
   }), [key, state, fetchAsync, clear])
 }

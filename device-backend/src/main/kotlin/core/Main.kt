@@ -28,6 +28,7 @@ import io.ktor.websocket.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import utils.HttpException
 import utils.JSON
 import utils.configureJackson
 import java.time.Duration
@@ -112,6 +113,9 @@ private fun Application.configureCallLogging() {
 
 private fun Application.configureStatusPages(logger: Logger) {
     install(StatusPages) {
+        exception<HttpException> {call, cause ->
+            call.respond(cause.status)
+        }
         exception<Throwable> { call, cause ->
             call.respond(HttpStatusCode.InternalServerError)
             logger.error(cause)
