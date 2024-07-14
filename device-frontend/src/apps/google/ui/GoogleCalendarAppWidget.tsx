@@ -3,6 +3,8 @@ import { Button, Card, CardContent, Divider, Paper, Stack, Typography } from "@m
 import { GoogleCalendarEvent } from "@src/apps/google/models/GoogleCalendarEvent.ts"
 import { GoogleCalendarAppState } from "@src/apps/google/state/GoogleCalendarAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { getDecimalHours, getStartOfDay, getStartOfMinute } from "@src/infrastructure/utils/dates.ts"
+import classNames from "classnames"
 import React from "react"
 import { useMeasure } from "react-use"
 
@@ -27,8 +29,6 @@ export const GoogleCalendarAppWidget = React.memo((props: { state: GoogleCalenda
   )
 })
 
-const AllHours = new Array(24).fill(0).map((_, i) => i)
-
 const CalendarView = (props: { events: GoogleCalendarEvent[], currentTime: Date }) => {
   const { events, currentTime } = props
 
@@ -36,91 +36,113 @@ const CalendarView = (props: { events: GoogleCalendarEvent[], currentTime: Date 
 
   const cellHeight = measure.height / 24
 
-  const startOfDay = new Date()
-  startOfDay.setHours(0)
-  startOfDay.setMinutes(0)
-  startOfDay.setSeconds(0)
-  startOfDay.setMilliseconds(0)
-
-  const now = currentTime
-  now.setSeconds(0)
-  now.setMilliseconds(0)
-  const nowHour = getDecimalHours(now.valueOf() - startOfDay.valueOf())
-  console.log(nowHour, nowHour * cellHeight)
+  const startOfDay = getStartOfDay(new Date())
 
   return (
-    <div ref={measureRef} style={{ flex: 1, display: "flex", position: "relative" }}>
-      {AllHours.map(i => <HourDivider key={i} hour={i} offsetY={i * cellHeight} />)}
-      {events.map((it, i) => <EventBox event={it} cellHeight={cellHeight} />)}
-      <div style={{
-        position: "absolute",
-        top: nowHour * cellHeight - 1,
-        left: 0,
-        right: 0,
-        height: 2,
-        background: "red",
-      }} />
+    <div className={classes.CalendarView} ref={measureRef}>
+      <PassedTimeShade currentTime={currentTime} startOfDay={startOfDay} cellHeight={cellHeight} />
+      <HourDividers cellHeight={cellHeight} />
+      <CurrentTimeMarker currentTime={currentTime} startOfDay={startOfDay} cellHeight={cellHeight} />
+      <EventCards events={events} currentTime={currentTime} startOfDay={startOfDay} cellHeight={cellHeight} />
     </div>
   )
 }
 
-const HourDivider = (props: { hour: number, offsetY: number }) => {
-  return <>
-    {props.hour != 0 && <Divider style={{ position: "absolute", top: props.offsetY, left: 0, right: 0, height: 1 }} />}
-    <Typography
-      variant={"caption"}
-      style={{
-        position: "absolute",
-        top: props.offsetY,
-        left: 2,
-      }}
-    >
-      {`${props.hour.toString().padStart(2, "0")}:00`}
-    </Typography>
-  </>
+const PassedTimeShade = (props: { currentTime: Date, startOfDay: Date, cellHeight: number }) => {
+  const { currentTime, startOfDay, cellHeight } = props
+
+  const now = getStartOfMinute(currentTime)
+  const nowHour = getDecimalHours(now.valueOf() - startOfDay.valueOf())
+
+  return (
+    <div
+      className={classes.PassedTimeShade}
+      style={{ bottom: (24 - nowHour) * cellHeight }}
+    />
+  )
 }
 
-const EventBox = (props: {
+const CurrentTimeMarker = (props: { currentTime: Date, startOfDay: Date, cellHeight: number }) => {
+  const { currentTime, startOfDay, cellHeight } = props
+
+  const now = getStartOfMinute(currentTime)
+  const nowHour = getDecimalHours(now.valueOf() - startOfDay.valueOf())
+
+  return (
+    <div
+      className={classes.CurrentTimeMarker}
+      style={{ top: nowHour * cellHeight - 1 }}
+    />
+  )
+}
+
+const AllHours = new Array(24).fill(0).map((_, i) => i)
+
+const HourDividers = React.memo((props: { cellHeight: number }) => {
+  const { cellHeight } = props
+  return <div>{AllHours.map(i => <HourDivider key={i} hour={i} offsetY={i * cellHeight} />)}</div>
+})
+
+const HourDivider = (props: { hour: number, offsetY: number }) => {
+  return (
+    <div className={classes.HourCell} style={{ top: props.offsetY }}>
+      <Typography
+        variant={"caption"}
+        children={`${props.hour.toString().padStart(2, "0")}:00`}
+      />
+    </div>
+  )
+}
+
+const EventCards = (props: {
+  events: GoogleCalendarEvent[],
+  currentTime: Date,
+  startOfDay: Date,
+  cellHeight: number
+}) => {
+  const { events, currentTime, startOfDay, cellHeight } = props
+  return events.map((it, i) => <EventCard key={it.id} event={it} cellHeight={cellHeight} startOfDay={startOfDay}
+                                          currentTime={currentTime} />)
+}
+
+const EventCard = (props: {
   event: GoogleCalendarEvent,
   cellHeight: number,
+  currentTime: Date,
+  startOfDay: Date
 }) => {
-  const { event, cellHeight } = props
+  const { event, cellHeight, currentTime, startOfDay } = props
 
-  const startOfDay = new Date()
-  startOfDay.setHours(0)
-  startOfDay.setMinutes(0)
-  startOfDay.setSeconds(0)
-  startOfDay.setMilliseconds(0)
-  const startTime = new Date(event.startTime)
-  startTime.setSeconds(0)
-  startTime.setMilliseconds(0)
-  const endTime = new Date(event.endTime)
-  endTime.setSeconds(0)
-  endTime.setMilliseconds(0)
+  const startTime = getStartOfMinute(new Date(event.startTime))
+  const endTime = getStartOfMinute(new Date(event.endTime))
   const startTimeHour = getDecimalHours(startTime.valueOf() - startOfDay.valueOf())
-  const endTimeHour = getDecimalHours(endTime.valueOf() - endTime.valueOf())
+  const endTimeHour = getDecimalHours(endTime.valueOf() - startOfDay.valueOf())
 
   const durationHours = endTimeHour - startTimeHour
 
   const offsetY = startTimeHour * cellHeight + 1
   const height = Math.max(24, durationHours * cellHeight)
 
+  const isInTheFuture = currentTime < startTime
+  const isInProgress = currentTime >= startTime && currentTime <= endTime
+  const isInThePast = currentTime > endTime
+
+  const className = classNames(classes.EventCard, {
+    [classes.IsInTheFuture]: isInTheFuture,
+    [classes.IsInProgress]: isInProgress,
+    [classes.IsInThePast]: isInThePast,
+  })
+
   return (
-    <Card style={{
-      position: "absolute",
-      top: offsetY,
-      left: 50,
-      right: 16,
-      border: "1px solid white",
-      minHeight: height,
-    }}>
+    <Card
+      className={className}
+      style={{
+        top: offsetY,
+        minHeight: height,
+      }}>
       <CardContent style={{ padding: 4 }}>
         <Typography variant={"body2"}>{event.summary}</Typography>
       </CardContent>
     </Card>
   )
-}
-
-function getDecimalHours(time: Date | number): number {
-  return time.valueOf() / (60 * 60 * 1_000)
 }

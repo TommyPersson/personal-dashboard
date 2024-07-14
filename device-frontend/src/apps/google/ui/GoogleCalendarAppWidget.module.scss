@@ -2,3 +2,61 @@
   height: 100%;
   width: 400px;
 }
+
+.CalendarView {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.HourCell {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  padding-left: 4px;
+}
+
+.HourCell:first-of-type {
+  border-top: none;
+}
+
+.PassedTimeShade {
+  background: var(--mui-palette-grey-200);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 4px;
+}
+
+.CurrentTimeMarker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: red;
+}
+
+.EventCard {
+  position: absolute;
+  left: 50px;
+  right: 16px;
+
+
+  &.IsInProgress {
+    color: var(--mui-palette-secondary-contrastText);
+    background: var(--mui-palette-secondary-main);
+  }
+
+  &.IsInTheFuture {
+    color: var(--mui-palette-primary-contrastText);
+    background: var(--mui-palette-primary-main);
+
+  }
+
+  &.IsInThePast {
+    background: var(--mui-palette-grey-300);
+  }
+
+}
