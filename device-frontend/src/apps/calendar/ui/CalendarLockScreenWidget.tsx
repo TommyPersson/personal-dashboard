@@ -2,6 +2,7 @@ import { Card, CardContent, Stack, Typography } from "@mui/material"
 import { CalendarEvent } from "@src/apps/calendar/models/CalendarEvent.ts"
 import { CalendarAppState } from "@src/apps/calendar/state/CalendarAppState.ts"
 import { LockScreenWidgetPortal } from "@src/common/components/LockScreenWidgetPortal/LockScreenIconPortal.tsx"
+import classNames from "classnames"
 import { DateTime } from "luxon"
 import React from "react"
 
@@ -28,15 +29,15 @@ const UpcomingEventsView = (props: { state: CalendarAppState }) => {
       <Typography variant={"h4"} children={"Upcoming events"} />
       <div className={classes.EventSections}>
         {eventsByDateArray.map(([date, events]) => (
-          <EventSection key={date} date={date} events={events ?? []} />
+          <EventSection key={date} date={date} events={events ?? []} currentTime={state.currentTime} />
         ))}
       </div>
     </Stack>
   )
 }
 
-const EventSection = (props: { date: string, events: CalendarEvent[] }) => {
-  const { events } = props
+const EventSection = (props: { date: string, events: CalendarEvent[], currentTime: DateTime }) => {
+  const { events, currentTime } = props
 
   const date = DateTime.fromISO(props.date)
   const title = date.toFormat("EEEE, MM-dd")
@@ -44,20 +45,30 @@ const EventSection = (props: { date: string, events: CalendarEvent[] }) => {
   return (
     <Stack className={classes.EventSection}>
       <Typography variant={"caption"} children={title} />
-      {events.map(it => <EventCard key={it.id} event={it} />)}
+      {events.map(it => <EventCard key={it.id} event={it} currentTime={currentTime} />)}
     </Stack>
   )
 }
 
-const EventCard = (props: { event: CalendarEvent }) => {
-  const { event } = props
+const EventCard = (props: { event: CalendarEvent, currentTime: DateTime }) => {
+  const { event, currentTime } = props
 
   const startTimeText = event.startTime.toFormat("HH:mm")
   const endTimeText = event.endTime.toFormat("HH:mm")
   const timeText = `${startTimeText} — ${endTimeText}`
 
+  const isInTheFuture = currentTime < event.startTime
+  const isInProgress = currentTime >= event.startTime && currentTime <= event.endTime
+  const isInThePast = currentTime > event.endTime
+
+  const className = classNames(classes.EventCard, {
+    [classes.IsInTheFuture]: isInTheFuture,
+    [classes.IsInProgress]: isInProgress,
+    [classes.IsInThePast]: isInThePast,
+  })
+
   return (
-    <Card className={classes.EventCard}>
+    <Card className={className}>
       <CardContent>
         <Typography variant={"body1"} children={event.summary} className={classes.EventSummaryText} />
         <Typography variant={"body2"} children={timeText} className={classes.EventTimeText} />

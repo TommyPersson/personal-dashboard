@@ -26,4 +26,17 @@
   .EventTimeText {
 
   }
+
+  &.IsInTheFuture {
+
+  }
+
+  &.IsInProgress {
+    background: var(--mui-palette-secondary-main) !important;
+    color: var(--mui-palette-secondary-contrastText) !important;
+  }
+
+  &.IsInThePast {
+    opacity: 0.5;
+  }
 }
