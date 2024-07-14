@@ -1,7 +1,7 @@
 import { CalendarTodayOutlined, RefreshOutlined } from "@mui/icons-material"
 import { Button, Card, CardContent, Paper, Stack, Typography } from "@mui/material"
-import { GoogleCalendarEvent } from "@src/apps/google/models/GoogleCalendarEvent.ts"
-import { GoogleCalendarAppState } from "@src/apps/google/state/GoogleCalendarAppState.ts"
+import { CalendarEvent } from "@src/apps/calendar/models/CalendarEvent.ts"
+import { CalendarAppState } from "@src/apps/calendar/state/CalendarAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { getDecimalHours, getStartOfMinute } from "@src/infrastructure/utils/dates.ts"
 import classNames from "classnames"
@@ -9,20 +9,20 @@ import { DateTime } from "luxon"
 import React from "react"
 import { useMeasure } from "react-use"
 
-import classes from "./GoogleCalendarAppWidget.module.scss"
+import classes from "./CalendarAppWidget.module.scss"
 
-export const GoogleCalendarAppWidget = React.memo((props: { state: GoogleCalendarAppState }) => {
+export const CalendarAppWidget = React.memo((props: { state: CalendarAppState }) => {
   const { state } = props
 
   const todayDate = state.currentTime.toISODate()
   const events = state.events.filter(it => it.startTime.toISODate() === todayDate || it.endTime.toISODate() === todayDate)
 
   return (
-    <AppWidget className={classes.GoogleCalendarAppWidget}>
+    <AppWidget className={classes.CalendarAppWidget}>
       <Stack spacing={2} flex={1}>
         <AppWidgetHeader
           icon={<CalendarTodayOutlined />}
-          title={"Google Calendar"}
+          title={"Calendar"}
           rightContent={<Button startIcon={<RefreshOutlined />} children={"Refresh"} onClick={state.refresh} />}
         />
         {state.error && <strong>Not authenticated</strong>}
@@ -34,7 +34,7 @@ export const GoogleCalendarAppWidget = React.memo((props: { state: GoogleCalenda
   )
 })
 
-const CalendarView = (props: { events: GoogleCalendarEvent[], currentTime: DateTime }) => {
+const CalendarView = (props: { events: CalendarEvent[], currentTime: DateTime }) => {
   const { events, currentTime } = props
 
   const [measureRef, measure] = useMeasure<HTMLDivElement>()
@@ -100,7 +100,7 @@ const HourDivider = (props: { hour: number, offsetY: number }) => {
 }
 
 const EventCards = (props: {
-  events: GoogleCalendarEvent[],
+  events: CalendarEvent[],
   currentTime: DateTime,
   startOfDay: DateTime,
   cellHeight: number
@@ -118,7 +118,7 @@ const EventCards = (props: {
 }
 
 const EventCard = (props: {
-  event: GoogleCalendarEvent,
+  event: CalendarEvent,
   cellHeight: number,
   currentTime: DateTime,
   startOfDay: DateTime

@@ -1,14 +1,14 @@
-import { GoogleCalendarEvent } from "@src/apps/google/models/GoogleCalendarEvent.ts"
+import { CalendarEvent } from "@src/apps/calendar/models/CalendarEvent.ts"
 import { EntityType } from "@src/infrastructure/framework/entities"
 import { DateTime } from "luxon"
 
-export const GoogleCalendarEventsEntity: (min: DateTime, max: DateTime) => EntityType<GoogleCalendarEvent[]> = (min: DateTime<true>, max: DateTime<true>) => ({
-  key: "google/calendarEventsEntity",
+export const CalendarEventsEntity: (min: DateTime, max: DateTime) => EntityType<CalendarEvent[]> = (min: DateTime<true>, max: DateTime<true>) => ({
+  key: "calendar/calendarEventsEntity",
   fetchUrl: `/api/apps/google/calendar/events?minTime=${encodeURIComponent(min.toISO())}&maxTime=${encodeURIComponent(max.toISO())}`,
   transform: transform,
 })
 
-function transform(payload: any): GoogleCalendarEvent[] {
+function transform(payload: any): CalendarEvent[] {
   return payload.events.map((it: any) => ({
     ...it,
     startTime: DateTime.fromISO(it.startTime), // TODO use zod?

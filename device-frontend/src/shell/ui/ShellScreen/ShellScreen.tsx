@@ -4,7 +4,7 @@ import { BitbucketAppUI } from "@src/apps/bitbucket/ui/BitbucketAppUI.tsx"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
 import { ClockAppUI } from "@src/apps/clock/ui/ClockAppUI.tsx"
 import { GithubAppUI } from "@src/apps/github/ui/GithubAppUI.tsx"
-import { GoogleAppUI } from "@src/apps/google/ui/GoogleAppUI.tsx"
+import { CalendarAppUI } from "@src/apps/calendar/ui/CalendarAppUI.tsx"
 import { HotKeysAppUI } from "@src/apps/hot-keys/ui/HotKeysAppUI.tsx"
 import { MediaControlUI } from "@src/apps/media-control/ui/MediaControlUI.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
@@ -41,9 +41,9 @@ const appWidgets: AppWidgetProvider[] = [
     factory: () => <WeatherAppUI />,
   },
   {
-    id: "google-app",
-    title: "Google",
-    factory: () => <GoogleAppUI />,
+    id: "calendar-app",
+    title: "Calendar",
+    factory: () => <CalendarAppUI />,
   },
   {
     id: "media-control-app",
