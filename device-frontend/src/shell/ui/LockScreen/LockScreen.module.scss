@@ -6,37 +6,33 @@
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--mui-palette-primary-dark);
   color: var(--mui-palette-primary-contrastText);
-  display: flex;
+  display: grid;
+  grid-template-columns: 4fr 3fr 3fr;
   padding-left: 50px;
   padding-right: 50px;
   gap: 50px;
+
+  > * {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    overflow-y: auto;
+  }
 }
 
 .LeftColumn {
-  flex: 1;
-  padding-top: 50px;
-  padding-bottom: 50px;
-  overflow-y: auto;
   gap: 100px;
-  max-width: calc(40% - 50px);
 }
 
 .MiddleColumn {
-  flex: 1;
-  padding-top: 50px;
-  padding-bottom: 50px;
   overflow-y: auto;
   gap: 100px;
-  max-width: calc(30% - 50px);
 }
 
 .RightColumn {
-  flex: 1;
-  padding-top: 50px;
-  padding-bottom: 50px;
-  max-width: calc(30%);
 }
 
 .WidgetPanel {

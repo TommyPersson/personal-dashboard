@@ -1,9 +1,10 @@
 .UnlockKeyPad {
-  gap: var(--mui-sp-4)
+  gap: var(--mui-sp-4);
 }
 
 .PinDisplay {
-  gap: var(--mui-sp-2);  align-items: center;
+  gap: var(--mui-sp-2);
+  align-items: center;
   justify-content: center;
   min-height: 100px;
 }
