@@ -10,3 +10,26 @@
   margin: auto;
   width: 100px;
 }
+
+.AlmostFinishedDialogContent {
+  background: var(--mui-palette-primary-dark);
+  color: var(--mui-palette-primary-contrastText);
+  width: 80vw;
+  height: 80vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  place-content: center;
+  gap: var(--mui-sp-2);
+
+  .RemainingTimeText {
+    font-size: 200px;
+  }
+
+  .DismissButton {
+    position: absolute;
+    top: var(--mui-sp-2);
+    right: var(--mui-sp-2);
+  }
+}

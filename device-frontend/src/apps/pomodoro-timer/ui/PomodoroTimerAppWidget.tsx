@@ -1,8 +1,8 @@
 import { Pause, PlayArrow, Replay, TimerOutlined } from "@mui/icons-material"
-import { Button, Card, CardContent, CircularProgress, Stack, Typography } from "@mui/material"
+import { Button, Card, CardContent, CircularProgress, Dialog, DialogContent, Stack, Typography } from "@mui/material"
 import { PomodoroTimerAppState } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import React from "react"
+import React, { useCallback, useEffect, useState } from "react"
 
 import classes from "./PomodoroTimerAppWidget.module.scss"
 
@@ -26,6 +26,7 @@ export const PomodoroTimerAppWidget = React.memo((props: { state: PomodoroTimerA
           </CardContent>
         </Card>
       </Stack>
+      <AlmostFinishedDialog state={state} />
     </AppWidget>
   )
 })
@@ -98,3 +99,57 @@ const ActionButtons = (props: { state: PomodoroTimerAppState }) => {
   )
 }
 
+const AlmostFinishedDialog = (props: { state: PomodoroTimerAppState }) => {
+  const { state } = props
+
+  const [isDismissed, setIsDismissed] = useState(false)
+
+  const isFinished = state.remainingSeconds === 0
+
+  const titleText = isFinished
+    ? "Pomodoro finished!"
+    : "Pomodoro almost finished!"
+
+  const isOpen = state.remainingSeconds <= 30 && !isDismissed
+
+  const handleDismissClicked = useCallback(() => setIsDismissed(true), [setIsDismissed])
+
+  const handleStartNextClicked = useCallback(() => {
+    state.reset()
+    state.startOrResume()
+  }, [state.reset, state.startOrResume])
+
+  useEffect(() => {
+    setIsDismissed(false)
+  }, [state.isRunning, setIsDismissed])
+
+  return (
+    <Dialog open={isOpen} maxWidth={"xl"}>
+      <DialogContent className={classes.AlmostFinishedDialogContent}>
+        <Typography
+          variant={"body1"}
+          children={titleText}
+        />
+        <Typography
+          variant={"h1"}
+          children={state.remainingTimeText}
+          className={classes.RemainingTimeText}
+        />
+        <Button
+          children={"Start Next"}
+          variant={"contained"}
+          size={"large"}
+          onClick={handleStartNextClicked}
+          style={{ visibility: isFinished ? "visible" : "hidden" }}
+        />
+        <Button
+          children={"Dismiss"}
+          variant={"contained"}
+          size={"large"}
+          onClick={handleDismissClicked}
+          className={classes.DismissButton}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
