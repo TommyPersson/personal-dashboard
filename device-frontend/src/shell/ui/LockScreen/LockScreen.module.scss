@@ -9,20 +9,34 @@
   background: var(--mui-palette-primary-dark);
   color: var(--mui-palette-primary-contrastText);
   display: flex;
-  padding: 50px;
-  gap: 100px;
+  padding-left: 50px;
+  padding-right: 50px;
+  gap: 50px;
 }
 
 .LeftColumn {
   flex: 1;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  overflow-y: auto;
   gap: 100px;
-  max-width: calc(50% - 50px);
+  max-width: calc(40% - 50px);
+}
+
+.MiddleColumn {
+  flex: 1;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  overflow-y: auto;
+  gap: 100px;
+  max-width: calc(30% - 50px);
 }
 
 .RightColumn {
   flex: 1;
-  //border: 1px solid white;
-  max-width: calc(50% - 50px);
+  padding-top: 50px;
+  padding-bottom: 50px;
+  max-width: calc(30%);
 }
 
 .WidgetPanel {

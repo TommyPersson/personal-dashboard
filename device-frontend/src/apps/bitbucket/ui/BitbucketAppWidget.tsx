@@ -137,18 +137,21 @@ const MergeDescription = (props: { pullRequest: BitbucketPullRequest }) => {
   const { pullRequest } = props
 
   return (
-    <Stack direction={"row"} gap={1} alignItems={"center"}>
+    <>
       <Chip
+        component={"span"}
         size={"small"}
         label={pullRequest.author.name}
         icon={<PersonOutlined />}
       />
+      &nbsp;&nbsp;
       <Chip
+        component={"span"}
         size={"small"}
         label={<>{pullRequest.toRepository} / <strong>{pullRequest.toBranch}</strong></>}
         icon={<ArrowForwardOutlined />}
       />
-    </Stack>
+    </>
   )
 }
 

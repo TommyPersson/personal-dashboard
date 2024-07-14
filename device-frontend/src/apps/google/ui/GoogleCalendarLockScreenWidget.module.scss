@@ -1,0 +1,29 @@
+
+.UpcomingEventsView {
+
+}
+
+.EventSections {
+}
+
+.EventSection {
+  margin-top: var(--mui-sp-2);
+  gap: var(--mui-sp-1);
+}
+
+.EventCard {
+  background: var(--mui-palette-primary-main) !important;
+  color: var(--mui-palette-primary-contrastText) !important;
+
+  :global(.MuiCardContent-root) {
+    padding: var(--mui-sp-1) !important;
+  }
+
+  .EventSummaryText {
+    font-weight: bold;
+  }
+
+  .EventTimeText {
+
+  }
+}

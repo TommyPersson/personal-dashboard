@@ -20,11 +20,16 @@ export const LockScreenView = React.forwardRef((props, ref) => {
   return (
     <div className={classes.LockScreen} ref={ref as any} {...props}>
       <Stack direction={"column"} className={classes.LeftColumn}>
-        <Stack direction={"column"} className={classes.WidgetPanel} id={"lockScreenWidgetPortal"}>
+        <Stack direction={"column"} className={classes.WidgetPanel} id={"lockScreenWidgetPortal-1"}>
 
         </Stack>
 
         <Stack direction={"row"} className={classes.IconBar} id={"lockScreenIconPortal"} />
+      </Stack>
+      <Stack direction={"column"} className={classes.MiddleColumn}>
+        <Stack direction={"column"} className={classes.WidgetPanel} id={"lockScreenWidgetPortal-2"}>
+
+        </Stack>
       </Stack>
       <Stack direction={"column"} className={classes.RightColumn}>
         <UnlockKeyPad />

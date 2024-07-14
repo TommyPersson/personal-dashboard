@@ -18,7 +18,7 @@ export const MediaControlLockScreenWidget = React.memo((props: { state: MediaCon
   const { state } = props
 
   return (
-    <LockScreenWidgetPortal id={"media-control-lock-screen-widget"} order={200}>
+    <LockScreenWidgetPortal id={"media-control-lock-screen-widget"} column={1} order={200}>
       <MediaInfoView state={state} />
     </LockScreenWidgetPortal>
   )

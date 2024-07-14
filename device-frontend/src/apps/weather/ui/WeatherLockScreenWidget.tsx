@@ -16,7 +16,7 @@ export const WeatherLockScreenWidget = React.memo((props: { state: WeatherAppSta
   const currentWeather = state.data.currentWeather
 
   return (
-    <LockScreenWidgetPortal id={"weather-lock-screen-widget"} order={100}>
+    <LockScreenWidgetPortal id={"weather-lock-screen-widget"} column={1} order={100}>
       <Stack direction={"row"} className={classes.WeatherLockScreenWidget}>
         <WeatherIcon iconName={currentWeather.weatherIconName} className={classes.WeatherIcon}/>
         <Stack>

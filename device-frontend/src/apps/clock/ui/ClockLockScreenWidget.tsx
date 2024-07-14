@@ -9,13 +9,13 @@ import classes from "./ClockLockScreenWidget.module.scss"
 export const ClockLockScreenWidget = React.memo((props: { state: ClockAppState }) => {
   const { state } = props
 
-  const timeText = useMemo(() => formatTime(state.time), [state.time.getMinutes()])
-  const dayText = useMemo(() => formatDay(state.time), [state.time.getDay()])
-  const dateText = useMemo(() => formatDate(state.time), [state.time.getDay()])
-  const weekText = useMemo(() => formatWeek(state.time), [state.time.getDay()])
+  const timeText = useMemo(() => formatTime(state.time), [state.time.minute])
+  const dayText = useMemo(() => formatDay(state.time), [state.time.day])
+  const dateText = useMemo(() => formatDate(state.time), [state.time.day])
+  const weekText = useMemo(() => formatWeek(state.time), [state.time.day])
 
   return (
-    <LockScreenWidgetPortal id={"clock-lock-screen-widget"} order={0}>
+    <LockScreenWidgetPortal id={"clock-lock-screen-widget"} column={1} order={0}>
       <Stack direction={"row"} className={classes.ClockLockScreenWidget}>
         <Typography variant={"h1"} children={timeText} />
         <Stack>
