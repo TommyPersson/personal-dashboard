@@ -32,7 +32,7 @@ import classes from "@src/apps/bitbucket/ui/BitbucketAppWidget.module.scss"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import React from "react"
 
-export const BitbucketAppWidget = (props: { state: BitbucketAppState }) => {
+export const BitbucketAppWidget = React.memo((props: { state: BitbucketAppState }) => {
   const { state } = props
 
   const openPullRequests = state.pullRequests.filter(it => it.state === "OPEN" && !it.belongsToUser)
@@ -56,7 +56,7 @@ export const BitbucketAppWidget = (props: { state: BitbucketAppState }) => {
       </Stack>
     </AppWidget>
   )
-}
+})
 
 const PullRequestListCard = (props: {
   title: string

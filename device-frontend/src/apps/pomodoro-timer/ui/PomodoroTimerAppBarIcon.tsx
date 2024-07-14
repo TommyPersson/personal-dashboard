@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const PomodoroTimerAppBarIcon = (props: { state: PomodoroTimerAppState }) => {
+export const PomodoroTimerAppBarIcon = React.memo((props: { state: PomodoroTimerAppState }) => {
   const { state } = props
 
   const badgeContent = state.remainingSeconds !== PomodoroDurationSeconds ? state.remainingTimeText : null
@@ -24,4 +24,4 @@ export const PomodoroTimerAppBarIcon = (props: { state: PomodoroTimerAppState })
       onClick={handleClick}
     />
   )
-}
+})

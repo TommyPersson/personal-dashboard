@@ -5,7 +5,7 @@ import React, { useMemo } from "react"
 
 import classes from "./ClockAppBarWidget.module.scss"
 
-export const ClockAppBarWidget = () => {
+export const ClockAppBarWidget = React.memo(() => {
   const state = useClockAppState()
 
   const timeText = useMemo(() => formatTime(state.time), [state.time.getMinutes()])
@@ -21,4 +21,4 @@ export const ClockAppBarWidget = () => {
       <Typography variant={"caption"}>w. {weekText}</Typography>
     </Stack>
   )
-}
+})

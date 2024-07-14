@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const HotKeysAppBarIcon = (props: { state: HotKeysAppState }) => {
+export const HotKeysAppBarIcon = React.memo((props: { state: HotKeysAppState }) => {
   const { state } = props
 
   const handleClick = useScrollIntoView("hotKeysAppWidget")
@@ -17,4 +17,4 @@ export const HotKeysAppBarIcon = (props: { state: HotKeysAppState }) => {
       onClick={handleClick}
     />
   )
-}
+})

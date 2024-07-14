@@ -17,7 +17,7 @@ import React from "react"
 import classes from "./GithubAppWidget.module.scss"
 
 
-export const GithubAppWidget = (props: { state: GithubAppState }) => {
+export const GithubAppWidget = React.memo((props: { state: GithubAppState }) => {
   const { state } = props
 
   return (
@@ -52,7 +52,7 @@ export const GithubAppWidget = (props: { state: GithubAppState }) => {
       </Stack>
     </AppWidget>
   )
-}
+})
 
 const NotificationListItem = (props: { notification: GithubNotification }) => {
   const { notification } = props

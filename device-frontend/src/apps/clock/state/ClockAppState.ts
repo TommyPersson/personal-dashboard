@@ -1,6 +1,8 @@
 import { CurrentTimeEntity } from "@src/apps/clock/entities/CurrentTimeEntity.ts"
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useMemo } from "react"
 
 
 export type ClockAppState = {
@@ -15,7 +17,9 @@ export function useClockAppState(): ClockAppState {
 
   useInterval(entity.fetchAsync, 5000)
 
-  return {
-    time: entity.value ?? new Date()
-  }
+  const time = entity.value ?? new Date()
+
+  return useDeepEqualMemo(() => ({
+    time: time,
+  }), [time])
 }

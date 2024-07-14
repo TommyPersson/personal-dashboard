@@ -5,6 +5,7 @@ import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useCallback, useMemo } from "react"
 
 export type HotKeysAppState = {
@@ -28,7 +29,7 @@ export function useHotKeysAppState(): HotKeysAppState {
     sendKeysAction.executeAsync({ hotKeyId: hotKey.id })
   }, [sendKeysAction])
 
-  return useMemo(() => ({
+  return useDeepEqualMemo(() => ({
     sections,
     execute,
   }), [sections, execute])

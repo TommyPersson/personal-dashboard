@@ -1,11 +1,9 @@
 import { MarkGithubIcon } from "@primer/octicons-react"
 import { GithubAppState } from "@src/apps/github/state/GithubAppState.ts"
-import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { LockScreenIcon } from "@src/common/components/LockScreenIcon/LockScreenIcon.tsx"
-import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const GithubLockScreenIcon = (props: {
+export const GithubLockScreenIcon = React.memo((props: {
   state: GithubAppState
 }) => {
   const { state } = props
@@ -25,4 +23,4 @@ export const GithubLockScreenIcon = (props: {
       }}
     />
   )
-}
+})

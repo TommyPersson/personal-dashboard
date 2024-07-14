@@ -20,7 +20,7 @@ import React, { useMemo } from "react"
 
 import classes from "./WeatherAppWidget.module.scss"
 
-export const WeatherAppWidget = (props: { state: WeatherAppState }) => {
+export const WeatherAppWidget = React.memo((props: { state: WeatherAppState }) => {
   const { state } = props
 
   const refreshButton = (
@@ -67,8 +67,7 @@ export const WeatherAppWidget = (props: { state: WeatherAppState }) => {
       </Stack>
     </AppWidget>
   )
-}
-
+})
 
 const CurrentWeatherCard = (props: { cityName: string, current: CurrentWeather }) => {
   const { cityName, current } = props

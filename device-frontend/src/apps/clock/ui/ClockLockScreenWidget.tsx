@@ -2,11 +2,11 @@ import { Stack, Typography } from "@mui/material"
 import { ClockAppState } from "@src/apps/clock/state/ClockAppState.ts"
 import { formatDate, formatDay, formatTime, formatWeek } from "@src/apps/clock/utils/clockUtils.ts"
 import { LockScreenWidgetPortal } from "@src/common/components/LockScreenWidgetPortal/LockScreenIconPortal.tsx"
-import { useMemo } from "react"
+import React, { useMemo } from "react"
 
 import classes from "./ClockLockScreenWidget.module.scss"
 
-export const ClockLockScreenWidget = (props: { state: ClockAppState }) => {
+export const ClockLockScreenWidget = React.memo((props: { state: ClockAppState }) => {
   const { state } = props
 
   const timeText = useMemo(() => formatTime(state.time), [state.time.getMinutes()])
@@ -25,4 +25,4 @@ export const ClockLockScreenWidget = (props: { state: ClockAppState }) => {
       </Stack>
     </LockScreenWidgetPortal>
   )
-}
+})

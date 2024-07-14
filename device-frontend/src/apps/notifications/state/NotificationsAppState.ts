@@ -7,6 +7,7 @@ import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
 import { EmptyArray } from "@src/infrastructure/utils"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useCallback, useEffect, useState } from "react"
 
 export type NotificationsAppState = {
@@ -56,11 +57,11 @@ export function useNotificationsAppState(): NotificationsAppState {
   useMessageListener(NewNotificationMessage, entity.fetchAsync)
   useMessageListener(NotificationDismissedMessage, entity.fetchAsync)
 
-  return {
+  return useDeepEqualMemo(() => ({
     notifications: items,
     isMinimized: isMinimized,
     toggleMinimized,
     dismiss,
     clear,
-  }
+  }), [items, isMinimized, toggleMinimized, dismiss, clear])
 }

@@ -3,6 +3,7 @@ import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRe
 import { useEntity } from "@src/infrastructure/framework/entities"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 
 export type BitbucketAppState = {
   pullRequests: BitbucketPullRequest[]
@@ -19,8 +20,8 @@ export function useBitbucketAppState(): BitbucketAppState {
 
   const pullRequests: BitbucketPullRequest[] = entity.value ?? EmptyArray
 
-  return {
+  return useDeepEqualMemo(() => ({
     pullRequests,
     refresh: entity.fetchAsync,
-  }
+  }), [pullRequests])
 }

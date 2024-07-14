@@ -8,7 +8,7 @@ import React, { useCallback } from "react"
 import classes from "./HotKeysAppWidget.module.scss"
 
 
-export const HotKeysAppWidget = (props: { state: HotKeysAppState }) => {
+export const HotKeysAppWidget = React.memo((props: { state: HotKeysAppState }) => {
   const { state } = props
 
   const content = state.sections.length > 0 ? (
@@ -39,8 +39,7 @@ export const HotKeysAppWidget = (props: { state: HotKeysAppState }) => {
       </Stack>
     </AppWidget>
   )
-}
-
+})
 
 const HotKeyMenuItem = (props: { state: HotKeysAppState, hotKey: HotKey }) => {
   const { state, hotKey } = props

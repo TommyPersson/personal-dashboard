@@ -3,7 +3,7 @@ import { MediaControlAppState } from "@src/apps/media-control/state/MediaControl
 import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import React from "react"
 
-export const MediaControlAppBarIcon = (props: { state: MediaControlAppState }) => {
+export const MediaControlAppBarIcon = React.memo((props: { state: MediaControlAppState }) => {
   const { state } = props
 
   const variant = state.status ? "dot" : "standard"
@@ -20,4 +20,4 @@ export const MediaControlAppBarIcon = (props: { state: MediaControlAppState }) =
       onClick={state.toggleMinimized}
     />
   )
-}
+})

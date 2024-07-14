@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const GithubAppBarIcon = (props: {
+export const GithubAppBarIcon = React.memo((props: {
   state: GithubAppState
 }) => {
   const { state } = props
@@ -23,4 +23,4 @@ export const GithubAppBarIcon = (props: {
       onClick={handleClick}
     />
   )
-}
+})

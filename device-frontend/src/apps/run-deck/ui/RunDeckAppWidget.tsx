@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react"
 
 import classes from "./RunDeckAppWidget.module.scss"
 
-export const RunDeckAppWidget = (props: { state: RunDeckAppState }) => {
+export const RunDeckAppWidget = React.memo((props: { state: RunDeckAppState }) => {
   const { state } = props
 
   const content = state.sections.length > 0 ? (
@@ -46,7 +46,7 @@ export const RunDeckAppWidget = (props: { state: RunDeckAppState }) => {
       </AppWidget>
     </>
   )
-}
+})
 
 const RunDeckItemButton = (props: { item: Item, runItemAction: (item: Item) => void }) => {
   const { item, runItemAction } = props

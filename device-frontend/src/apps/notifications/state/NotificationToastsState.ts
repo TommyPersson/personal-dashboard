@@ -5,6 +5,7 @@ import {
 } from "@src/apps/notifications/messages"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useCallback, useState } from "react"
 
 export type NotificationToastsState = {
@@ -30,9 +31,9 @@ export function useNotificationsToastState(): NotificationToastsState {
   useMessageListener(NewNotificationMessage, handleNewNotification)
   useMessageListener(NotificationDismissedMessage, handleNotificationDismissed)
 
-  return {
+  return useDeepEqualMemo(() => ({
     notifications,
     removeNotification,
-  }
+  }), [notifications, removeNotification])
 }
 

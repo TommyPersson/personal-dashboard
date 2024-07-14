@@ -6,7 +6,7 @@ import React from "react"
 
 import classes from "./PomodoroTimerAppWidget.module.scss"
 
-export const PomodoroTimerAppWidget = (props: { state: PomodoroTimerAppState }) => {
+export const PomodoroTimerAppWidget = React.memo((props: { state: PomodoroTimerAppState }) => {
   const { state } = props
 
   return (
@@ -28,7 +28,7 @@ export const PomodoroTimerAppWidget = (props: { state: PomodoroTimerAppState }) 
       </Stack>
     </AppWidget>
   )
-}
+})
 
 const AnalogProgressTimer = (props: { state: PomodoroTimerAppState }) => {
   const { state } = props

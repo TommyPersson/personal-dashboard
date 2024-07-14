@@ -6,7 +6,7 @@ import {
   SouthEastOutlined,
 } from "@mui/icons-material"
 import { Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
-import { MediaControlStatus, PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
+import { PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
 import { MediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
 import { getThumbnailImageSrc } from "@src/apps/media-control/utils/mediaControlUtils.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
@@ -14,7 +14,7 @@ import React from "react"
 
 import classes from "./MediaControlOverlay.module.scss"
 
-export const MediaControlOverlay = (props: { state: MediaControlAppState }) => {
+export const MediaControlOverlay = React.memo((props: { state: MediaControlAppState }) => {
   const { state } = props
 
   return (
@@ -27,7 +27,7 @@ export const MediaControlOverlay = (props: { state: MediaControlAppState }) => {
       </Slide>
     </AppAreaOverlayPortal>
   )
-}
+})
 
 const MediaInfoView = (props: { state: MediaControlAppState }) => {
   const { state } = props

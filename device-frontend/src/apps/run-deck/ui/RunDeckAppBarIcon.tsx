@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const RunDeckAppBarIcon = (props: { state: RunDeckAppState }) => {
+export const RunDeckAppBarIcon = React.memo((props: { state: RunDeckAppState }) => {
   const { state } = props
 
   const handleClick = useScrollIntoView("runDeckAppWidget")
@@ -17,4 +17,4 @@ export const RunDeckAppBarIcon = (props: { state: RunDeckAppState }) => {
       onClick={handleClick}
     />
   )
-}
+})

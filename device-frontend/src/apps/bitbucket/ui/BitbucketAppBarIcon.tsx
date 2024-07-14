@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const BitbucketAppBarIcon = (props: {
+export const BitbucketAppBarIcon = React.memo((props: {
   state: BitbucketAppState
 }) => {
   const { state } = props
@@ -27,5 +27,5 @@ export const BitbucketAppBarIcon = (props: {
       onClick={handleClick}
     />
   )
-}
+})
 

@@ -14,7 +14,7 @@ import React from "react"
 
 import classes from "./MediaControlLockScreenWidget.module.scss"
 
-export const MediaControlLockScreenWidget = (props: { state: MediaControlAppState }) => {
+export const MediaControlLockScreenWidget = React.memo((props: { state: MediaControlAppState }) => {
   const { state } = props
 
   return (
@@ -22,7 +22,7 @@ export const MediaControlLockScreenWidget = (props: { state: MediaControlAppStat
       <MediaInfoView state={state} />
     </LockScreenWidgetPortal>
   )
-}
+})
 
 
 const MediaInfoView = (props: { state: MediaControlAppState }) => {

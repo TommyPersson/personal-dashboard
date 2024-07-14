@@ -1,16 +1,14 @@
-import { CalendarTodayOutlined, Event, RefreshOutlined } from "@mui/icons-material"
+import { CalendarTodayOutlined, RefreshOutlined } from "@mui/icons-material"
 import { Button, Card, CardContent, Divider, Paper, Stack, Typography } from "@mui/material"
-import { CurrentTimeEntity } from "@src/apps/clock/entities/CurrentTimeEntity.ts"
 import { GoogleCalendarEvent } from "@src/apps/google/models/GoogleCalendarEvent.ts"
 import { GoogleCalendarAppState } from "@src/apps/google/state/GoogleCalendarAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
-import { useEntity } from "@src/infrastructure/framework/entities"
 import React from "react"
 import { useMeasure } from "react-use"
 
 import classes from "./GoogleCalendarAppWidget.module.scss"
 
-export const GoogleCalendarAppWidget = (props: { state: GoogleCalendarAppState }) => {
+export const GoogleCalendarAppWidget = React.memo((props: { state: GoogleCalendarAppState }) => {
   const { state } = props
   return (
     <AppWidget className={classes.GoogleCalendarAppWidget}>
@@ -22,19 +20,17 @@ export const GoogleCalendarAppWidget = (props: { state: GoogleCalendarAppState }
         />
         {state.error && <strong>Not authenticated</strong>}
         <Paper style={{ flex: 1, display: "flex", position: "relative" }}>
-          <CalendarView events={state.events} />
+          <CalendarView events={state.events} currentTime={state.currentTime} />
         </Paper>
       </Stack>
     </AppWidget>
   )
-}
+})
 
 const AllHours = new Array(24).fill(0).map((_, i) => i)
 
-const CalendarView = (props: { events: GoogleCalendarEvent[] }) => {
-  const { events } = props
-
-  const currentTimeEntity = useEntity(CurrentTimeEntity)
+const CalendarView = (props: { events: GoogleCalendarEvent[], currentTime: Date }) => {
+  const { events, currentTime } = props
 
   const [measureRef, measure] = useMeasure<HTMLDivElement>()
 
@@ -46,7 +42,7 @@ const CalendarView = (props: { events: GoogleCalendarEvent[] }) => {
   startOfDay.setSeconds(0)
   startOfDay.setMilliseconds(0)
 
-  const now = new Date(currentTimeEntity.value ?? 0)
+  const now = currentTime
   now.setSeconds(0)
   now.setMilliseconds(0)
   const nowHour = getDecimalHours(now.valueOf() - startOfDay.valueOf())

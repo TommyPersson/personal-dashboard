@@ -1,3 +1,4 @@
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useSecondTimer } from "@src/shell/infrastructure/Timer.ts"
 import { useCallback, useEffect, useState } from "react"
 
@@ -50,7 +51,7 @@ export function usePomodoroTimerAppState(): PomodoroTimerAppState {
     }
   }, [remainingSeconds, setIsRunning])
 
-  return {
+  return useDeepEqualMemo(() => ({
     isRunning: isRunning,
     remainingSeconds: remainingSeconds,
     remainingTimeText: formatTime(remainingSeconds),
@@ -58,7 +59,7 @@ export function usePomodoroTimerAppState(): PomodoroTimerAppState {
     startOrResume: startOrResume,
     pause: pause,
     reset: reset,
-  }
+  }), [isRunning, remainingSeconds, startOrResume, pause, reset])
 }
 
 function formatTime(seconds: number) {

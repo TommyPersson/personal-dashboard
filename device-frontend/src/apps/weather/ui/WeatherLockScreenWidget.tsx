@@ -2,10 +2,11 @@ import { Stack, Typography } from "@mui/material"
 import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { WeatherIcon } from "@src/apps/weather/ui/components/WeatherIcon.tsx"
 import { LockScreenWidgetPortal } from "@src/common/components/LockScreenWidgetPortal/LockScreenIconPortal.tsx"
+import React from "react"
 
 import classes from "./WeatherLockScreenWidget.module.scss"
 
-export const WeatherLockScreenWidget = (props: { state: WeatherAppState }) => {
+export const WeatherLockScreenWidget = React.memo((props: { state: WeatherAppState }) => {
   const { state } = props
 
   if (!state.data) {
@@ -26,4 +27,4 @@ export const WeatherLockScreenWidget = (props: { state: WeatherAppState }) => {
 
     </LockScreenWidgetPortal>
   )
-}
+})

@@ -1,10 +1,9 @@
-import { AccountTreeOutlined } from "@mui/icons-material"
 import { GitPullRequestIcon } from "@primer/octicons-react"
 import { BitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
 import { LockScreenIcon } from "@src/common/components/LockScreenIcon/LockScreenIcon.tsx"
 import React from "react"
 
-export const BitbucketLockScreenIcon = (props: {
+export const BitbucketLockScreenIcon = React.memo((props: {
   state: BitbucketAppState
 }) => {
   const { state } = props
@@ -20,9 +19,9 @@ export const BitbucketLockScreenIcon = (props: {
       icon={<GitPullRequestIcon size={24} />}
       badgeProps={{
         badgeContent: numPullRequestsToApprove,
-        color: "warning"
+        color: "warning",
       }}
     />
   )
-}
+})
 

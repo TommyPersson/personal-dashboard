@@ -5,6 +5,7 @@ import { useEntity } from "@src/infrastructure/framework/entities"
 import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
 import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
+import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useCallback } from "react"
 
 export type GithubAppState = {
@@ -30,9 +31,9 @@ export function useGithubState(): GithubAppState {
 
   const notifications: GithubNotification[] = entity.value ?? EmptyArray
 
-  return {
+  return useDeepEqualMemo(() => ({
     notifications,
     markAllAsRead,
     refresh: entity.fetchAsync,
-  }
+  }), [notifications, markAllAsRead, entity.fetchAsync])
 }

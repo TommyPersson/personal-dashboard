@@ -4,7 +4,7 @@ import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
-export const WeatherAppBarIcon = (props: { state: WeatherAppState }) => {
+export const WeatherAppBarIcon = React.memo((props: { state: WeatherAppState }) => {
   const { state } = props
 
   const badgeContent = state.data ? `${state.data?.currentWeather.temperature}°` : null
@@ -23,4 +23,4 @@ export const WeatherAppBarIcon = (props: { state: WeatherAppState }) => {
       onClick={handleClick}
     />
   )
-}
+})
