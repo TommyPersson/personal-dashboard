@@ -1,6 +1,6 @@
-package apps.google.domain
+package apps.calendar.domain
 
-import GoogleAppConfig
+import apps.calendar.application.config.CalendarAppConfig
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
@@ -19,7 +19,7 @@ import java.io.File
 
 @Singleton
 class GoogleCredentialsProvider @Inject constructor(
-    private val config: GoogleAppConfig,
+    private val config: CalendarAppConfig,
 ) {
 
     private var _credential: Credential? = null
@@ -36,12 +36,12 @@ class GoogleCredentialsProvider @Inject constructor(
         val transport = GoogleNetHttpTransport.newTrustedTransport()
         val dataStore = FileDataStoreFactory(File(Directories.Data, "google"))
         val jsonFactory = GsonFactory()
-        val secrets = GoogleClientSecrets.load(jsonFactory, File(config.clientSecretJsonFilePath).reader())
+        val secrets = GoogleClientSecrets.load(jsonFactory, File(config.googleCalendar.clientSecretJsonFilePath).reader())
 
         val flow = GoogleAuthorizationCodeFlow.Builder(transport, jsonFactory, secrets, scopes).also {
             it.setDataStoreFactory(dataStore)
         }.build()
 
-        _credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize(config.emailAddress)
+        _credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize(config.googleCalendar.emailAddress)
     }
 }

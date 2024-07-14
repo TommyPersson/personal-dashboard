@@ -1,8 +1,8 @@
-package apps.google.application.contracts
+package apps.calendar.application.contracts
 
 import java.time.Instant
 
-data class GetGoogleCalendarEventsResponseDTO(
+data class GetCalendarEventsResponseDTO(
     val events: List<Event>
 ) {
     data class Event(

@@ -3,7 +3,7 @@ package core
 import apps.bitbucket.application.BitbucketGuiceModule
 import apps.clock.application.ClockGuiceModule
 import apps.github.application.GithubGuiceModule
-import apps.google.application.GoogleGuiceModule
+import apps.calendar.application.CalendarGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
@@ -52,7 +52,7 @@ fun main() {
         HotKeysGuiceModule(),
         BitbucketGuiceModule(),
         GithubGuiceModule(),
-        GoogleGuiceModule(),
+        CalendarGuiceModule(),
     )
 
     val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))

@@ -1,7 +1,7 @@
-package apps.google.application.queries
+package apps.calendar.application.queries
 
-import GoogleAppConfig
-import apps.google.application.contracts.GetGoogleCalendarEventsResponseDTO
+import apps.calendar.application.config.CalendarAppConfig
+import apps.calendar.application.contracts.GetCalendarEventsResponseDTO
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Events
@@ -11,29 +11,29 @@ import framework.mediator.QueryHandler
 import jakarta.inject.Inject
 import java.time.Instant
 
-data class GetGoogleCalendarEvents(
+data class GetCalendarEvents(
     val minTime: Instant,
     val maxTime: Instant,
-) : Query<GetGoogleCalendarEventsResponseDTO>
+) : Query<GetCalendarEventsResponseDTO>
 
 class GetGoogleCalendarEventsQueryHandler @Inject constructor(
-    private val config: GoogleAppConfig,
+    private val config: CalendarAppConfig,
     private val calendarApiProvider: Provider<Calendar>,
-) : QueryHandler<GetGoogleCalendarEvents, GetGoogleCalendarEventsResponseDTO> {
+) : QueryHandler<GetCalendarEvents, GetCalendarEventsResponseDTO> {
 
-    override suspend fun handle(query: GetGoogleCalendarEvents): GetGoogleCalendarEventsResponseDTO {
+    override suspend fun handle(query: GetCalendarEvents): GetCalendarEventsResponseDTO {
         val calendar = calendarApiProvider.get()
 
-        val events = config.calendars.flatMap {
+        val events = config.googleCalendar.calendars.flatMap { calendarName ->
             val response: Events = calendar.Events()
-                .list(config.calendars.first())
+                .list(calendarName)
                 .setTimeMin(DateTime.parseRfc3339(query.minTime.toString()))
                 .setTimeMax(DateTime.parseRfc3339(query.maxTime.toString()))
                 .setSingleEvents(true)
                 .execute()
 
             response.items.map {
-                GetGoogleCalendarEventsResponseDTO.Event(
+                GetCalendarEventsResponseDTO.Event(
                     id = it.id,
                     calendarName = response.summary,
                     summary = it.summary,
@@ -43,7 +43,7 @@ class GetGoogleCalendarEventsQueryHandler @Inject constructor(
             }
         }.sortedBy { it.startTime }
 
-        return GetGoogleCalendarEventsResponseDTO(
+        return GetCalendarEventsResponseDTO(
             events = events
         )
     }

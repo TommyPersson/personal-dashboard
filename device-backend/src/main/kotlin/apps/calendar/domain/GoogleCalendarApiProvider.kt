@@ -1,4 +1,4 @@
-package apps.google.domain
+package apps.calendar.domain
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -13,7 +13,7 @@ class GoogleCalendarApiProvider @Inject constructor(
 ) : Provider<Calendar> {
     override fun get(): Calendar {
         val credential = credentialsProvider.credential
-            ?: throw GoogleErrors.NotYetAuthenticated()
+            ?: throw CalendarErrors.NotYetAuthenticatedToGoogleCalendar()
 
         val transport = GoogleNetHttpTransport.newTrustedTransport()
         val jsonFactory = GsonFactory()
