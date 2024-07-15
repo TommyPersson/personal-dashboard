@@ -1,11 +1,7 @@
 package apps.calendar.application.queries
 
-import apps.calendar.application.config.CalendarAppConfig
 import apps.calendar.application.contracts.GetCalendarEventsResponseDTO
-import com.google.api.client.util.DateTime
-import com.google.api.services.calendar.Calendar
-import com.google.api.services.calendar.model.Events
-import com.google.inject.Provider
+import apps.calendar.domain.GoogleCalendarState
 import framework.mediator.Query
 import framework.mediator.QueryHandler
 import jakarta.inject.Inject
@@ -17,25 +13,15 @@ data class GetCalendarEvents(
 ) : Query<GetCalendarEventsResponseDTO>
 
 class GetGoogleCalendarEventsQueryHandler @Inject constructor(
-    private val config: CalendarAppConfig,
-    private val calendarApiProvider: Provider<Calendar>,
+    private val calendarState: GoogleCalendarState,
 ) : QueryHandler<GetCalendarEvents, GetCalendarEventsResponseDTO> {
 
     override suspend fun handle(query: GetCalendarEvents): GetCalendarEventsResponseDTO {
-        val calendar = calendarApiProvider.get()
-
-        val events = config.googleCalendar.calendars.flatMap { calendarName ->
-            val response: Events = calendar.Events()
-                .list(calendarName)
-                .setTimeMin(DateTime.parseRfc3339(query.minTime.toString()))
-                .setTimeMax(DateTime.parseRfc3339(query.maxTime.toString()))
-                .setSingleEvents(true)
-                .execute()
-
-            response.items.map {
+        val events = calendarState.get().flatMap { (calendarId, events) ->
+            events.map {
                 GetCalendarEventsResponseDTO.Event(
                     id = it.id,
-                    calendarName = response.summary,
+                    calendarName = calendarId,
                     summary = it.summary,
                     startTime = Instant.ofEpochMilli(it.start.dateTime.value),
                     endTime = Instant.ofEpochMilli(it.end.dateTime.value)

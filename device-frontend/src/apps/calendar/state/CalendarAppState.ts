@@ -27,7 +27,7 @@ export function useCalendarState(): CalendarAppState {
     clearOnFetch: false,
   })
 
-  useInterval(entity.fetchAsync, 5 * 60 * 1000) // TODO allow luxon Duration?
+  useInterval(entity.fetchAsync, 5_000)
 
   return useDeepEqualMemo(() => ({
     events: entity.value ?? EmptyArray,
