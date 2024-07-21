@@ -1,8 +1,10 @@
 package apps.calendar.application
 
+import apps.calendar.application.config.CalendarAppConfig
 import apps.calendar.application.queries.GetCalendarEvents
-import apps.calendar.domain.GoogleCalendarState
-import apps.calendar.domain.GoogleCredentialsProvider
+import apps.calendar.domain.AggregateCalendarState
+import apps.calendar.domain.google.GoogleCalendarState
+import apps.calendar.domain.google.GoogleCredentialsProvider
 import framework.AppModule
 import framework.mediator.Mediator
 import io.ktor.server.application.*
@@ -13,14 +15,15 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.awt.Menu
 import java.awt.MenuItem
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
 class CalendarAppModule @Inject constructor(
     private val mediator: Mediator,
-    private val googleCredentialsProvider: GoogleCredentialsProvider,
-    private val googleCalendarState: GoogleCalendarState,
+    private val calendarState: AggregateCalendarState,
+    private val config: CalendarAppConfig
 ) : AppModule {
 
     private val logger = LoggerFactory.getLogger(CalendarAppModule::class.java)
@@ -42,8 +45,8 @@ class CalendarAppModule @Inject constructor(
         coroutineScope.launch {
             while (true) {
                 try {
-                    googleCalendarState.refresh()
-                    delay(5*60*1000)
+                    calendarState.refresh()
+                    delay(config.refreshPeriod.toMillis())
                 } catch (e: Exception) {
                     logger.error("Error during calendar refresh", e)
                     delay(10_000)
@@ -55,14 +58,16 @@ class CalendarAppModule @Inject constructor(
     override val trayIconMenu: Menu = Menu("Google Calendar Integration")
 
     init {
-        trayIconMenu.add(MenuItem("Authenticate ...").also {
-            it.addActionListener { e ->
-                coroutineScope.launch {
-                    googleCredentialsProvider.refresh()
-                    trayIconMenu.removeAll()
-                    trayIconMenu.add(MenuItem("Authenticated")) // TODO allow log out / detect credential status
+        for (authenticator in calendarState.authenticators) {
+            trayIconMenu.add(MenuItem("[${authenticator.name}] Authenticate ...").also {
+                it.addActionListener { e ->
+                    coroutineScope.launch {
+                        authenticator.authenticate()
+                        trayIconMenu.removeAll()
+                        trayIconMenu.add(MenuItem("[${authenticator.name}] Authenticated")) // TODO allow log out / detect credential status
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 }

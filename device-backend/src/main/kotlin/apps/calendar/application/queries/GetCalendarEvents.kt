@@ -1,7 +1,7 @@
 package apps.calendar.application.queries
 
 import apps.calendar.application.contracts.GetCalendarEventsResponseDTO
-import apps.calendar.domain.GoogleCalendarState
+import apps.calendar.domain.AggregateCalendarState
 import framework.mediator.Query
 import framework.mediator.QueryHandler
 import jakarta.inject.Inject
@@ -13,21 +13,11 @@ data class GetCalendarEvents(
 ) : Query<GetCalendarEventsResponseDTO>
 
 class GetGoogleCalendarEventsQueryHandler @Inject constructor(
-    private val calendarState: GoogleCalendarState,
+    private val calendarState: AggregateCalendarState,
 ) : QueryHandler<GetCalendarEvents, GetCalendarEventsResponseDTO> {
 
     override suspend fun handle(query: GetCalendarEvents): GetCalendarEventsResponseDTO {
-        val events = calendarState.get().flatMap { (calendarId, events) ->
-            events.map {
-                GetCalendarEventsResponseDTO.Event(
-                    id = it.id,
-                    calendarName = calendarId,
-                    summary = it.summary,
-                    startTime = Instant.ofEpochMilli(it.start.dateTime.value),
-                    endTime = Instant.ofEpochMilli(it.end.dateTime.value)
-                )
-            }
-        }.sortedBy { it.startTime }
+        val events = calendarState.get().filter { it.startTime >= query.minTime && it.endTime <= query.maxTime }
 
         return GetCalendarEventsResponseDTO(
             events = events

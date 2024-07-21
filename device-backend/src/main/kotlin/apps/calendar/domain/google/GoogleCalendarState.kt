@@ -1,35 +1,48 @@
-package apps.calendar.domain
+package apps.calendar.domain.google
 
 import apps.calendar.application.config.CalendarAppConfig
+import apps.calendar.domain.CalendarAuthenticator
+import apps.calendar.domain.CalendarEvent
+import apps.calendar.domain.CalendarState
 import com.google.api.client.http.HttpResponseException
 import com.google.api.client.util.DateTime
-import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
-import com.google.api.services.calendar.model.Events
 import jakarta.inject.Inject
-import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
-import java.time.*
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.*
 
 @Singleton
 class GoogleCalendarState @Inject constructor(
-    private val config: CalendarAppConfig,
-    private val calendarApiProvider: Provider<Calendar>
-) {
+    private val config: CalendarAppConfig.CalendarProvider.Google,
+    private val calendarApiProvider: GoogleCalendarApiProvider,
+) : CalendarState {
     private val logger = LoggerFactory.getLogger(GoogleCalendarState::class.java)
 
     private val stateByCalendarId = Collections.synchronizedMap(mutableMapOf<String, SingleCalendarState>())
     private val stateMutex = Mutex()
 
-    private val calendarIds = config.googleCalendar.calendars
+    private val calendarIds = config.calendars
 
-    suspend fun refresh() {
+    override val id = "google:${config.emailAddress}"
+
+    override val authenticator = object : CalendarAuthenticator {
+        override val name: String
+            get() = config.emailAddress
+
+        override suspend fun authenticate() {
+            calendarApiProvider.credentialsProvider.refresh()
+        }
+    }
+
+    override suspend fun refresh() {
         stateMutex.withLock {
             try {
                 refreshCalendarState()
@@ -45,9 +58,21 @@ class GoogleCalendarState @Inject constructor(
         }
     }
 
-    suspend fun get(): Map<String, List<Event>> {
+    override suspend fun get(): List<CalendarEvent> {
         return stateMutex.withLock {
-            stateByCalendarId.map { it.key to it.value.events.values.toList() }.toMap()
+            stateByCalendarId
+                .map { it.key to it.value.events.values.toList() }
+                .flatMap { (calendarId, events) ->
+                    events.map {
+                        CalendarEvent(
+                            id = it.id,
+                            calendarName = calendarId,
+                            summary = it.summary,
+                            startTime = Instant.ofEpochMilli(it.start.dateTime.value),
+                            endTime = Instant.ofEpochMilli(it.end.dateTime.value)
+                        )
+                    }
+                }
         }
     }
 
@@ -60,7 +85,8 @@ class GoogleCalendarState @Inject constructor(
         val calendar = calendarApiProvider.get()
 
         calendarIds.forEach { calendarId ->
-            val currentState = stateByCalendarId[calendarId] ?: SingleCalendarState(calendarId, null, emptyMap())
+            val currentState = stateByCalendarId[calendarId]
+                ?: SingleCalendarState(calendarId, null, emptyMap())
 
             val response = calendar.Events()
                 .list(calendarId)
@@ -76,6 +102,7 @@ class GoogleCalendarState @Inject constructor(
 
             val newEvents = response.items.filter { it.status != "cancelled" }.associateBy { it.id }
             val cancelledEventIds = response.items.filter { it.status == "cancelled" }.map { it.id }
+
             stateByCalendarId[calendarId] = currentState.copy(
                 nextSyncToken = response.nextSyncToken,
                 events = (currentState.events + newEvents).filterKeys { !cancelledEventIds.contains(it) }

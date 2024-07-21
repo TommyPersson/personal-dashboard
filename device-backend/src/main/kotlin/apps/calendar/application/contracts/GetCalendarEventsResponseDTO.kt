@@ -1,15 +1,8 @@
 package apps.calendar.application.contracts
 
-import java.time.Instant
+import apps.calendar.domain.CalendarEvent
 
 data class GetCalendarEventsResponseDTO(
-    val events: List<Event>
-) {
-    data class Event(
-        val id: String,
-        val calendarName: String,
-        val summary: String,
-        val startTime: Instant,
-        val endTime: Instant,
-    )
-}
+    val events: List<CalendarEvent>
+)
+
