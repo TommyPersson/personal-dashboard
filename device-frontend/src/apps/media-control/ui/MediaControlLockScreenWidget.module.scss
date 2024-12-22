@@ -4,7 +4,7 @@
   background: #0a0a0a;
   background-position: center;
   background-size: cover;
-  box-shadow: 2px 2px 2px #000000aa;
+  box-shadow: var(--mui-shadows-2);
 
   .ThumbnailTextContainer {
     flex: 1;

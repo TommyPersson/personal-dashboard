@@ -1,0 +1,48 @@
+
+.Container {
+  position: relative;
+  background: var(--mui-palette-primary-main) !important;
+  box-shadow: var(--mui-shadows-2);
+  overflow: visible;
+
+  * {
+    z-index: 1;
+  }
+}
+
+.ProgressBackground {
+  z-index: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #33336633;
+}
+
+.Header {
+ // position: absolute;
+  top: -4px;
+}
+
+.LeftContent {
+  margin: var(--mui-sp-2);
+}
+
+.RightContent {
+  flex: 0;
+  gap: var(--mui-sp-4);
+  margin: var(--mui-sp-2);
+  align-items: center;
+
+  :global(.MuiSvgIcon-root) {
+    transform: scale(2);
+  }
+
+  button > * {
+    color: #ffffff;
+  }
+
+  button:global(.Mui-disabled) > * {
+    color: rgba(255,255,255,0.26);
+  }
+}
