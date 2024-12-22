@@ -1,11 +1,5 @@
-import {
-  PauseOutlined,
-  PlayArrowOutlined,
-  SkipNextOutlined,
-  SkipPreviousOutlined,
-  SouthEastOutlined,
-} from "@mui/icons-material"
-import { Box, CardContent, Fade, IconButton, Stack, Typography } from "@mui/material"
+import { PauseOutlined, PlayArrowOutlined, SkipNextOutlined, SkipPreviousOutlined } from "@mui/icons-material"
+import { Fade, IconButton, Stack, Typography } from "@mui/material"
 import { PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
 import { MediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
 import { getThumbnailImageSrc } from "@src/apps/media-control/utils/mediaControlUtils.ts"
@@ -46,7 +40,7 @@ const MediaInfoView = (props: { state: MediaControlAppState }) => {
   )
 
   return (
-    <Fade in={!!state.status}>
+    <Fade in={!!state.status} appear={true} unmountOnExit={true} mountOnEnter={true}>
       <Stack
         className={classes.ThumbnailContainer}
         style={{ backgroundImage: backgroundImage }}

@@ -66,22 +66,3 @@ const PomodoroTimerView = (props: { state: PomodoroTimerAppState }) => {
     </Fade>
   )
 }
-
-
-const PlaybackControlsView = (props: { state: PomodoroTimerAppState }) => {
-  const { state } = props
-
-  const pauseOrPlayIcon = state.isRunning
-    ? <PauseOutlined />
-    : <PlayArrowOutlined />
-
-  return (
-    <Stack direction={"row"} className={classes.PlaybackControlsView}>
-      <IconButton
-        size={"large"}
-        children={pauseOrPlayIcon}
-        onClick={state.pause}
-      />
-    </Stack>
-  )
-}
