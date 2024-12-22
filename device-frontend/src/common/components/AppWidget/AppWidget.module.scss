@@ -7,6 +7,26 @@
   padding: var(--mui-sp-2);
   border-right: var(--mui-divider-border);
   border-right: var(--mui-divider-border);
+  position: relative;
+}
+
+.AppWidgetErrorOverlay {
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: #aaaaaaaa;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  justify-content: center;
+
+  > * {
+    pointer-events: auto;
+  }
 }
 
 .AppWidgetHeader {

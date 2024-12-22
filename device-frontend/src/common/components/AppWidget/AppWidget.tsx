@@ -1,4 +1,4 @@
-import { Box, IconProps, Stack, Typography } from "@mui/material"
+import { Alert, Box, IconProps, Stack, Typography } from "@mui/material"
 import classNames from "classnames"
 import React, { useMemo } from "react"
 import classes from "./AppWidget.module.scss"
@@ -7,12 +7,14 @@ export const AppWidget = (props: {
   id?: string
   className?: string
   style?: React.CSSProperties
+  error?: Error | null
   children: any
 }) => {
   const className = classNames(props.className, classes.AppWidget)
 
   return (
     <div style={props.style} className={className} id={props.id}>
+      <AppWidgetErrorOverlay error={props.error} />
       {props.children}
     </div>
   )
@@ -37,5 +39,19 @@ export const AppWidgetHeader = (props: {
       {title && <Typography variant={"overline"} component={"h1"}>{title}</Typography>}
       {rightContent && <><Box sx={{ flex: 1 }} />{rightContent}</>}
     </Stack>
+  )
+}
+
+export const AppWidgetErrorOverlay = (props: {
+  error?: Error | null
+})=> {
+  if (!props.error) {
+    return null
+  }
+
+  return (
+    <div className={classes.AppWidgetErrorOverlay}>
+      <Alert severity={"error"}>{props.error.message}</Alert>
+    </div>
   )
 }

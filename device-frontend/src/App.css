@@ -25,7 +25,10 @@
 
     --mui-divider-color: rgba(0,0,0,0.12);
     --mui-divider-border: 1px solid var(--mui-divider-color);
+}
 
+html,body {
+    overscroll-behavior-x: none;
 }
 
 #root {

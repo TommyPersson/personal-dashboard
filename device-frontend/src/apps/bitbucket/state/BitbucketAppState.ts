@@ -7,6 +7,7 @@ import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 
 export type BitbucketAppState = {
   pullRequests: BitbucketPullRequest[]
+  error: Error | null
   refresh: () => void
 }
 
@@ -22,6 +23,7 @@ export function useBitbucketAppState(): BitbucketAppState {
 
   return useDeepEqualMemo(() => ({
     pullRequests,
+    error: entity.error,
     refresh: entity.fetchAsync,
-  }), [pullRequests])
+  }), [pullRequests, entity.error])
 }

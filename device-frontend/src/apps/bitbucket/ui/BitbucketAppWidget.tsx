@@ -41,7 +41,7 @@ export const BitbucketAppWidget = React.memo((props: { state: BitbucketAppState 
   const mergedPullRequests = state.pullRequests.filter(it => it.state === "MERGED")
 
   return (
-    <AppWidget className={classes.BitbucketAppWidget} id={"bitbucketAppWidget"}>
+    <AppWidget className={classes.BitbucketAppWidget} id={"bitbucketAppWidget"} error={state.error}>
       <Stack spacing={2}>
         <AppWidgetHeader
           title={"Bitbucket Pull Requests"}
