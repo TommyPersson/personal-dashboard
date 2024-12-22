@@ -5,6 +5,7 @@ import core.auth.application.commands.UnlockDevice
 import core.auth.application.contracts.UnlockDeviceRequestDTO
 import core.auth.application.queries.IsDeviceUnlocked
 import core.auth.domain.DeviceSessionJWT
+import core.layout.application.queries.GetLayout
 import core.notifications.application.commands.DismissNotification
 import core.notifications.application.commands.PostNotification
 import core.notifications.application.contracts.NotificationDTO
@@ -36,6 +37,10 @@ class CoreAppModule @Inject constructor(
                 val notificationId = call.parameters.getOrFail("id")
                 mediator.send(DismissNotification(notificationId))
                 call.respond(OkResponseDTO())
+            }
+
+            get("/api/layout") {
+                call.respond(mediator.send(GetLayout()))
             }
 
             post("/api/auth/unlock-device") {

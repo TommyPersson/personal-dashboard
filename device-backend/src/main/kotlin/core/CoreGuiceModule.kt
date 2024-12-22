@@ -6,6 +6,7 @@ import common.winctrl.WinCtrlCommandExecutor
 import core.auth.application.commands.UnlockDeviceCommandHandler
 import core.auth.application.queries.IsDeviceUnlocked
 import core.auth.application.queries.IsDeviceUnlockedQueryHandler
+import core.layout.application.queries.GetLayoutQueryHandler
 import core.notifications.application.commands.DismissNotificationCommandHandler
 import core.notifications.application.commands.PostNotificationCommandHandler
 import core.notifications.application.queries.GetNotificationsQueryHandler
@@ -36,6 +37,8 @@ class CoreGuiceModule : com.google.inject.Module {
         binder.bindRequestHandler<GetNotificationsQueryHandler>()
         binder.bindRequestHandler<PostNotificationCommandHandler>()
         binder.bindRequestHandler<DismissNotificationCommandHandler>()
+
+        binder.bindRequestHandler<GetLayoutQueryHandler>()
 
         binder.bindRequestHandler<UnlockDeviceCommandHandler>()
         binder.bindRequestHandler<IsDeviceUnlockedQueryHandler>()

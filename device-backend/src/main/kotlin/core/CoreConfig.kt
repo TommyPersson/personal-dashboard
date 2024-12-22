@@ -3,6 +3,7 @@ package core
 data class CoreConfig(
     val winCtrl: WinCtrl,
     val auth: Auth,
+    val layout: Layout,
 ) {
     data class WinCtrl(
         val executablePath: String
@@ -13,4 +14,12 @@ data class CoreConfig(
         val jwtSecret: String,
         val sessionTimeoutMinutes: Long = 480,
     )
+
+    data class Layout(
+        val apps: List<App>,
+    ) {
+        data class App(
+            val appId: String,
+        )
+    }
 }
