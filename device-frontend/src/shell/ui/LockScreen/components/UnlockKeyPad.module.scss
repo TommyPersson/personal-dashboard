@@ -1,3 +1,17 @@
+.UnlockWidget {
+  height: 100%;
+  position: relative;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}
+
+.UnlockActivatorButton {
+  transform: scale(4);
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.26) !important;
+}
+
 .UnlockKeyPad {
   gap: var(--mui-sp-4);
 }
@@ -11,7 +25,6 @@
 
 .DigitDisplay {
   margin-top: var(--mui-sp-2);
-  //border: 1px solid white;
 }
 
 .ButtonPanel {

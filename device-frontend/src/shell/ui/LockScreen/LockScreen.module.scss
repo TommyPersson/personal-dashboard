@@ -15,6 +15,7 @@
   padding-left: 50px;
   padding-right: 50px;
   gap: 50px;
+  pointer-events: none;
 
   > * {
     padding-top: 50px;
@@ -24,7 +25,6 @@
 }
 
 .LeftColumn {
-  gap: 100px;
   overflow: visible;
   width: 600px;
 }
@@ -35,11 +35,18 @@
 }
 
 .RightColumn {
+  > * {
+    pointer-events: auto;
+  }
 }
 
 .WidgetPanel {
   flex: 1;
   gap: var(--mui-sp-2);
+
+  > * {
+    pointer-events: auto;
+  }
 }
 
 .IconBar {

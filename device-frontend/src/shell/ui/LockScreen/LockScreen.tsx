@@ -1,6 +1,6 @@
-import { Box, Slide, Stack } from "@mui/material"
+import { Slide, Stack } from "@mui/material"
 import { AppContext } from "@src/shell/state/ShellState.tsx"
-import { UnlockKeyPad } from "@src/shell/ui/LockScreen/components/UnlockKeyPad.tsx"
+import { UnlockWidget } from "@src/shell/ui/LockScreen/components/UnlockKeyPad.tsx"
 import React, { useContext } from "react"
 import classes from "./LockScreen.module.scss"
 
@@ -32,7 +32,7 @@ export const LockScreenView = React.forwardRef((props, ref) => {
         </Stack>
       </Stack>
       <Stack direction={"column"} className={classes.RightColumn}>
-        <UnlockKeyPad />
+        <UnlockWidget />
       </Stack>
     </div>
   )
