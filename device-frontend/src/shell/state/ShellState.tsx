@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from "react"
 
 export type AppContextValue = {
   isUnlocked: boolean
+  isServerReachable: boolean
   lock: () => void
   unlock: (pinCode: string) => void
   unlockInProgress: boolean
@@ -15,7 +16,8 @@ export type AppContextValue = {
 }
 
 const DefaultAppContextValue: AppContextValue = {
-  isUnlocked: true,
+  isUnlocked: false,
+  isServerReachable: false,
   lock: () => {},
   unlock: (pinCode: string) => {},
   unlockInProgress: false,
@@ -44,9 +46,10 @@ export const AppContextProvider = (props: { children: any }) => {
     await refreshIsDeviceUnlocked()
   }, [executeUnlock, refreshIsDeviceUnlocked])
 
-  useInterval(refreshIsDeviceUnlocked, 10_000)
+  useInterval(refreshIsDeviceUnlocked, 2_000)
 
   const contextValue = {
+    isServerReachable: !isDeviceUnlockedEntity.error,
     isUnlocked: isDeviceUnlockedEntity.value ?? false,
     lock,
     unlock,

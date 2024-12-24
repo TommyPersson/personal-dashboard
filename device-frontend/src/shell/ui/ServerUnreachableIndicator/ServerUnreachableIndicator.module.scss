@@ -1,0 +1,7 @@
+.ServerUnreachableIndicator {
+  z-index: 1000;
+  position: absolute;
+  left: 50%;
+  top: var(--mui-sp-2);
+  transform: translateX(-50%);
+}
