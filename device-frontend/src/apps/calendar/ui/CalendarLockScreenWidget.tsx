@@ -28,6 +28,7 @@ const UpcomingEventsView = (props: { state: CalendarAppState }) => {
     <Stack direction={"column"} className={classes.UpcomingEventsView}>
       <Typography variant={"h4"} children={"Upcoming events"} />
       <div className={classes.EventSections}>
+        {eventsByDateArray.length === 0 ? <Typography variant={"body1"} marginTop={2}><em>None</em></Typography> : null}
         {eventsByDateArray.map(([date, events]) => (
           <EventSection key={date} date={date} events={events ?? []} currentTime={state.currentTime} />
         ))}

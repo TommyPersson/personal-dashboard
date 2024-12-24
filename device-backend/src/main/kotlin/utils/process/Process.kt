@@ -20,7 +20,7 @@ suspend fun runProcess(executable: String, vararg args: String): FinishedProcess
 
         builder.toString()
     }
-    val hasTerminated = process.waitFor(1, TimeUnit.SECONDS)
+    val hasTerminated = process.waitFor(5, TimeUnit.SECONDS)
     if (!hasTerminated) {
         process.destroy()
         throw Exception("process timed out")

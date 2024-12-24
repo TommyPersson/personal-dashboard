@@ -9,6 +9,7 @@
         <module name="host-backend" />
         <module name="device-backend" />
         <module name="common-backend" />
+        <module name="device-frontend" />
       </profile>
     </annotationProcessing>
   </component>

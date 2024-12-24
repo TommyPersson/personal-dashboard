@@ -3,8 +3,11 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/common-backend/src/main/kotlin" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common-backend/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/device-backend/src/generated/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/device-backend/src/main/kotlin" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/device-backend/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/device-frontend/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/device-frontend/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/host-backend/src/main/kotlin" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/host-backend/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/kotlin" charset="UTF-8" />

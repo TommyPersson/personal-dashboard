@@ -17,6 +17,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -37,6 +38,7 @@ import java.awt.Menu
 import java.awt.PopupMenu
 import java.awt.SystemTray
 import java.awt.TrayIcon
+import java.io.File
 import java.time.Duration
 import javax.imageio.ImageIO
 
@@ -71,6 +73,8 @@ fun main() {
         appModules.forEach {
             it.setup(this)
         }
+
+        configureStaticFiles()
     }.start(wait = true)
 }
 
@@ -130,6 +134,14 @@ private fun Application.configureStatusPages(logger: Logger) {
             call.respond(HttpStatusCode.InternalServerError)
             logger.error(cause)
             throw cause
+        }
+    }
+}
+
+private fun Application.configureStaticFiles() {
+    routing {
+        staticResources("/", "/static-files") {
+            default("index.html")
         }
     }
 }
