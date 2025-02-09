@@ -87,6 +87,18 @@ class WinCtrlWebServiceFacade @Inject constructor(
 
             return response.body<ActiveWindowInfoCommandData>()
         }
+
+        override suspend fun openUrl(url: String) {
+            winCtrlClient.post("/api/processes/actions/open-url") {
+                setBody(url)
+            }
+        }
+
+        override suspend fun startProcess(executable: String) {
+            winCtrlClient.post("/api/processes/actions/start-process") {
+                setBody(executable)
+            }
+        }
     }
 
     override val keyboard = object : WinCtrlFacade.Keyboard {

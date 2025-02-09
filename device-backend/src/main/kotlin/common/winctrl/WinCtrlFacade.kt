@@ -18,6 +18,8 @@ interface WinCtrlFacade {
 
     interface Processes {
         suspend fun getActiveWindowInfo(): ActiveWindowInfoCommandData?
+        suspend fun openUrl(url: String)
+        suspend fun startProcess(executable: String)
     }
 
     interface Keyboard {
