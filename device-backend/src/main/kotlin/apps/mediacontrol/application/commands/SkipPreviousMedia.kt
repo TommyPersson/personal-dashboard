@@ -1,17 +1,16 @@
 package apps.mediacontrol.application.commands
 
-import common.winctrl.WinCtrlCommandExecutor
-import common.winctrl.execute
+import common.winctrl.WinCtrlFacade
 import framework.mediator.Command
 import framework.mediator.CommandHandler
 import jakarta.inject.Inject
 
-class SkipNextMedia : Command<Unit>
+class SkipPreviousMedia : Command<Unit>
 
-class SkipNextMediaCommandHandler @Inject constructor(
-    private val executor: WinCtrlCommandExecutor,
-) : CommandHandler<SkipNextMedia, Unit> {
-    override suspend fun handle(command: SkipNextMedia) {
-        executor.execute<Any>("system-media", "skip-next")
+class SkipPreviousMediaCommandHandler @Inject constructor(
+    private val winCtrl: WinCtrlFacade,
+) : CommandHandler<SkipPreviousMedia, Unit> {
+    override suspend fun handle(command: SkipPreviousMedia) {
+        winCtrl.mediaControl.skipPrevious()
     }
 }

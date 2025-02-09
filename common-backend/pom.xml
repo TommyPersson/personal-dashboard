@@ -68,6 +68,18 @@
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-websockets-jvm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-cio-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-content-negotiation-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-jackson-jvm</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>

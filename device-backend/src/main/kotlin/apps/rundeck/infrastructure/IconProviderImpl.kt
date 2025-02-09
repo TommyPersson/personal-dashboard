@@ -1,9 +1,7 @@
 package apps.rundeck.infrastructure
 
 import apps.rundeck.domain.IconProvider
-import common.winctrl.WinCtrlCommandExecutor
-import common.winctrl.commands.IconDataCommandData
-import common.winctrl.execute
+import common.winctrl.WinCtrlFacade
 import jakarta.inject.Inject
 import kotlinx.coroutines.future.await
 import java.io.File
@@ -56,10 +54,10 @@ class UrlIconProvider {
 }
 
 class FileIconProvider @Inject constructor(
-    private val executor: WinCtrlCommandExecutor
+    private val winCtrl: WinCtrlFacade
 ) {
     suspend fun getForFile(file: File): ByteArray {
-        val iconData = executor.execute<IconDataCommandData>("executables", "icon-data", file.absolutePath)
-        return iconData.Data!!.Bytes
+        val iconBytes = winCtrl.executables.getIconImageBytes(file.absolutePath)
+        return iconBytes
     }
 }

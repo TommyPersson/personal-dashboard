@@ -6,7 +6,7 @@ data class CoreConfig(
     val layout: Layout,
 ) {
     data class WinCtrl(
-        val executablePath: String
+        val url: String,
     )
 
     data class Auth(
