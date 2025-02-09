@@ -20,7 +20,7 @@ import utils.configureJackson
 class WinCtrlWebServiceFacade @Inject constructor(
     private val config: CoreConfig,
 
-) : WinCtrlFacade {
+    ) : WinCtrlFacade {
     val winCtrlClient = HttpClient(CIO) {
         defaultRequest {
             url(config.winCtrl.url)
@@ -86,6 +86,14 @@ class WinCtrlWebServiceFacade @Inject constructor(
             }
 
             return response.body<ActiveWindowInfoCommandData>()
+        }
+    }
+
+    override val keyboard = object : WinCtrlFacade.Keyboard {
+        override suspend fun sendKeys(keys: String) {
+            winCtrlClient.post("/api/keyboard/actions/send-keys") {
+                setBody(keys)
+            }
         }
     }
 }

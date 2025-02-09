@@ -20,7 +20,12 @@ interface WinCtrlFacade {
         suspend fun getActiveWindowInfo(): ActiveWindowInfoCommandData?
     }
 
+    interface Keyboard {
+        suspend fun sendKeys(keys: String)
+    }
+
     val mediaControl: MediaControl
     val executables: Executables
     val processes: Processes
+    val keyboard: Keyboard
 }
