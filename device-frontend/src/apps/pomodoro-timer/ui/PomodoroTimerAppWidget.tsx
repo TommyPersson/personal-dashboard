@@ -52,8 +52,7 @@ const TextualProgressTimer = (props: { state: PomodoroTimerAppState }) => {
     <Typography
       variant={"h2"}
       component={"h2"}
-      fontWeight={"bold"}
-      textAlign={"center"}
+      sx={{ fontWeight: "bold", textAlign: "center" }}
     >
       {state.remainingTimeText}
       <Typography variant={"body1"}>remaining</Typography>
@@ -68,8 +67,7 @@ const ActionButtons = (props: { state: PomodoroTimerAppState }) => {
     <Stack
       direction={"column"}
       spacing={1}
-      justifyContent={"center"}
-      alignItems={"center"}
+      sx={{ justifyContent: "center", alignItems: "center" }}
     >
       {!state.isRunning &&
         <Button

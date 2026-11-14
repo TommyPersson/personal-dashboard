@@ -24,7 +24,7 @@ export function useGithubState(): GithubAppState {
 
   const markAllAsRead = useCallback(async () => {
     await markAllAsReadAction.execute()
-    entity.fetchAsync
+    entity.fetchAsync()
   }, [markAllAsReadAction.execute, entity.fetchAsync])
 
   useInterval(entity.fetchAsync, 5 * 60_000)

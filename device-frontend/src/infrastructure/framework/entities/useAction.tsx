@@ -23,7 +23,7 @@ export type ActionType<TArgs, TValue, TPayload = any> = {
   readonly __payloadType?: TPayload
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type UseActionOptions = {
 }
 

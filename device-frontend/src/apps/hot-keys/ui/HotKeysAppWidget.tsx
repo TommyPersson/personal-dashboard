@@ -24,7 +24,7 @@ export const HotKeysAppWidget = React.memo((props: { state: HotKeysAppState }) =
     <Typography
       color={"text.secondary"}
       children={"No hot-keys configured for current application"}
-      textAlign={"center"}
+      sx={{ textAlign: "center" }}
     />
   )
 

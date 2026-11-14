@@ -38,7 +38,7 @@ export const ShellScreen = () => {
         <IconButton size={"large"} onClick={appContext.lock}>
           <Lock />
         </IconButton>
-        <Box flex={1} />
+        <Box sx={{ flex: 1 }} />
         <div id={"appBarPortal"} className={classes.AppBarPortal}></div>
         <Divider />
         <ClockAppBarWidget />

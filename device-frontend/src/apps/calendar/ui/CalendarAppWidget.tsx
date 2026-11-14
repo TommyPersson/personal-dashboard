@@ -19,7 +19,7 @@ export const CalendarAppWidget = React.memo((props: { state: CalendarAppState })
 
   return (
     <AppWidget className={classes.CalendarAppWidget}>
-      <Stack spacing={2} flex={1}>
+      <Stack spacing={2} sx={{ flex: 1 }}>
         <AppWidgetHeader
           icon={<CalendarTodayOutlined />}
           title={"Calendar"}

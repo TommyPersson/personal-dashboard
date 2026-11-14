@@ -22,7 +22,7 @@ export const NotificationsAppWidget = () => {
   const state = useNotificationsAppState()
 
   const rightContent = (
-    <Stack direction={"row"} gap={2}>
+    <Stack direction={"row"} sx={{ gap: 2 }}>
       <Button
         onClick={state.clear}
         children={"Clear"}
@@ -49,7 +49,7 @@ export const NotificationsAppWidget = () => {
     <>
       <AppWidget className={widgetClassName}>
         <AppWidgetHeader icon={widgetIcon} />
-        <Box flex={1} />
+        <Box sx={{ flex: 1 }} />
         <ToggleMinimizedButton state={state} />
       </AppWidget>
       <NotificationsToastOverlay />
@@ -59,7 +59,7 @@ export const NotificationsAppWidget = () => {
   const expandedWidget = (
     <>
       <AppWidget className={widgetClassName}>
-        <Stack spacing={2} flex={1}>
+        <Stack spacing={2} sx={{ flex: 1 }}>
           <AppWidgetHeader
             title={"Notifications"}
             icon={widgetIcon}
@@ -69,7 +69,7 @@ export const NotificationsAppWidget = () => {
             notifications={state.notifications}
             onDismiss={state.dismiss}
           />
-          <Box flex={1} />
+          <Box sx={{ flex: 1 }} />
           <Stack direction={"row"}>
             <ToggleMinimizedButton state={state} />
           </Stack>

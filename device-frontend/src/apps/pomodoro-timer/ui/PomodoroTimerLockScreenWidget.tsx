@@ -34,7 +34,7 @@ const PomodoroTimerView = (props: { state: PomodoroTimerAppState }) => {
             <Typography
               variant={"h2"}
               component={"h2"}
-              fontWeight={"bold"}
+              sx={{ fontWeight: "bold" }}
             >
               {state.remainingTimeText}
             </Typography>

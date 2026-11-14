@@ -32,7 +32,7 @@ export const WeatherAppWidget = React.memo((props: { state: WeatherAppState }) =
   )
 
   const content = state.isLoading || !state.data ? (
-    <Stack alignItems={"center"} padding={10}>
+    <Stack sx={{ alignItems: "center", padding: 10 }}>
       <CircularProgress />
     </Stack>
   ) : (
@@ -167,7 +167,7 @@ const DailyForecastRow = (props: WeeklyForecastRowProps) => {
     <TableRow className={classes.DailyForecastRow}>
       <TableCell>{day}</TableCell>
       <TableCell>
-        <Stack direction={"row"} alignItems={"center"}>
+        <Stack direction={"row"} sx={{ alignItems: "center" }}>
           <WaterDropOutlined className={classes.HumidityIcon} /> {forecast.humidityPercent}%
         </Stack>
       </TableCell>

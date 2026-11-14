@@ -50,7 +50,7 @@ export const BitbucketAppWidget = React.memo((props: { state: BitbucketAppState 
         />
         <PullRequestListCard title={"Open"} pullRequests={openPullRequests} />
         <PullRequestListCard title={"Your pull requests"} pullRequests={usersPullRequests} />
-        <Typography variant={"caption"} children={"Recently closed"} alignSelf={"center"} />
+        <Typography variant={"caption"} children={"Recently closed"} sx={{ alignSelf: "center" }} />
         <PullRequestListCard title={"Declined"} pullRequests={declinedPullRequests} />
         <PullRequestListCard title={"Merged"} pullRequests={mergedPullRequests} />
       </Stack>
@@ -71,8 +71,8 @@ const PullRequestListCard = (props: {
       <PullRequestItemRow key={it.id} pullRequest={it} />,
     )
   ) : (
-    <Stack alignItems={"center"}>
-      <Typography variant={"body2"} children={"None"} fontStyle={"italic"} />
+    <Stack sx={{ alignItems: "center" }}>
+      <Typography variant={"body2"} children={"None"} sx={{ fontStyle: "italic" }} />
     </Stack>
   )
 
@@ -178,7 +178,7 @@ const IconWithText = (props: {
   text: any,
 }) => {
   return (
-    <Stack direction={"row"} gap={1} alignItems={"center"}>
+    <Stack direction={"row"} sx={{ gap: 1, alignItems: "center" }}>
       {props.icon}
       <Typography variant={"subtitle2"} children={props.text} />
     </Stack>

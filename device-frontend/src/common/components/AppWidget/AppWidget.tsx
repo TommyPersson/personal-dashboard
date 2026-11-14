@@ -31,8 +31,7 @@ export const AppWidgetHeader = (props: {
     <Stack
       direction={"row"}
       spacing={1}
-      sx={{ whiteSpace: "nowrap", height: 40 }}
-      alignItems={"center"}
+      sx={{ whiteSpace: "nowrap", height: 40, alignItems: "center" }}
       className={classes.AppWidgetHeader}
     >
       {icon}

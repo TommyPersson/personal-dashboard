@@ -29,7 +29,7 @@ export const RunDeckAppWidget = React.memo((props: { state: RunDeckAppState }) =
     <Typography
       color={"text.secondary"}
       children={"No Run Deck configured"}
-      textAlign={"center"}
+      sx={{ textAlign: "center" }}
     />
   )
 

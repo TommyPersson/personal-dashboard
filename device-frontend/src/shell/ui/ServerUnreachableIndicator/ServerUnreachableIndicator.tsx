@@ -4,8 +4,7 @@ import { useContext } from "react"
 
 import classes from "./ServerUnreachableIndicator.module.scss"
 
-export const ServerUnreachableIndicator = (props: {
-}) => {
+export const ServerUnreachableIndicator = () => {
   const appContext = useContext(AppContext)
 
   return (

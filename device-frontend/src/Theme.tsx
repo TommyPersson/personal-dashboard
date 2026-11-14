@@ -1,7 +1,6 @@
 
 // Augment the palette to include an ochre color
-import { createTheme } from "@mui/material"
-import { experimental_extendTheme as extendTheme } from "@mui/material/styles"
+import { createTheme } from "@mui/material/styles"
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -22,6 +21,7 @@ declare module '@mui/material/Button' {
 
 
 export const theme = createTheme({
+  cssVariables: true,
   palette: {
     ochre: {
       main: "#E3D026",
@@ -40,14 +40,9 @@ export const theme = createTheme({
 })
 
 export const darkTheme = createTheme({
+  cssVariables: true,
   palette: {
     mode: "dark"
   }
 })
 
-export const cssVarsTheme = extendTheme({
-}, theme)
-
-
-export const cssVarsDarkTheme = extendTheme({
-}, darkTheme)

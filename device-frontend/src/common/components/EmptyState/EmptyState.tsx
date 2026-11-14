@@ -24,9 +24,7 @@ export const EmptyState = (props: EmptyStateProps) => {
 const stackProps: React.ComponentProps<typeof Stack> = {
   direction: "column",
   spacing: 1,
-  alignItems: "center",
-  mt: 8,
-  mb: 8,
+  sx: { alignItems: "center", mt: 8, mb: 8 },
 }
 
 const titleProps: React.ComponentProps<typeof Typography> = {
