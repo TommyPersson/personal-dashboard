@@ -6,12 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="host-backend" />
         <module name="device-backend" />
         <module name="common-backend" />
         <module name="device-frontend" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="host-backend" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="TypeScriptCompiler">
     <option name="memoryLimit" value="4096" />

@@ -28,7 +28,6 @@
 
     <modules>
         <module>device-backend</module>
-        <module>host-backend</module>
         <module>common-backend</module>
         <module>device-frontend</module>
     </modules>
