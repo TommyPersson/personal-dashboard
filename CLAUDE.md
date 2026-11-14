@@ -82,6 +82,18 @@ Both the backend and frontend can be run locally, I have a basic configuration s
   (or in a `.env.local` file), e.g. `BACKEND_URL=http://localhost:8081 npm run dev -- --port 5174` to pair with a
   backend started on a custom `server.port`.
 
+## Storybook
+
+* `npm run storybook` under `device-frontend`, at `localhost:6006`. It needs no backend: `/api` is never proxied.
+* Stories live in a `stories/` folder next to each app (`src/apps/<app>/stories`), together with fixtures for the
+  app's state and API payloads. `src/shell/stories` renders the whole app (pin code `1234`).
+* Widgets take their state as props, so most stories pass a fixture state. Components that load their own data are
+  served by MSW handlers given in the `msw` story parameter, grouped by name (`msw: { handlers: { weather: [...] } }`)
+  so a story can override one group. Unmocked `/api` requests are answered by fallbacks in `src/storybook/msw.ts`.
+  The worker script is served by MSW's Vite plugin, so there's no `mockServiceWorker.js` in `public/`.
+* Widgets that render through portals (lock screen, app bar, app area overlay) need the matching decorator from
+  `src/storybook/frames.tsx`.
+
 # WinCtrl 
 
 The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl. Making changes to it is out-of-scope for now.

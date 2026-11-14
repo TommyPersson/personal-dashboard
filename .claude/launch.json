@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["device-frontend/node_modules/vite/bin/vite.js", "device-frontend"],
       "port": 5173
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "device-frontend", "run", "storybook"],
+      "port": 6006
     }
   ]
 }

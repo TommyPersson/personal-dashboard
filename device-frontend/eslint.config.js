@@ -3,10 +3,11 @@ import reactHooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
 import { defineConfig, globalIgnores } from "eslint/config"
 import globals from "globals"
+import storybook from "eslint-plugin-storybook"
 import tseslint from "typescript-eslint"
 
 export default defineConfig([
-  globalIgnores(["dist", "target"]),
+  globalIgnores(["dist", "target", "storybook-static", "!.storybook"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -29,6 +30,14 @@ export default defineConfig([
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  ...storybook.configs["flat/recommended"],
+  {
+    // Stories and Storybook helpers export meta objects/decorators, which react-refresh would warn about
+    files: ["**/*.stories.{ts,tsx}", "src/storybook/**", ".storybook/**"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 ])
