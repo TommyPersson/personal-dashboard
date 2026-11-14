@@ -27,9 +27,9 @@
     </properties>
 
     <modules>
+        <module>device-frontend</module>
         <module>device-backend</module>
         <module>common-backend</module>
-        <module>device-frontend</module>
     </modules>
 
     <repositories>
