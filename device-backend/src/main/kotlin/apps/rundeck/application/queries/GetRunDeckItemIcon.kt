@@ -24,7 +24,7 @@ class GetRunDeckItemIconQueryHandler @Inject constructor(
 
         val iconBytes = when (item) {
             is RunDeckDataDTO.Item.OpenUrl -> iconProvider.getForUrl(URI.create(item.url))
-            is RunDeckDataDTO.Item.RunExecutable -> iconProvider.getForFile(File(item.executable))
+            is RunDeckDataDTO.Item.RunExecutable -> iconProvider.getForFile(item.executable)
         }
 
         return iconBytes

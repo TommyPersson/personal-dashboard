@@ -3,8 +3,6 @@ package apps.calendar.application
 import apps.calendar.application.config.CalendarAppConfig
 import apps.calendar.application.queries.GetCalendarEvents
 import apps.calendar.domain.AggregateCalendarState
-import apps.calendar.domain.google.GoogleCalendarState
-import apps.calendar.domain.google.GoogleCredentialsProvider
 import framework.AppModule
 import framework.mediator.Mediator
 import io.ktor.server.application.*
@@ -13,9 +11,6 @@ import io.ktor.server.routing.*
 import jakarta.inject.Inject
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
-import java.awt.Menu
-import java.awt.MenuItem
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -54,9 +49,7 @@ class CalendarAppModule @Inject constructor(
             }
         }
     }
-
-    override val trayIconMenu: Menu = Menu("Google Calendar Integration")
-
+/* move sign in to frontend
     init {
         for (authenticator in calendarState.authenticators) {
             trayIconMenu.add(MenuItem("[${authenticator.name}] Authenticate ...").also {
@@ -70,4 +63,6 @@ class CalendarAppModule @Inject constructor(
             })
         }
     }
+
+ */
 }

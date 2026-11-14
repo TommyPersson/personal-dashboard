@@ -1,9 +1,9 @@
 package core
 
 import apps.bitbucket.application.BitbucketGuiceModule
+import apps.calendar.application.CalendarGuiceModule
 import apps.clock.application.ClockGuiceModule
 import apps.github.application.GithubGuiceModule
-import apps.calendar.application.CalendarGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
 import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
@@ -34,13 +34,7 @@ import utils.HttpErrorResponseDTO
 import utils.HttpException
 import utils.JSON
 import utils.configureJackson
-import java.awt.Menu
-import java.awt.PopupMenu
-import java.awt.SystemTray
-import java.awt.TrayIcon
-import java.io.File
 import java.time.Duration
-import javax.imageio.ImageIO
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
@@ -60,8 +54,6 @@ fun main() {
     val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
 
     val webSocketService = injector.getInstance(WebSocketService::class.java)
-
-    setupTrayIcon(appModules.mapNotNull { it.trayIconMenu })
 
     embeddedServer(Netty, port = 8080) {
         configureContentNegotiations()
@@ -144,16 +136,4 @@ private fun Application.configureStaticFiles() {
             default("index.html")
         }
     }
-}
-
-
-fun setupTrayIcon(appSubMenus: List<Menu>) {
-    val iconImage = ImageIO.read(object {}::class.java.getResource("/tray-icon.png"))
-    val trayIcon = TrayIcon(iconImage, "Desktop Dashboard").also { trayIcon ->
-        trayIcon.popupMenu = PopupMenu().also { menu ->
-            appSubMenus.forEach { menu.add(it) }
-        }
-    }
-
-    SystemTray.getSystemTray().add(trayIcon)
 }

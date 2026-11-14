@@ -14,7 +14,7 @@ class AggregateCalendarState @Inject constructor(
     val authenticators = calendarStates.map { it.authenticator }
 
     suspend fun refresh() {
-        calendarStates.forEach { it.refresh() }
+        //calendarStates.forEach { it.refresh() } // TODO re-enable after porting sign in from tray icon
     }
 
     suspend fun get(): List<CalendarEvent> {

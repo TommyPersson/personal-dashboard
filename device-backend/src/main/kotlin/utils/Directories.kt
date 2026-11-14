@@ -3,9 +3,11 @@ package utils
 import java.io.File
 
 object Directories {
-    private val base = File(System.getProperty("user.home"), ".personal-dashboard")
 
-    val Configs = File(base, "config").also {
+    private val dataDir = System.getenv("DATA_DIR")?.let { File(it) }
+        ?: File(System.getProperty("user.home"), ".personal-dashboard")
+
+    val Configs = File(dataDir, "config").also {
         it.mkdirs()
     }
 
@@ -13,11 +15,11 @@ object Directories {
         it.mkdirs()
     }
 
-    val Cache = File(base, "cache").also {
+    val Cache = File(dataDir, "cache").also {
         it.mkdirs()
     }
 
-    val Data = File(base, "data").also {
+    val Data = File(dataDir, "data").also {
         it.mkdirs()
     }
 }

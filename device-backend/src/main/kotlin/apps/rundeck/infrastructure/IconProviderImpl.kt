@@ -25,8 +25,8 @@ class IconProviderImpl @Inject constructor(
         }
     }
 
-    override suspend fun getForFile(file: File): ByteArray {
-        val iconId = "file-${file.absolutePath}"
+    override suspend fun getForFile(file: String): ByteArray {
+        val iconId = "file-${file}"
 
         return iconCache.getOrPut(iconId) {
             fileIconProvider.getForFile(file)
@@ -56,8 +56,8 @@ class UrlIconProvider {
 class FileIconProvider @Inject constructor(
     private val winCtrl: WinCtrlFacade
 ) {
-    suspend fun getForFile(file: File): ByteArray {
-        val iconBytes = winCtrl.executables.getIconImageBytes(file.absolutePath)
+    suspend fun getForFile(file: String): ByteArray {
+        val iconBytes = winCtrl.executables.getIconImageBytes(file)
         return iconBytes
     }
 }
