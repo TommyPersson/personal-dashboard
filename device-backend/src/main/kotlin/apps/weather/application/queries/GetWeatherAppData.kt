@@ -4,7 +4,9 @@ import apps.weather.application.config.WeatherAppConfig
 import apps.weather.application.contracts.WeatherAppDataResponseDTO
 import apps.weather.domain.Location
 import apps.weather.domain.WeatherAppDataProvider
-import com.sksamuel.aedile.core.cacheBuilder
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.sksamuel.aedile.core.asLoadingCache
+import com.sksamuel.aedile.core.expireAfterWrite
 import framework.mediator.Query
 import framework.mediator.QueryHandler
 import jakarta.inject.Inject
@@ -18,9 +20,9 @@ class GetWeatherAppDataQueryHandler @Inject constructor(
     private val config: WeatherAppConfig
 ) : QueryHandler<GetWeatherAppData, WeatherAppDataResponseDTO> {
 
-    private val cache = cacheBuilder<Location, WeatherAppDataResponseDTO> {
-        expireAfterWrite = 5.minutes
-    }.build(::load)
+    private val cache = Caffeine.newBuilder()
+        .expireAfterWrite(5.minutes)
+        .asLoadingCache<Location, WeatherAppDataResponseDTO> { load(it) }
 
     override suspend fun handle(query: GetWeatherAppData): WeatherAppDataResponseDTO {
         return cache.get(config.location)

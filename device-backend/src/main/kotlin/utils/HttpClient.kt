@@ -1,10 +1,10 @@
 package utils
 
-import io.ktor.util.*
+import kotlin.io.encoding.Base64
 import java.net.http.HttpRequest
 
 fun HttpRequest.Builder.withBasicAuth(username: String, password: String): HttpRequest.Builder {
-    val secret = "$username:$password".encodeBase64()
+    val secret = Base64.encode("$username:$password".toByteArray())
     val headerValue = "Basic $secret"
     return header("Authorization", headerValue)
 }

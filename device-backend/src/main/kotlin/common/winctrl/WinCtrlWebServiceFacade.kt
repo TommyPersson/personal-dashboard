@@ -60,7 +60,7 @@ class WinCtrlWebServiceFacade @Inject constructor(
                 return null
             }
 
-            return response.readBytes()
+            return response.readRawBytes()
         }
     }
 
@@ -74,7 +74,7 @@ class WinCtrlWebServiceFacade @Inject constructor(
                 return byteArrayOf()
             }
 
-            return response.readBytes()
+            return response.readRawBytes()
         }
     }
 

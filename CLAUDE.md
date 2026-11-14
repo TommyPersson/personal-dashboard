@@ -49,7 +49,15 @@ Pi (Chrome kiosk) ──HTTP/WebSocket──▶ device-backend (Docker on a serv
 The Maven configuration does both a backend and frontend build. The frontend is built by the `device-frontend` Maven 
 module and is then copied into the backend resources.
 
-A full build is made using `mvn clean install` at the repository root.
+Always use the Maven wrapper (`./mvnw`, or `mvnw.cmd` on Windows), never the system `mvn`; the enforcer plugin rejects
+Maven < 3.9 and JDKs older than `java.version` (25). All plugin versions are managed in the root `pom.xml`.
+
+A full build is made using `./mvnw clean install` at the repository root.
+
+## Docker
+
+The Docker image is built by copying `device-backend/target/device-backend-*-shaded.jar`, so the backend needs to be 
+built separately from the Docker build script for now.
 
 # Running
 
@@ -57,11 +65,12 @@ Both the backend and frontend can be run locally, I have a basic configuration s
 
 ## Backend
 
-* `mvn exec:java` under `device-backend`
+* `../mvnw exec:java` under `device-backend`
+* The backend will run at `localhost:8080` with the bundled UI served at the root. The API is mounted at `/api`
 
 ## Frontend
 
-* `npm run dev` under `device-frontend`
+* `npm run dev` under `device-frontend`. It should start at `localhost:5173`
 
 # WinCtrl 
 

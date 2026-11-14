@@ -19,7 +19,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
@@ -34,7 +34,7 @@ import utils.HttpErrorResponseDTO
 import utils.HttpException
 import utils.JSON
 import utils.configureJackson
-import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
@@ -72,8 +72,8 @@ fun main() {
 
 private fun Application.configureWebSockets(webSocketService: WebSocketService) {
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(10)
-        timeout = Duration.ofSeconds(60)
+        pingPeriod = 10.seconds
+        timeout = 60.seconds
         contentConverter = JacksonWebsocketContentConverter(JSON.objectMapper)
     }
 
