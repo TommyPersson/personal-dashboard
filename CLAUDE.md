@@ -61,6 +61,8 @@ The Maven build expects Node and NPM to be available on the system PATH.
 The Docker image is built by copying `device-backend/target/device-backend-*-shaded.jar`, so the backend needs to be 
 built separately from the Docker build script for now.
 
+CI will build and publish the image to `ghcr.io/tommypersson/personal-dashboard`.
+
 # Running
 
 Both the backend and frontend can be run locally, I have a basic configuration setup in my home folder for the backend to use.
@@ -69,10 +71,16 @@ Both the backend and frontend can be run locally, I have a basic configuration s
 
 * `../mvnw exec:java` under `device-backend`
 * The backend will run at `localhost:8080` with the bundled UI served at the root. The API is mounted at `/api`
+* The port can be overridden with the `server.port` JVM system property, e.g. `../mvnw exec:java -Dserver.port=8081`
+  (or `java -Dserver.port=8081 -jar ...` for the shaded jar). The user usually has an instance running on 8080 from
+  their IDE, so use a different port when running the backend yourself.
 
 ## Frontend
 
 * `npm run dev` under `device-frontend`. It should start at `localhost:5173`
+* `/api` is proxied to `http://localhost:8080` by default. Override it with the `BACKEND_URL` environment variable
+  (or in a `.env.local` file), e.g. `BACKEND_URL=http://localhost:8081 npm run dev -- --port 5174` to pair with a
+  backend started on a custom `server.port`.
 
 # WinCtrl 
 

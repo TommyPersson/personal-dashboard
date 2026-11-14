@@ -55,7 +55,9 @@ fun main() {
 
     val webSocketService = injector.getInstance(WebSocketService::class.java)
 
-    embeddedServer(Netty, port = 8080) {
+    val port = System.getProperty("server.port")?.toInt() ?: 8080
+
+    embeddedServer(Netty, port = port) {
         configureContentNegotiations()
         configureCallLogging()
         configureStatusPages(logger)
