@@ -9,7 +9,9 @@ import apps.mediacontrol.application.MediaControlGuiceModule
 import apps.rundeck.application.RunDeckGuiceModule
 import apps.weather.application.WeatherGuiceModule
 import com.google.inject.Guice
+import com.google.inject.Injector
 import com.google.inject.Key
+import com.google.inject.Module
 import com.google.inject.TypeLiteral
 import common.services.WebSocketService
 import framework.AppModule
@@ -37,39 +39,44 @@ import utils.configureJackson
 import kotlin.time.Duration.Companion.seconds
 
 fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-
-    val injector = Guice.createInjector(
-        CoreGuiceModule(),
-        ClockGuiceModule(),
-        WeatherGuiceModule(),
-        RunDeckGuiceModule(),
-        MediaControlGuiceModule(),
-        HotKeysGuiceModule(),
-        BitbucketGuiceModule(),
-        GithubGuiceModule(),
-        CalendarGuiceModule(),
-    )
-
-    val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
-
-    val webSocketService = injector.getInstance(WebSocketService::class.java)
-
     val port = System.getProperty("server.port")?.toInt() ?: 8080
 
+    val injector = Guice.createInjector(defaultGuiceModules())
+
     embeddedServer(Netty, port = port) {
-        configureContentNegotiations()
-        configureCallLogging()
-        configureStatusPages(logger)
-        configureRouting()
-        configureWebSockets(webSocketService)
-
-        appModules.forEach {
-            it.setup(this)
-        }
-
-        configureStaticFiles()
+        rootModule(injector)
     }.start(wait = true)
+}
+
+fun defaultGuiceModules(): List<Module> = listOf(
+    CoreGuiceModule(),
+    ClockGuiceModule(),
+    WeatherGuiceModule(),
+    RunDeckGuiceModule(),
+    MediaControlGuiceModule(),
+    HotKeysGuiceModule(),
+    BitbucketGuiceModule(),
+    GithubGuiceModule(),
+    CalendarGuiceModule(),
+)
+
+fun Application.rootModule(injector: Injector) {
+    val logger = LoggerFactory.getLogger("Main")
+
+    val appModules = injector.getInstance(Key.get(object : TypeLiteral<Set<AppModule>>() {}))
+    val webSocketService = injector.getInstance(WebSocketService::class.java)
+
+    configureContentNegotiations()
+    configureCallLogging()
+    configureStatusPages(logger)
+    configureRouting()
+    configureWebSockets(webSocketService)
+
+    appModules.forEach {
+        it.setup(this)
+    }
+
+    configureStaticFiles()
 }
 
 private fun Application.configureWebSockets(webSocketService: WebSocketService) {

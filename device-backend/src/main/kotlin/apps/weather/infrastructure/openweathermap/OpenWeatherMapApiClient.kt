@@ -18,7 +18,7 @@ class OpenWeatherMapApiClient(
     private val objectMapper: ObjectMapper,
 ) {
     private val oneCallApiUriFormat =
-        "https://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&units=metric&appid=${config.apiKey}"
+        "${config.apiUrl}/data/3.0/onecall?lat=%s&lon=%s&units=metric&appid=${config.apiKey}"
 
     private val httpClient: HttpClient = HttpClient.newHttpClient()
 

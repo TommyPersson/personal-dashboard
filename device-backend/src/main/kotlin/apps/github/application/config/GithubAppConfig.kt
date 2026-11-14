@@ -5,5 +5,6 @@ data class GithubAppConfig(
 ) {
     data class Github(
         val accessToken: String,
+        val apiUrl: String = "https://api.github.com",
     )
 }

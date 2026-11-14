@@ -17,6 +17,7 @@ data class WeatherAppConfig(
         @JsonTypeName("OpenWeather")
         class OpenWeather(
             val apiKey: String,
+            val apiUrl: String = "https://api.openweathermap.org",
         ) : Source()
     }
 }

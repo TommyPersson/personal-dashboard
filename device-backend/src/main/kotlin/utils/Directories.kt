@@ -4,7 +4,7 @@ import java.io.File
 
 object Directories {
 
-    private val dataDir = System.getenv("DATA_DIR")?.let { File(it) }
+    private val dataDir = (System.getProperty("dataDir") ?: System.getenv("DATA_DIR"))?.let { File(it) }
         ?: File(System.getProperty("user.home"), ".personal-dashboard")
 
     val Configs = File(dataDir, "config").also {

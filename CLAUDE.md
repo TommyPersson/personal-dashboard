@@ -34,7 +34,23 @@ In locked mode, only a subset of app widgets are shown, such as the pomodoro tim
 
 # Testing
 
-There are no automated tests yet.
+The backend has integration tests (`device-backend/src/it/kotlin`, classes named `*IT`) run by failsafe during
+`verify`/`install`. They boot the real Ktor/Guice wiring in-process on a random port with RestAssured, against a
+throw-away data directory (`device-backend/target/it-data`, set via the `dataDir` system property, which overrides
+`DATA_DIR`). Configs are written by `testing/TestConfigs.kt`. Every external service (WinCtrl, GitHub,
+Bitbucket, OpenWeather) is played by its own WireMock server on `TestBackend`, which tests stub and verify; external
+API base URLs are therefore configurable in each app's config. Between tests the WireMocks are reset (WinCtrl then
+accepts any `POST .../actions/...` and 404s everything else) and files in `data`/`cache` are deleted, but in-memory
+state is not. Tests reach that state through the backend's injector (`inject<T>()` in `IntegrationTest`), e.g. calling
+`invalidateCaches()` on a query handler. Request handlers aren't singletons by default, so a handler whose state tests
+need to reset must be annotated `@Singleton`; otherwise the injector hands out a fresh instance.
+
+Integration tests have their own source root (`src/it/kotlin`, added by `build-helper-maven-plugin`) so they don't mix
+with unit tests, which go in `src/test/kotlin` as usual and are run by surefire.
+
+* Run only the backend tests: `./mvnw -pl device-backend -am verify` at the repository root (skips the frontend build).
+
+The frontend has no automated tests yet.
 
 # Deployment Architecture
 

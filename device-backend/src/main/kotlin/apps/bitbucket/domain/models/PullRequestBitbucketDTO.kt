@@ -1,7 +1,6 @@
 package apps.bitbucket.domain.models
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.Instant
 
 data class PullRequestBitbucketDTO(
     val id: Long,
@@ -9,8 +8,10 @@ data class PullRequestBitbucketDTO(
     val title: String,
     val description: String?,
     val state: PullRequestState,
-    val createdDate: Instant,
-    val updatedDate: Instant,
+    /** Epoch milliseconds */
+    val createdDate: Long,
+    /** Epoch milliseconds */
+    val updatedDate: Long,
     val fromRef: Ref,
     val toRef: Ref,
     val author: Participant,

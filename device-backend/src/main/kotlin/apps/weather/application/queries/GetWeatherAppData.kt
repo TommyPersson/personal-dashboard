@@ -10,11 +10,13 @@ import com.sksamuel.aedile.core.expireAfterWrite
 import framework.mediator.Query
 import framework.mediator.QueryHandler
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
 
 
 class GetWeatherAppData : Query<WeatherAppDataResponseDTO>
 
+@Singleton
 class GetWeatherAppDataQueryHandler @Inject constructor(
     private val dataProvider: WeatherAppDataProvider,
     private val config: WeatherAppConfig
@@ -26,6 +28,10 @@ class GetWeatherAppDataQueryHandler @Inject constructor(
 
     override suspend fun handle(query: GetWeatherAppData): WeatherAppDataResponseDTO {
         return cache.get(config.location)
+    }
+
+    fun invalidateCaches() {
+        cache.invalidateAll()
     }
 
     private suspend fun load(location: Location): WeatherAppDataResponseDTO {

@@ -24,7 +24,7 @@ class GithubApiClientImpl @Inject constructor(
         .build()
 
     override suspend fun getNotifications(): List<GithubApiNotificationDTO> {
-        val uri = URI.create("https://api.github.com/notifications")
+        val uri = URI.create("${config.github.apiUrl}/notifications")
         val request = HttpRequest.newBuilder()
             .GET()
             .uri(uri)
@@ -44,7 +44,7 @@ class GithubApiClientImpl @Inject constructor(
     override suspend fun markAllNotificationsAsRead() {
         val lastReadAt = Instant.now().toString()
 
-        val uri = URI.create("https://api.github.com/notifications")
+        val uri = URI.create("${config.github.apiUrl}/notifications")
         val request = HttpRequest.newBuilder()
             .PUT(BodyPublishers.ofString("""{ "last_read_at": "$lastReadAt", "read": true }"""))
             .uri(uri)

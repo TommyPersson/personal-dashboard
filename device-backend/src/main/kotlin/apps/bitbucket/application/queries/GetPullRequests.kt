@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import framework.mediator.Query
 import framework.mediator.QueryHandler
 import jakarta.inject.Inject
+import java.time.Instant
 
 class GetPullRequests : Query<GetPullRequestsResponseDTO>
 
@@ -30,8 +31,8 @@ class GetPullRequestsQueryHandler @Inject constructor(
                     title = pr.title,
                     description = pr.description ?: "",
                     state = pr.state,
-                    createdAt = pr.createdDate,
-                    updatedAt = pr.updatedDate,
+                    createdAt = Instant.ofEpochMilli(pr.createdDate),
+                    updatedAt = Instant.ofEpochMilli(pr.updatedDate),
                     fromRepository = pr.fromRef.repository.name,
                     fromBranch = pr.fromRef.displayId,
                     toRepository = pr.toRef.repository.name,
