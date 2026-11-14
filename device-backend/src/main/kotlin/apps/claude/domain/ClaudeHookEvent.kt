@@ -15,6 +15,7 @@ class ClaudeHookEvent(private val json: JsonNode) {
     val cwd: String? get() = json.text("project_dir") ?: json.text("cwd")
     val toolName: String? get() = json.text("tool_name")
     val toolInput: JsonNode get() = json["tool_input"] ?: MissingNode.getInstance()
+    val toolUseId: String? get() = json.text("tool_use_id")
     val prompt: String? get() = json.text("prompt")
     val message: String? get() = json.text("message")
     val notificationType: String? get() = json.text("notification_type")
@@ -37,7 +38,8 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
         "UserPromptSubmit" if event.isSystemPrompt -> session.copy(
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            currentActivity = null,
+            currentActivity = THINKING,
+            runningToolCalls = emptyList(),
             promptEndedAt = null,
         )
 
@@ -45,7 +47,8 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
             prompt = event.prompt,
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            currentActivity = null,
+            currentActivity = THINKING,
+            runningToolCalls = emptyList(),
             plan = emptyList(),
             promptStartedAt = now,
             promptEndedAt = null,
@@ -53,11 +56,12 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
         )
 
         "PreToolUse" -> when (val question = event.questionForUser()) {
-            null -> session.copy(
+            null -> if (event.isBookkeeping) session.copy(status = ClaudeSessionStatus.Working, waitingFor = null)
+            else session.copy(
                 status = ClaudeSessionStatus.Working,
                 waitingFor = null,
-                currentActivity = event.describeToolCall(),
-            )
+                runningToolCalls = runningToolCalls + ClaudeToolCall(event.toolUseId, event.describeToolCall()),
+            ).withCurrentActivity()
 
             else -> session.copy(
                 status = ClaudeSessionStatus.WaitingForInput,
@@ -71,18 +75,20 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
             waitingFor = "Permission: ${event.describeToolCall()}",
         )
 
+        // Tool calls made together run, and so finish, in parallel: the activity falls back to the calls still
+        // running, and to Claude thinking once none are.
         "PostToolUse" -> session.copy(
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            currentActivity = null,
+            runningToolCalls = runningToolCalls.finish(event),
             plan = applyPlanUpdate(plan, event),
-        )
+        ).withCurrentActivity()
 
         "PostToolUseFailure" -> session.copy(
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            currentActivity = null,
-        )
+            runningToolCalls = runningToolCalls.finish(event),
+        ).withCurrentActivity()
 
         // "idle_prompt" is sent a while after a turn has ended; the session is already idle then.
         "Notification" -> if (event.notificationType == "idle_prompt") session else session.copy(
@@ -94,6 +100,7 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
             status = ClaudeSessionStatus.Idle,
             waitingFor = null,
             currentActivity = null,
+            runningToolCalls = emptyList(),
             promptEndedAt = promptStartedAt?.let { now },
             result = event.lastAssistantMessage?.let(::summarizeMessage) ?: result,
         )
@@ -102,6 +109,18 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
     }
 }
 
+private fun ClaudeSession.withCurrentActivity() =
+    copy(currentActivity = runningToolCalls.lastOrNull()?.description ?: THINKING)
+
+/** Removes [event]'s call, or all of them for a payload without `tool_use_id`, which then can't be told apart. */
+private fun List<ClaudeToolCall>.finish(event: ClaudeHookEvent) =
+    if (event.toolUseId == null) emptyList() else filterNot { it.id == event.toolUseId }
+
+/** Tools that keep track of the turn rather than do its work, so they don't replace the current activity. */
+private val bookkeepingTools = setOf("mcp__ccd_turn__update_plan", "mcp__ccd_turn__wrap_up", "TodoWrite", "ToolSearch")
+
+private val ClaudeHookEvent.isBookkeeping: Boolean get() = toolName in bookkeepingTools
+
 /** Tools that block on the user until they answer. */
 private fun ClaudeHookEvent.questionForUser(): String? = when (toolName) {
     "AskUserQuestion" -> toolInput["questions"]?.firstOrNull()?.text("question") ?: "Claude has a question"
@@ -109,16 +128,7 @@ private fun ClaudeHookEvent.questionForUser(): String? = when (toolName) {
     else -> null
 }
 
-private fun ClaudeHookEvent.describeToolCall(): String {
-    toolInput.text("description")?.let { return it }
-
-    val tool = toolName?.substringAfterLast("__") ?: "tool"
-    val target = toolInput.text("file_path")?.substringAfterLast('/')?.substringAfterLast('\\')
-        ?: toolInput.text("pattern")
-        ?: toolInput.text("url")
-
-    return if (target != null) "$tool $target" else tool
-}
+private fun ClaudeHookEvent.describeToolCall(): String = describeToolCall(toolName, toolInput)
 
 private fun applyPlanUpdate(plan: List<ClaudePlanItem>, event: ClaudeHookEvent): List<ClaudePlanItem> {
     val input = event.toolInput

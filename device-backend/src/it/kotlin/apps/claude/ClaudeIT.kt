@@ -191,19 +191,47 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
-    fun `a running tool call is shown until it finishes`() {
+    fun `running tool calls are shown, and Claude thinking between them`() {
+        postEvent("UserPromptSubmit", "prompt" to "Run the tests")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].currentActivity", equalTo("Thinking…"))
+        }
+
         postEvent(
             "PreToolUse",
             "tool_name" to "Bash",
+            "tool_use_id" to "tests",
             "tool_input" to mapOf("command" to "./mvnw verify", "description" to "Run the backend tests"),
         )
 
         When { get("/api/apps/claude/sessions") } Then {
             body("sessions[0].status", equalTo("Working"))
-            body("sessions[0].currentActivity", equalTo("Run the backend tests"))
+            body("sessions[0].currentActivity", equalTo("Running the backend tests"))
         }
 
-        postToolUse("Bash", mapOf("command" to "./mvnw verify"))
+        postEvent("PostToolUse", "tool_name" to "Bash", "tool_use_id" to "tests", "tool_input" to mapOf<String, Any>())
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].currentActivity", equalTo("Thinking…"))
+        }
+
+        // Task list updates aren't shown.
+        postEvent("PreToolUse", "tool_name" to "mcp__ccd_turn__update_plan", "tool_use_id" to "plan", "tool_input" to mapOf("advance" to true))
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].currentActivity", equalTo("Thinking…"))
+        }
+
+        // Calls made together finish in any order: the one still running stays shown.
+        postEvent("PreToolUse", "tool_name" to "Bash", "tool_use_id" to "status", "tool_input" to mapOf("description" to "Show git status"))
+        postEvent("PostToolUse", "tool_name" to "mcp__ccd_turn__update_plan", "tool_use_id" to "plan", "tool_input" to mapOf("advance" to true))
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].currentActivity", equalTo("Showing git status"))
+        }
+
+        postEvent("Stop")
 
         When { get("/api/apps/claude/sessions") } Then {
             body("sessions[0].currentActivity", nullValue())
@@ -216,7 +244,7 @@ class ClaudeIT : IntegrationTest() {
 
         When { get("/api/apps/claude/sessions") } Then {
             body("sessions[0].status", equalTo("WaitingForInput"))
-            body("sessions[0].waitingFor", equalTo("Permission: Delete the build"))
+            body("sessions[0].waitingFor", equalTo("Permission: Deleting the build"))
         }
 
         postToolUse("Bash", mapOf("description" to "Delete the build"))

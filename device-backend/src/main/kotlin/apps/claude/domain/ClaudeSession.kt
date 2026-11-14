@@ -11,8 +11,10 @@ data class ClaudeSession(
     val status: ClaudeSessionStatus,
     /** What the session is waiting for while [status] is [ClaudeSessionStatus.WaitingForInput]. */
     val waitingFor: String?,
-    /** The tool call currently running, if any. */
+    /** What Claude is doing: the latest tool call still running, else [THINKING] while it works on a prompt. */
     val currentActivity: String?,
+    /** The tool calls that have started but not finished, oldest first. */
+    val runningToolCalls: List<ClaudeToolCall> = emptyList(),
     /** The task list of the current prompt. */
     val plan: List<ClaudePlanItem>,
     /** When the latest prompt was submitted. */
@@ -40,6 +42,15 @@ data class ClaudeSession(
         )
     }
 }
+
+data class ClaudeToolCall(
+    /** The hook payload's `tool_use_id`. */
+    val id: String?,
+    val description: String,
+)
+
+/** The activity while Claude works on a prompt with no tool call running. */
+const val THINKING = "Thinking…"
 
 enum class ClaudeSessionStatus {
     /** Claude is working on a prompt. */
