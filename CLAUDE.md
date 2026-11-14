@@ -102,3 +102,7 @@ The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl.
 
 Make suggestions on how to improve this file as you encountered issues. Without overloading it with details that can be
 understood from the code.
+
+# FUTURE_WORK.md
+
+Ideas for future work is stored in this file. Append to it if we discuss any such ideas.
