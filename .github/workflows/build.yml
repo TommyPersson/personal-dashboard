@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: device-frontend/package-lock.json
+
+      - name: Build
+        run: ./mvnw --batch-mode --no-transfer-progress clean install
+
+      - name: Upload shaded jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: device-backend
+          path: device-backend/target/device-backend-*-shaded.jar
+          if-no-files-found: error

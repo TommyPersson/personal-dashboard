@@ -54,6 +54,8 @@ Maven < 3.9 and JDKs older than `java.version` (25). All plugin versions are man
 
 A full build is made using `./mvnw clean install` at the repository root.
 
+The Maven build expects Node and NPM to be available on the system PATH.
+
 ## Docker
 
 The Docker image is built by copying `device-backend/target/device-backend-*-shaded.jar`, so the backend needs to be 
