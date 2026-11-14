@@ -286,6 +286,53 @@ class ClaudeIT : IntegrationTest() {
         }
     }
 
+    @Test
+    fun `all sessions can be discarded at once`() {
+        postEvent("SessionStart", sessionId = "first")
+        postEvent("SessionStart", sessionId = "second")
+
+        When {
+            post("/api/apps/claude/sessions/actions/discard-all")
+        } Then {
+            statusCode(200)
+        }
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions", empty<Any>())
+        }
+    }
+
+    @Test
+    fun `a notification is posted when Claude finishes its turn`() {
+        postEvent("UserPromptSubmit", "prompt" to "Fix the bug")
+        postEvent("Stop", "last_assistant_message" to "Fixed the **bug**.")
+        // Already idle: not another finished turn.
+        postEvent("Stop")
+
+        When { get("/api/notifications") } Then {
+            body("items.size()", equalTo(1))
+            body("items[0].title", equalTo("Claude finished in personal-dashboard"))
+            body("items[0].description", equalTo("Fixed the bug."))
+            body("items[0].source", equalTo("Claude Code"))
+        }
+
+        // A session first seen through its `Stop`, e.g. after a backend restart: no turn was seen in progress.
+        postEvent("Stop", sessionId = "unknown")
+
+        When { get("/api/notifications") } Then {
+            body("items.size()", equalTo(1))
+        }
+
+        postEvent("UserPromptSubmit", "prompt" to "Try again")
+        postEvent("StopFailure")
+
+        When { get("/api/notifications") } Then {
+            body("items.size()", equalTo(2))
+            body("items[0].title", equalTo("Claude stopped with an error in personal-dashboard"))
+            body("items[0].description", equalTo("Try again"))
+        }
+    }
+
     private fun postToolUse(toolName: String, toolInput: Map<String, Any>) =
         postEvent("PostToolUse", "tool_name" to toolName, "tool_input" to toolInput)
 

@@ -24,6 +24,12 @@ class ClaudeHookEvent(private val json: JsonNode) {
 
     val isSessionEnd: Boolean get() = hookEventName == "SessionEnd"
 
+    /** Claude has finished its turn, successfully or not. */
+    val isTurnEnd: Boolean get() = hookEventName == "Stop" || isTurnFailure
+
+    /** The turn ended because of an API error. */
+    val isTurnFailure: Boolean get() = hookEventName == "StopFailure"
+
     /** A prompt Claude Code submitted on its own, such as the notification that a background task has finished. */
     val isSystemPrompt: Boolean get() = prompt?.trimStart()?.startsWith("<task-notification>") == true
 }

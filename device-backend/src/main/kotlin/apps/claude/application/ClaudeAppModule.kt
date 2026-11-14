@@ -1,5 +1,6 @@
 package apps.claude.application
 
+import apps.claude.application.commands.DiscardAllClaudeSessions
 import apps.claude.application.commands.DiscardClaudeSession
 import apps.claude.application.commands.HandleClaudeHookEvent
 import apps.claude.application.queries.GetClaudeSessions
@@ -29,6 +30,11 @@ class ClaudeAppModule @Inject constructor(
 
             get("/api/apps/claude/sessions") {
                 call.respond(mediator.send(GetClaudeSessions()))
+            }
+
+            post("/api/apps/claude/sessions/actions/discard-all") {
+                mediator.send(DiscardAllClaudeSessions())
+                call.respond(OkResponseDTO())
             }
 
             post("/api/apps/claude/sessions/{id}/actions/discard") {

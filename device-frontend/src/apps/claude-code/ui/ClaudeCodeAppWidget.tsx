@@ -7,6 +7,7 @@ import {
 } from "@mui/icons-material"
 import {
   Alert,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -34,7 +35,18 @@ export const ClaudeCodeAppWidget = React.memo((props: { state: ClaudeCodeAppStat
   return (
     <AppWidget className={classes.ClaudeCodeAppWidget} id={"claudeCodeAppWidget"} error={state.error}>
       <Stack spacing={2}>
-        <AppWidgetHeader title={"Claude Code"} icon={<SmartToyOutlined />} />
+        <AppWidgetHeader
+          title={"Claude Code"}
+          icon={<SmartToyOutlined />}
+          rightContent={
+            <Button
+              onClick={state.discardAll}
+              disabled={state.sessions.length === 0}
+              startIcon={<CloseOutlined />}
+              children={"Clear"}
+            />
+          }
+        />
         {state.sessions.length > 0 ? (
           state.sessions.map(it => (
             <SessionCard key={it.id} session={it} onDiscard={() => state.discard(it)} />

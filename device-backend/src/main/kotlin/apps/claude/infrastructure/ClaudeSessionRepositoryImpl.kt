@@ -44,6 +44,14 @@ class ClaudeSessionRepositoryImpl @Inject constructor(
         removed
     }
 
+    override suspend fun removeAll(): List<String> = lock.withLock {
+        val ids = loadStore().keys.toList()
+        if (ids.isNotEmpty()) {
+            saveStore(emptyMap())
+        }
+        ids
+    }
+
     private suspend fun loadStore(): MutableMap<String, ClaudeSession> = withContext(Dispatchers.IO) {
         if (!dataFile.exists()) {
             return@withContext mutableMapOf()

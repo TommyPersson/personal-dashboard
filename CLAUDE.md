@@ -67,6 +67,7 @@ module and is then copied into the backend resources.
 
 Always use the Maven wrapper (`./mvnw`, or `mvnw.cmd` on Windows), never the system `mvn`; the enforcer plugin rejects
 Maven < 3.9 and JDKs older than `java.version` (25). All plugin versions are managed in the root `pom.xml`.
+On Windows, run `mvnw.cmd` from PowerShell: `./mvnw` from Git Bash fails to download the Maven distribution.
 
 A full build is made using `./mvnw clean install` at the repository root.
 

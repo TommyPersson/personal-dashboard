@@ -8,4 +8,7 @@ interface ClaudeSessionRepository {
 
     /** Returns whether there was a session to remove. */
     suspend fun remove(id: String): Boolean
+
+    /** Returns the IDs of the removed sessions. */
+    suspend fun removeAll(): List<String>
 }

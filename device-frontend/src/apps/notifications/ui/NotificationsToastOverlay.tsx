@@ -6,6 +6,9 @@ import { TransitionGroup } from "react-transition-group"
 
 import classes from "./NotificationsToastOverlay.module.scss"
 
+/** How long a toast is shown before it hides itself. */
+const TOAST_DURATION_MS = 8000
+
 export const NotificationsToastOverlay = () => {
   const state = useNotificationsToastState()
 
@@ -33,9 +36,9 @@ const NotificationToastCardContent = (props: {
   notification: Notification
   removeNotification: (notification: Notification) => void
 }) => {
-  const { notification } = props
+  const { notification, removeNotification } = props
   return (
-    <div onClick={() => props.removeNotification(notification)}>
+    <div onClick={() => removeNotification(notification)}>
       <CardContent>
         <Stack>
           <Typography
@@ -57,6 +60,12 @@ const NotificationToastCardContent = (props: {
           />
         </Stack>
       </CardContent>
+      {/* The bar's animation is the toast's timer: the toast hides when it has run out. */}
+      <div
+        className={classes.CountdownBar}
+        style={{ animationDuration: `${TOAST_DURATION_MS}ms` }}
+        onAnimationEnd={() => removeNotification(notification)}
+      />
     </div>
   )
 }
