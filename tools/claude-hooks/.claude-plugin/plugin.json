@@ -1,0 +1,16 @@
+{
+  "name": "personal-dashboard",
+  "displayName": "Personal Dashboard",
+  "version": "0.1.0",
+  "description": "Forwards Claude Code hook events to the personal dashboard's Claude Code app",
+  "author": { "name": "Tommy Persson" },
+  "repository": "https://github.com/TommyPersson/personal-dashboard",
+  "userConfig": {
+    "backend_url": {
+      "type": "string",
+      "title": "Dashboard backend URL",
+      "description": "Base URL of the dashboard backend, e.g. http://dashboard.lan:8080",
+      "default": "http://localhost:8080"
+    }
+  }
+}

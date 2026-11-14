@@ -12,6 +12,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "device-frontend", "run", "storybook"],
       "port": 6006
+    },
+    {
+      "name": "backend-8081",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd device-backend && ..\\mvnw.cmd -q exec:java -Dserver.port=8081 -DdataDir=C:\\Users\\Tommy\\AppData\\Local\\Temp\\claude\\f8431401d34a1833\\74cea5e4-b2fa-4a25-a6b5-d99d7f9442e4\\scratchpad\\dashboard-data"],
+      "port": 8081
+    },
+    {
+      "name": "frontend-8081",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set BACKEND_URL=http://localhost:8081&& node device-frontend/node_modules/vite/bin/vite.js device-frontend --port 5174"],
+      "port": 5174
     }
   ]
 }

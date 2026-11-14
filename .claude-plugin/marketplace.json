@@ -1,0 +1,12 @@
+{
+  "name": "personal-dashboard",
+  "description": "Claude Code integration for the personal dashboard",
+  "owner": { "name": "Tommy Persson" },
+  "plugins": [
+    {
+      "name": "personal-dashboard",
+      "source": "./tools/claude-hooks",
+      "description": "Forwards Claude Code hook events to the personal dashboard's Claude Code app"
+    }
+  ]
+}

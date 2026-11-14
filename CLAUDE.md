@@ -114,6 +114,18 @@ Both the backend and frontend can be run locally, I have a basic configuration s
 
 The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl. Making changes to it is out-of-scope for now.
 
+# Claude Code app
+
+Shows what Claude Code sessions on the workstation are doing. It is fed by Claude Code hooks on the PC that run
+`tools/claude-hooks/forward-event.mjs`, which POSTs each hook payload to `/api/apps/claude/events`;
+the backend folds the events into per-session state (`apps/claude/domain/ClaudeHookEvent.kt`).
+
+The hooks are packaged as the `personal-dashboard` plugin (`tools/claude-hooks`, listed by the repository's
+`.claude-plugin/marketplace.json`). Its "Dashboard backend URL" option (default `http://localhost:8080`) reaches the
+script as `CLAUDE_PLUGIN_OPTION_BACKEND_URL`. Install it with `/plugin marketplace add C:/work/personal-dashboard`
+(or `TommyPersson/personal-dashboard` from GitHub), then `/plugin install personal-dashboard@personal-dashboard`, and
+change the URL in `/config`. Don't also register the hooks in a settings file, or every event is posted twice.
+
 # CLAUDE.md
 
 Make suggestions on how to improve this file as you encountered issues. Without overloading it with details that can be

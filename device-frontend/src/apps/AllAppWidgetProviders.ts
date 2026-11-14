@@ -1,5 +1,6 @@
 import { bitbucketAppWidgetProvider } from "@src/apps/bitbucket/BitbucketAppWidgetProvider.tsx"
 import { calendarAppWidgetProvider } from "@src/apps/calendar/CalendarAppWidgetProvider.tsx"
+import { claudeCodeAppWidgetProvider } from "@src/apps/claude-code/ClaudeCodeAppWidgetProvider.tsx"
 import { clockAppWidgetProvider } from "@src/apps/clock/ClockAppWidgetProvider.tsx"
 import { githubAppWidgetProvider } from "@src/apps/github/GithubAppWidgetProvider.tsx"
 import { hotKeysAppWidgetProvider } from "@src/apps/hot-keys/HotKeysAppWidgetProvider.tsx"
@@ -19,4 +20,5 @@ export const allAppWidgetProviders: AppWidgetProvider[] = [
   runDeckAppWidgetProvider,
   bitbucketAppWidgetProvider,
   githubAppWidgetProvider,
+  claudeCodeAppWidgetProvider,
 ]

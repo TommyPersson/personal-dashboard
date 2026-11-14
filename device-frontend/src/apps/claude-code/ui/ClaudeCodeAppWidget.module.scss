@@ -1,0 +1,33 @@
+.ClaudeCodeAppWidget {
+  min-width: 500px;
+  max-width: 500px;
+}
+
+.SessionCard {
+  flex-shrink: 0;
+}
+
+.Prompt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+.PlanItemIcon {
+  min-width: 32px !important;
+  display: flex;
+  justify-content: center;
+  margin-right: var(--mui-sp-1);
+}
+
+.RunTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.Header {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}

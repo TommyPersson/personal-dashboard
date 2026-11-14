@@ -2,6 +2,7 @@ package core
 
 import apps.bitbucket.application.BitbucketGuiceModule
 import apps.calendar.application.CalendarGuiceModule
+import apps.claude.application.ClaudeGuiceModule
 import apps.clock.application.ClockGuiceModule
 import apps.github.application.GithubGuiceModule
 import apps.hotkeys.application.HotKeysGuiceModule
@@ -58,6 +59,7 @@ fun defaultGuiceModules(): List<Module> = listOf(
     BitbucketGuiceModule(),
     GithubGuiceModule(),
     CalendarGuiceModule(),
+    ClaudeGuiceModule(),
 )
 
 fun Application.rootModule(injector: Injector) {
