@@ -18,8 +18,13 @@ class ClaudeHookEvent(private val json: JsonNode) {
     val prompt: String? get() = json.text("prompt")
     val message: String? get() = json.text("message")
     val notificationType: String? get() = json.text("notification_type")
+    /** Claude's final message of the turn, sent with `Stop`. */
+    val lastAssistantMessage: String? get() = json.text("last_assistant_message")
 
     val isSessionEnd: Boolean get() = hookEventName == "SessionEnd"
+
+    /** A prompt Claude Code submitted on its own, such as the notification that a background task has finished. */
+    val isSystemPrompt: Boolean get() = prompt?.trimStart()?.startsWith("<task-notification>") == true
 }
 
 /** Folds [event] into the session's state. */
@@ -27,6 +32,15 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
     val session = copy(cwd = event.cwd ?: cwd, updatedAt = now)
 
     return when (event.hookEventName) {
+        // Claude Code itself submits these, e.g. when a background task finishes: Claude picks the turn up again,
+        // so the user's prompt, plan and run time are kept.
+        "UserPromptSubmit" if event.isSystemPrompt -> session.copy(
+            status = ClaudeSessionStatus.Working,
+            waitingFor = null,
+            currentActivity = null,
+            promptEndedAt = null,
+        )
+
         "UserPromptSubmit" -> session.copy(
             prompt = event.prompt,
             status = ClaudeSessionStatus.Working,
@@ -35,6 +49,7 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
             plan = emptyList(),
             promptStartedAt = now,
             promptEndedAt = null,
+            result = null,
         )
 
         "PreToolUse" -> when (val question = event.questionForUser()) {
@@ -80,6 +95,7 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
             waitingFor = null,
             currentActivity = null,
             promptEndedAt = promptStartedAt?.let { now },
+            result = event.lastAssistantMessage?.let(::summarizeMessage) ?: result,
         )
 
         else -> session
@@ -162,5 +178,38 @@ private fun advance(items: List<ClaudePlanItem>): List<ClaudePlanItem> {
 
 private fun List<ClaudePlanItem>.withStatus(index: Int, status: ClaudePlanItemStatus) =
     mapIndexed { i, item -> if (i == index) item.copy(status = status) else item }
+
+private const val MAX_RESULT_LENGTH = 300
+
+/**
+ * Turns Claude's Markdown reply into a short plain-text summary for a card: code blocks, tables and Markdown markers
+ * are dropped, blank lines collapsed, and the text cut at a word boundary after [MAX_RESULT_LENGTH] characters.
+ */
+internal fun summarizeMessage(message: String): String? {
+    val text = message
+        .replace(Regex("```.*?(```|$)", RegexOption.DOT_MATCHES_ALL), "")
+        .lines()
+        .filterNot { it.trimStart().startsWith("|") }
+        .joinToString("\n") { line ->
+            line
+                .replace(Regex("^\\s*#{1,6}\\s+"), "")
+                .replace(Regex("^(\\s*)[-*+]\\s+"), "$1• ")
+                .replace(Regex("\\[([^\\]]+)\\]\\([^)]*\\)"), "$1")
+                .replace(Regex("\\*\\*|__|`"), "")
+                .trimEnd()
+        }
+        .replace(Regex("\n{2,}"), "\n")
+        .trim()
+
+    if (text.isEmpty()) {
+        return null
+    }
+    if (text.length <= MAX_RESULT_LENGTH) {
+        return text
+    }
+
+    val cut = text.substring(0, MAX_RESULT_LENGTH)
+    return cut.substring(0, cut.lastIndexOf(' ').takeIf { it > MAX_RESULT_LENGTH / 2 } ?: cut.length).trimEnd() + "…"
+}
 
 private fun JsonNode.text(field: String): String? = get(field)?.takeIf { it.isTextual }?.asText()

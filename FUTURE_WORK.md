@@ -38,3 +38,17 @@ The first version is in (`apps/claude` on the backend, `apps/claude-code` on the
   session id. The transcript format is internal and may change, so the lookup must fail quietly.
 * Alternatives: OpenTelemetry export (`CLAUDE_CODE_ENABLE_TELEMETRY`) for usage/cost, or reading transcripts in
   `~/.claude/projects/*/*.jsonl` (only on the PC, so it would need WinCtrl or a small forwarder).
+* More to show from hook payloads (fields the backend ignores today):
+  * Badges for `permission_mode` (plan, auto, bypassPermissions) and `effort.level`, plus the model from
+    `SessionStart.model` and `PostModelSwitch.to_model` (not always sent).
+  * Subagents: events from a subagent carry `agent_id`/`agent_type`; registering `SubagentStart`/`SubagentStop` would
+    let a card show running subagents (e.g. "2 × Explore") instead of mixing their tool calls into the main activity.
+  * Failures: `StopFailure`'s error type (`rate_limit`, `overloaded`, `billing_error`, ...) as a distinct red state
+    rather than plain Idle; a count of `PostToolUseFailure` per turn.
+  * Turn result: `Stop.last_assistant_message` (truncated) as the card's text once Claude is done.
+  * Turn stats: pairing `PreToolUse`/`PostToolUse` by `tool_use_id` gives tool durations; also tool counts and the
+    files edited (`Edit`/`Write` `file_path`) in the turn.
+  * Context fill: hooks carry no token usage, but `forward-event.mjs` runs on the PC and could read the latest
+    `usage` from the transcript tail (same caveats as session names). `PreCompact`/`PostCompact` mark compactions.
+  * Worktrees: `cwd` differing from `project_dir` shows a session working in a worktree or subfolder.
+  * `SessionStart.source` (resume, fork, compact) and the `SessionEnd` reason for a short history line.

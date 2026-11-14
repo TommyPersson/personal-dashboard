@@ -20,6 +20,8 @@ data class ClaudeSessionDTO(
     val plan: List<ClaudePlanItemDTO>,
     val promptStartedAt: Instant?,
     val promptEndedAt: Instant?,
+    /** A shortened, plain-text version of Claude's last message on the latest prompt. */
+    val result: String?,
     val startedAt: Instant,
     val updatedAt: Instant,
 )
@@ -40,6 +42,7 @@ fun ClaudeSession.toDTO() = ClaudeSessionDTO(
     plan = plan.map { it.toDTO() },
     promptStartedAt = promptStartedAt,
     promptEndedAt = promptEndedAt,
+    result = result,
     startedAt = startedAt,
     updatedAt = updatedAt,
 )

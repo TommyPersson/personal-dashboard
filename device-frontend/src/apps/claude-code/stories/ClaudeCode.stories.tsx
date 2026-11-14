@@ -1,4 +1,4 @@
-import { claudeCodeState, workingSession } from "@src/apps/claude-code/stories/claudeCodeFixtures.ts"
+import { claudeCodeState, idleSession, workingSession } from "@src/apps/claude-code/stories/claudeCodeFixtures.ts"
 import { ClaudeCodeAppBarIcon } from "@src/apps/claude-code/ui/ClaudeCodeAppBarIcon.tsx"
 import { ClaudeCodeAppWidget } from "@src/apps/claude-code/ui/ClaudeCodeAppWidget.tsx"
 import { ClaudeCodeLockScreenIcon } from "@src/apps/claude-code/ui/ClaudeCodeLockScreenIcon.tsx"
@@ -21,6 +21,24 @@ export const AppWidget: Story = {
 
 export const AppWidgetSingleSession: Story = {
   args: { state: claudeCodeState({ sessions: [workingSession] }) },
+  decorators: [withAppSlot],
+}
+
+/** Claude's last message is shortened by the backend and clamped to four lines. */
+export const AppWidgetLongResult: Story = {
+  args: {
+    state: claudeCodeState({
+      sessions: [{
+        ...idleSession,
+        result: "Added the result message to the session cards. The backend now keeps a shortened, plain-text version "
+          + "of Claude's last message when a turn ends and clears it on the next prompt.\n"
+          + "• Backend: new result field, with Markdown markers and code blocks removed\n"
+          + "• Frontend: shown under the plan while the session is done, clamped to four lines\n"
+          + "• Tests: integration test for the summary\n"
+          + "Not verified on the device itself.",
+      }],
+    }),
+  },
   decorators: [withAppSlot],
 }
 

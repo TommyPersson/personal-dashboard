@@ -24,6 +24,7 @@ export const workingSession: ClaudeSession = {
   ],
   promptStartedAt: minutesAgo(12.5),
   promptEndedAt: null,
+  result: null,
   startedAt: "2026-11-14T17:02:00Z",
   updatedAt: "2026-11-14T18:41:00Z",
 }
@@ -42,6 +43,7 @@ export const waitingSession: ClaudeSession = {
   ],
   promptStartedAt: minutesAgo(3),
   promptEndedAt: null,
+  result: null,
   startedAt: "2026-11-14T18:30:00Z",
   updatedAt: "2026-11-14T18:39:00Z",
 }
@@ -57,6 +59,8 @@ export const idleSession: ClaudeSession = {
   plan: [],
   promptStartedAt: "2026-11-14T15:10:00Z",
   promptEndedAt: "2026-11-14T15:14:23Z",
+  result: "The prompt read the branch from a value cached per directory, so it went stale after git checkout. "
+    + "It now asks git every time it is drawn.",
   startedAt: "2026-11-14T15:10:00Z",
   updatedAt: "2026-11-14T15:14:00Z",
 }

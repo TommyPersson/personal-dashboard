@@ -35,8 +35,10 @@ process.stdin.on("end", async () => {
     if (event.tool_input) {
       event.tool_input = truncateStrings(event.tool_input)
     }
-    if (typeof event.prompt === "string") {
-      event.prompt = truncate(event.prompt)
+    for (const field of ["prompt", "last_assistant_message"]) {
+      if (typeof event[field] === "string") {
+        event[field] = truncate(event[field])
+      }
     }
 
     if (eventsFile) {

@@ -19,6 +19,8 @@ data class ClaudeSession(
     val promptStartedAt: Instant? = null,
     /** When Claude finished its turn on the latest prompt; `null` while it is still on it. */
     val promptEndedAt: Instant? = null,
+    /** A shortened, plain-text version of Claude's last message on the latest prompt, once its turn has ended. */
+    val result: String? = null,
     val startedAt: Instant,
     val updatedAt: Instant,
 ) {

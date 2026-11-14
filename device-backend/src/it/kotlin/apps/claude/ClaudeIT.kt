@@ -1,5 +1,6 @@
 package apps.claude
 
+import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.Then
 import io.restassured.module.kotlin.extensions.When
@@ -100,6 +101,35 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
+    fun `a background task's notification resumes the turn without replacing the prompt`() {
+        postEvent("UserPromptSubmit", "prompt" to "Run the tests in the background")
+        postToolUse(
+            "TodoWrite",
+            mapOf("todos" to listOf(mapOf("content" to "Run tests", "status" to "in_progress"))),
+        )
+        postEvent("Stop", "last_assistant_message" to "Started the tests in the background.")
+
+        val startedAt = When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].status", equalTo("Idle"))
+        } Extract {
+            path<String>("sessions[0].promptStartedAt")
+        }
+
+        postEvent(
+            "UserPromptSubmit",
+            "prompt" to "<task-notification>\n<task-id>bk0vgymrm</task-id>\n<status>completed</status>\n</task-notification>",
+        )
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].prompt", equalTo("Run the tests in the background"))
+            body("sessions[0].status", equalTo("Working"))
+            body("sessions[0].plan.content", contains("Run tests"))
+            body("sessions[0].promptStartedAt", equalTo(startedAt))
+            body("sessions[0].promptEndedAt", nullValue())
+        }
+    }
+
+    @Test
     fun `a prompt's run time starts when it is submitted and ends when Claude stops`() {
         postEvent("UserPromptSubmit", "prompt" to "Do things")
 
@@ -119,6 +149,44 @@ class ClaudeIT : IntegrationTest() {
 
         When { get("/api/apps/claude/sessions") } Then {
             body("sessions[0].promptEndedAt", nullValue())
+        }
+    }
+
+    @Test
+    fun `Claude's last message is kept as a shortened plain-text result until the next prompt`() {
+        postEvent("UserPromptSubmit", "prompt" to "Fix the bug")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].result", nullValue())
+        }
+
+        val message = """
+            ## Fixed
+
+            The **cache** was stale; see [the docs](https://example.com) and `Cache.kt`.
+
+            ```kotlin
+            val x = 1
+            ```
+
+            | File | Change |
+            |------|--------|
+            | Cache.kt | Fixed |
+
+            - Updated `Cache.kt`
+        """.trimIndent() + " More words.".repeat(40)
+        postEvent("Stop", "last_assistant_message" to message)
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].result", startsWith("Fixed\nThe cache was stale; see the docs and Cache.kt.\n• Updated Cache.kt More words."))
+            body("sessions[0].result", endsWith("…"))
+            body("sessions[0].result.length()", lessThanOrEqualTo(301))
+        }
+
+        postEvent("UserPromptSubmit", "prompt" to "Next")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].result", nullValue())
         }
     }
 

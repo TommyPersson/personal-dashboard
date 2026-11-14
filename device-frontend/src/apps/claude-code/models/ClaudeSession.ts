@@ -18,6 +18,8 @@ export type ClaudeSession = {
   plan: ClaudePlanItem[]
   promptStartedAt: string | null
   promptEndedAt: string | null
+  /** A shortened, plain-text version of Claude's last message on the latest prompt. */
+  result: string | null
   startedAt: string
   updatedAt: string
 }

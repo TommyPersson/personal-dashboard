@@ -15,6 +15,16 @@
   white-space: pre-wrap;
 }
 
+.Result {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+  padding-left: var(--mui-sp-1);
+  border-left: 2px solid var(--mui-palette-divider);
+}
+
 .PlanItemIcon {
   min-width: 32px !important;
   display: flex;

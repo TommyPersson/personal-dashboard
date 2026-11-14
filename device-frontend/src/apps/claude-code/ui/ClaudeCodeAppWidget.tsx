@@ -103,6 +103,12 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void }) =
                 </List>
               )}
 
+              {session.status === "Idle" && session.result && (
+                <Typography variant={"body2"} color={"text.secondary"} className={classes.Result}>
+                  {session.result}
+                </Typography>
+              )}
+
               {session.currentActivity && (
                 <Stack direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
                   <CircularProgress size={14} />
