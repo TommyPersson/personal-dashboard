@@ -121,8 +121,8 @@ Shows what Claude Code sessions on the workstation are doing. It is fed by Claud
 the backend folds the events into per-session state (`apps/claude/domain/ClaudeHookEvent.kt`).
 
 The hooks are packaged as the `personal-dashboard` plugin (`tools/claude-hooks`, listed by the repository's
-`.claude-plugin/marketplace.json`). Its "Dashboard backend URL" option (default `http://localhost:8080`) reaches the
-script as `CLAUDE_PLUGIN_OPTION_BACKEND_URL`. Install it with `/plugin marketplace add C:/work/personal-dashboard`
+`.claude-plugin/marketplace.json`). Its "Dashboard backend URLs" option (default `http://localhost:8080`; several
+URLs separated by commas are all posted to) reaches the script as `CLAUDE_PLUGIN_OPTION_BACKEND_URL`. Install it with `/plugin marketplace add C:/work/personal-dashboard`
 (or `TommyPersson/personal-dashboard` from GitHub), then `/plugin install personal-dashboard@personal-dashboard`, and
 change the URL in `/config`. Don't also register the hooks in a settings file, or every event is posted twice.
 

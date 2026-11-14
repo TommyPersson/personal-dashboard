@@ -8,8 +8,8 @@
   "userConfig": {
     "backend_url": {
       "type": "string",
-      "title": "Dashboard backend URL",
-      "description": "Base URL of the dashboard backend, e.g. http://dashboard.lan:8080",
+      "title": "Dashboard backend URLs",
+      "description": "Base URL of the dashboard backend, e.g. http://dashboard.lan:8080. Separate several with commas to post to all of them",
       "default": "http://localhost:8080"
     }
   }

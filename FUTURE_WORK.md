@@ -30,5 +30,11 @@ The first version is in (`apps/claude` on the backend, `apps/claude-code` on the
   apply the session in `ClaudeSessionUpdated` directly.
 * Sessions that end without a `SessionEnd` event (e.g. the desktop app keeps them open) stay until discarded; idle
   sessions could expire after a while.
+* Session names: cards are named after the project directory, which several sessions can share. Hook payloads have no
+  title, but they carry `transcript_path`, and the transcript JSONL has `{"type":"custom-title","customTitle":...}`
+  lines (the desktop app's session title, or a CLI `/rename`). `forward-event.mjs` could read the transcript's tail
+  for the latest one and send it as `session_title`, which the backend keeps when an event has none. Fall back to the
+  git branch (`gitBranch` on transcript lines, distinct per worktree), then the session's first prompt, then a short
+  session id. The transcript format is internal and may change, so the lookup must fail quietly.
 * Alternatives: OpenTelemetry export (`CLAUDE_CODE_ENABLE_TELEMETRY`) for usage/cost, or reading transcripts in
   `~/.claude/projects/*/*.jsonl` (only on the PC, so it would need WinCtrl or a small forwarder).
