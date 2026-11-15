@@ -56,8 +56,16 @@ class ClaudeHookEvent(private val json: JsonNode) {
     /** The turn ended because of an API error. */
     val isTurnFailure: Boolean get() = hookEventName == "StopFailure"
 
-    /** A prompt Claude Code submitted on its own, such as the notification that a background task has finished. */
-    val isSystemPrompt: Boolean get() = prompt?.trimStart()?.startsWith("<task-notification>") == true
+    /**
+     * A prompt Claude Code submitted on its own, such as the notification that a background task has finished, or the
+     * reminder that the session runs in a git worktree.
+     */
+    val isSystemPrompt: Boolean
+        get() = prompt?.trimStart()?.let { prompt -> SYSTEM_PROMPT_TAGS.any { prompt.startsWith(it) } } == true
+
+    private companion object {
+        val SYSTEM_PROMPT_TAGS = listOf("<task-notification>", "<system-reminder>")
+    }
 }
 
 /** Folds [event] into the session's state. */

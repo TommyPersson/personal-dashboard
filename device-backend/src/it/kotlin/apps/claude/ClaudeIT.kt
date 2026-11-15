@@ -163,6 +163,22 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
+    fun `a system reminder resumes the turn without replacing the prompt`() {
+        postEvent("UserPromptSubmit", "prompt" to "Fix the bug")
+        postEvent("Stop")
+
+        postEvent(
+            "UserPromptSubmit",
+            "prompt" to "<system-reminder>\nYou are operating in a git worktree.\n</system-reminder>",
+        )
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].prompt", equalTo("Fix the bug"))
+            body("sessions[0].status", equalTo("Working"))
+        }
+    }
+
+    @Test
     fun `a prompt's run time starts when it is submitted and ends when Claude stops`() {
         postEvent("UserPromptSubmit", "prompt" to "Do things")
 
