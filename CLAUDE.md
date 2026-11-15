@@ -113,7 +113,7 @@ Both the backend and frontend can be run locally, I have a basic configuration s
 
 # WinCtrl 
 
-The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl. Making changes to it is out-of-scope for now.
+The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl.
 
 # Claude Code app
 

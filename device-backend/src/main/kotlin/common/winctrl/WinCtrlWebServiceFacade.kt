@@ -94,6 +94,14 @@ class WinCtrlWebServiceFacade @Inject constructor(
             }
         }
 
+        override suspend fun focusWindow(processName: String): Boolean {
+            val response = winCtrlClient.post("/api/processes/actions/focus-window") {
+                setBody(processName)
+            }
+
+            return response.status == HttpStatusCode.OK
+        }
+
         override suspend fun startProcess(executable: String) {
             winCtrlClient.post("/api/processes/actions/start-process") {
                 setBody(executable)

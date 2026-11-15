@@ -19,6 +19,12 @@ interface WinCtrlFacade {
     interface Processes {
         suspend fun getActiveWindowInfo(): ActiveWindowInfoCommandData?
         suspend fun openUrl(url: String)
+
+        /**
+         * Brings the main window of a process (by name, e.g. `claude`) to the front. Returns `false` if it has no
+         * window, or WinCtrl is too old to support it.
+         */
+        suspend fun focusWindow(processName: String): Boolean
         suspend fun startProcess(executable: String)
     }
 

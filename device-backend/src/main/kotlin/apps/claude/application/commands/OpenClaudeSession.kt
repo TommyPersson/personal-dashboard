@@ -22,6 +22,9 @@ class OpenClaudeSessionCommandHandler @Inject constructor(
             ?: return false
 
         winCtrlFacade.processes.openUrl("claude://code/continue?session=$desktopSessionId")
+        // When the app is running behind other windows, Windows' foreground lock stops it from coming to the front
+        // by itself (its taskbar button just flashes), so WinCtrl has to do it.
+        winCtrlFacade.processes.focusWindow("claude")
         return true
     }
 }

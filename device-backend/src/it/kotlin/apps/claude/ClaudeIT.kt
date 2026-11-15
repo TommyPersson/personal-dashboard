@@ -358,6 +358,11 @@ class ClaudeIT : IntegrationTest() {
             WireMock.postRequestedFor(WireMock.urlEqualTo("/api/processes/actions/open-url"))
                 .withRequestBody(WireMock.equalTo("claude://code/continue?session=local_cfb3f127-b247-49a7-bec0-9526798df85a"))
         )
+        winCtrl.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/processes/actions/focus-window"))
+                .withRequestBody(WireMock.equalTo("claude"))
+        )
     }
 
     private fun postToolUse(toolName: String, toolInput: Map<String, Any>) =
