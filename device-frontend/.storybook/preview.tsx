@@ -1,23 +1,26 @@
 import { CssBaseline } from "@mui/material"
 import { ThemeProvider } from "@mui/material/styles"
 import { DefaultObjectStore, EntityStateContextProvider } from "@src/infrastructure/framework/entities"
+import { createQueryClient } from "@src/infrastructure/framework/query/queryClient.ts"
 import { fallbackHandlers, logApiMutations } from "@src/storybook/msw.ts"
 import { theme } from "@src/Theme.tsx"
 import type { Preview } from "@storybook/react-vite"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { setupWorker } from "msw/browser"
 import { mswLoader } from "msw-storybook-addon/csf3"
 import React from "react"
 
 import "@src/App.css"
 
-// A fresh entity store per story, so cached entity state never leaks between stories
-let currentStore: { storyId: string, store: DefaultObjectStore } | null = null
+// A fresh entity store and query client per story, so cached state never leaks between stories
+let currentStores: { storyId: string, store: DefaultObjectStore, queryClient: QueryClient } | null = null
 
-function getStoreForStory(storyId: string) {
-  if (currentStore?.storyId !== storyId) {
-    currentStore = { storyId, store: new DefaultObjectStore() }
+function getStoresForStory(storyId: string) {
+  if (currentStores?.storyId !== storyId) {
+    currentStores?.queryClient.clear()
+    currentStores = { storyId, store: new DefaultObjectStore(), queryClient: createQueryClient() }
   }
-  return currentStore.store
+  return currentStores
 }
 
 const preview: Preview = {
@@ -40,14 +43,19 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story, context) => (
-      <EntityStateContextProvider store={getStoreForStory(context.id)}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Story />
-        </ThemeProvider>
-      </EntityStateContextProvider>
-    ),
+    (Story, context) => {
+      const { store, queryClient } = getStoresForStory(context.id)
+      return (
+        <QueryClientProvider client={queryClient}>
+          <EntityStateContextProvider store={store}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Story />
+            </ThemeProvider>
+          </EntityStateContextProvider>
+        </QueryClientProvider>
+      )
+    },
   ],
 }
 

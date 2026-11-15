@@ -26,8 +26,9 @@ The first version is in (`apps/claude` on the backend, `apps/claude-code` on the
   config needs configs to be optional first, since a missing config file fails startup.
 * The desktop app's task list comes from `mcp__ccd_turn__update_plan`, an internal tool whose shape may change. The
   CLI's newer `TaskCreate`/`TaskUpdate` tools aren't folded into the plan yet, only `TodoWrite`.
-* The frontend refetches all sessions on every websocket message (several per second while Claude works); it could
-  apply the session in `ClaudeSessionUpdated` directly.
+* The frontend refetches all sessions on every websocket message (several per second while Claude works); now
+  that it uses TanStack Query, it could apply the session in `ClaudeSessionUpdated` with `queryClient.setQueryData` instead of
+  invalidating (keeping the backend's ordering of sessions).
 * Sessions that end without a `SessionEnd` event (e.g. the desktop app keeps them open) stay until discarded; idle
   sessions could expire after a while.
 * Session names: cards are named after the project directory, which several sessions can share. Hook payloads have no
@@ -102,3 +103,11 @@ WebSocket instead of the backend calling `core.winCtrl.url`.
 * WinCtrl changes are out of scope, so a first step is a small relay on the PC that holds the WebSocket and forwards
   each call to WinCtrl on localhost. Integration tests would play the host with a WebSocket client instead of WireMock.
 * Alternative without code changes: an overlay network (Tailscale/WireGuard) between server and PC.
+
+
+# TanStack Query migration
+
+The `claude-code` app uses TanStack Query; the other apps and the shell still use `useEntity`/`useAction`. Once they
+are migrated, `infrastructure/framework/entities` and the `EntityStateContextProvider` can be removed. Possible
+additions along the way: `@tanstack/eslint-plugin-query`, and showing mutation errors (e.g. a failed discard) in the
+widgets, which `useAction` never surfaced either.

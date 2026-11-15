@@ -20,6 +20,15 @@ The "desktop dashboard" is an application intended to run on a Raspberry Pi with
   * Core features, such as `notifications`, `auth`, `layout` live under `core` instead of the app folders.
 * Data, configuration and caches for both apps and the main applications is located in `DATA_DIR`, default: `~/.personal-dashboard`
 
+## Frontend data fetching
+
+The frontend is moving from its own `useEntity`/`useAction` hooks (`infrastructure/framework/entities`) to TanStack
+Query, one app at a time; `claude-code` is migrated. Like the old entities and actions, each query (`queryOptions`) and
+mutation (`mutationOptions`) is defined in its own file under the app's `queries/` and `mutations/`. Mutations
+invalidate the queries they affect in `onSettled`, and the state hook invalidates queries on websocket messages. The
+`QueryClient` comes from `createQueryClient()` (`infrastructure/framework/query`), provided in `main.tsx` and, fresh per story, in
+the Storybook preview (so also in tests).
+
 ## Frontend UI Concept
 
 ### Unlocked mode

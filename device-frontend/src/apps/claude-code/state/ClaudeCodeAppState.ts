@@ -1,15 +1,13 @@
-import { DiscardAllClaudeSessions } from "@src/apps/claude-code/actions/DiscardAllClaudeSessions.ts"
-import { DiscardClaudeSession } from "@src/apps/claude-code/actions/DiscardClaudeSession.ts"
-import { OpenClaudeSessionOnWorkstation } from "@src/apps/claude-code/actions/OpenClaudeSessionOnWorkstation.ts"
-import { ClaudeSessionsEntity } from "@src/apps/claude-code/entities/ClaudeSessionsEntity.ts"
 import { ClaudeSessionRemovedMessage, ClaudeSessionUpdatedMessage } from "@src/apps/claude-code/messages/ClaudeSessionMessages.ts"
 import { ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { DiscardAllClaudeSessionsMutation } from "@src/apps/claude-code/mutations/DiscardAllClaudeSessionsMutation.ts"
+import { DiscardClaudeSessionMutation } from "@src/apps/claude-code/mutations/DiscardClaudeSessionMutation.ts"
+import { OpenClaudeSessionOnWorkstationMutation } from "@src/apps/claude-code/mutations/OpenClaudeSessionOnWorkstationMutation.ts"
+import { ClaudeSessionsQuery, ClaudeSessionsQueryKey } from "@src/apps/claude-code/queries/ClaudeSessionsQuery.ts"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback } from "react"
 
 export type ClaudeCodeAppState = {
@@ -22,46 +20,46 @@ export type ClaudeCodeAppState = {
 }
 
 export function useClaudeCodeAppState(): ClaudeCodeAppState {
-  const entity = useEntity(ClaudeSessionsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
-  })
-
-  const { fetchAsync } = entity
-  const { execute: executeDiscard } = useAction(DiscardClaudeSession)
-
-  const discard = useCallback(async (session: ClaudeSession) => {
-    await executeDiscard({ sessionId: session.id })
-    fetchAsync()
-  }, [executeDiscard, fetchAsync])
-
-  const { execute: executeDiscardAll } = useAction(DiscardAllClaudeSessions)
-
-  const discardAll = useCallback(async () => {
-    await executeDiscardAll()
-    fetchAsync()
-  }, [executeDiscardAll, fetchAsync])
-
-  const { execute: executeOpenOnWorkstation } = useAction(OpenClaudeSessionOnWorkstation)
-
-  const openOnWorkstation = useCallback((session: ClaudeSession) => {
-    executeOpenOnWorkstation({ sessionId: session.id })
-  }, [executeOpenOnWorkstation])
+  const queryClient = useQueryClient()
 
   // Updates arrive over the websocket; the interval only catches up after the websocket has reconnected.
-  useMessageListener(ClaudeSessionUpdatedMessage, fetchAsync)
-  useMessageListener(ClaudeSessionRemovedMessage, fetchAsync)
-  useInterval(fetchAsync, 60_000)
+  const sessionsQuery = useQuery({
+    ...ClaudeSessionsQuery,
+    refetchInterval: 60_000,
+  })
 
-  const sessions: ClaudeSession[] = entity.value ?? EmptyArray
+  const invalidateSessions = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ClaudeSessionsQueryKey })
+  }, [queryClient])
+
+  useMessageListener(ClaudeSessionUpdatedMessage, invalidateSessions)
+  useMessageListener(ClaudeSessionRemovedMessage, invalidateSessions)
+
+  const { mutate: discardSession } = useMutation(DiscardClaudeSessionMutation)
+  const { mutate: discardAllSessions } = useMutation(DiscardAllClaudeSessionsMutation)
+  const { mutate: openSessionOnWorkstation } = useMutation(OpenClaudeSessionOnWorkstationMutation)
+
+  const discard = useCallback((session: ClaudeSession) => {
+    discardSession({ sessionId: session.id })
+  }, [discardSession])
+
+  const discardAll = useCallback(() => {
+    discardAllSessions()
+  }, [discardAllSessions])
+
+  const openOnWorkstation = useCallback((session: ClaudeSession) => {
+    openSessionOnWorkstation({ sessionId: session.id })
+  }, [openSessionOnWorkstation])
+
+  const sessions: ClaudeSession[] = sessionsQuery.data ?? EmptyArray
   const sessionsRequiringInput = sessions.filter(it => it.status === "WaitingForInput")
 
   return useDeepEqualMemo(() => ({
     sessions,
     sessionsRequiringInput,
-    error: entity.error,
+    error: sessionsQuery.error,
     discard,
     discardAll,
     openOnWorkstation,
-  }), [sessions, sessionsRequiringInput, entity.error, discard, discardAll, openOnWorkstation])
+  }), [sessions, sessionsRequiringInput, sessionsQuery.error, discard, discardAll, openOnWorkstation])
 }
