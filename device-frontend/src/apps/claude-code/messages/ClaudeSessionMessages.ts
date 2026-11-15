@@ -1,8 +1,8 @@
-import { ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
+import { ClaudeSessionDTO } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { MessageType } from "@src/infrastructure/framework/messages/MessageType.ts"
 
 export type ClaudeSessionUpdatedMessageData = {
-  session: ClaudeSession
+  session: ClaudeSessionDTO
 }
 
 export const ClaudeSessionUpdatedMessage: MessageType<ClaudeSessionUpdatedMessageData> = {

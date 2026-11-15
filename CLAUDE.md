@@ -25,9 +25,15 @@ The "desktop dashboard" is an application intended to run on a Raspberry Pi with
 The frontend is moving from its own `useEntity`/`useAction` hooks (`infrastructure/framework/entities`) to TanStack
 Query, one app at a time; `claude-code` is migrated. Like the old entities and actions, each query (`queryOptions`) and
 mutation (`mutationOptions`) is defined in its own file under the app's `queries/` and `mutations/`. Mutations
-invalidate the queries they affect in `onSettled`, and the state hook invalidates queries on websocket messages. The
-`QueryClient` comes from `createQueryClient()` (`infrastructure/framework/query`), provided in `main.tsx` and, fresh per story, in
-the Storybook preview (so also in tests).
+invalidate the queries they affect in `onSettled`, and the state hook invalidates queries on websocket messages.
+
+Query functions parse responses with Zod schemas, which live in the app's `models/` and define its types (`z.infer`).
+Timestamps and durations become Luxon `DateTime`/`Duration` there (`zx.dateTime()`/`zx.duration()`), so components
+never parse ISO strings. The dashboard's own schemas go on the `zx` object (`infrastructure/framework/schemas/zx.ts`),
+not on `z`. Story fixtures are written as DTOs and parsed with the same schemas.
+
+The `QueryClient` comes from `createQueryClient()` (`infrastructure/framework/query`), provided in `main.tsx` and, fresh
+per story, in the Storybook preview (so also in tests).
 
 ## Frontend UI Concept
 

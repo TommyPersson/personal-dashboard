@@ -29,7 +29,6 @@ import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.t
 import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import { useNow } from "@src/infrastructure/hooks/useNow"
-import { DateTime } from "luxon"
 import React, { useCallback, useState } from "react"
 
 import classes from "./ClaudeCodeAppWidget.module.scss"
@@ -193,8 +192,8 @@ const PromptDurationIndicator = (props: { session: ClaudeSession }) => {
 
   // The turn can resume without a new prompt (e.g. a background task finishing), so trust the status over the end time.
   const promptEndedAt = !isRunning ? session.promptEndedAt : null
-  const end = !promptEndedAt ? DateTime.fromMillis(now) : DateTime.fromISO(promptEndedAt)
-  const elapsed = end.diff(DateTime.fromISO(session.promptStartedAt))
+  const end = promptEndedAt ?? now
+  const elapsed = end.diff(session.promptStartedAt)
 
   return (
     <Stack direction={"row"} spacing={0.5} sx={{ alignItems: "center", color: "text.secondary" }}>

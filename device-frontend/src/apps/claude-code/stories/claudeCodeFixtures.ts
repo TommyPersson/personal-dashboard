@@ -1,4 +1,4 @@
-import { ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
+import { ClaudeSession, ClaudeSessionSchema } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { DateTime } from "luxon"
 import { fn } from "storybook/test"
@@ -8,7 +8,10 @@ function minutesAgo(minutes: number) {
   return DateTime.now().minus({ minutes }).toISO()
 }
 
-export const workingSession: ClaudeSession = {
+// Sessions are written as the backend sends them, and parsed like the real responses.
+
+
+export const workingSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-working",
   project: "personal-dashboard",
   cwd: "C:\\work\\personal-dashboard",
@@ -29,9 +32,9 @@ export const workingSession: ClaudeSession = {
   result: null,
   startedAt: "2026-11-14T17:02:00Z",
   updatedAt: "2026-11-14T18:41:00Z",
-}
+})
 
-export const waitingSession: ClaudeSession = {
+export const waitingSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-waiting",
   project: "winctrl",
   cwd: "C:\\work\\winctrl",
@@ -49,9 +52,9 @@ export const waitingSession: ClaudeSession = {
   result: null,
   startedAt: "2026-11-14T18:30:00Z",
   updatedAt: "2026-11-14T18:39:00Z",
-}
+})
 
-export const idleSession: ClaudeSession = {
+export const idleSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-idle",
   project: "dotfiles",
   cwd: "C:\\Users\\me\\dotfiles",
@@ -68,7 +71,7 @@ export const idleSession: ClaudeSession = {
     + "It now asks git every time it is drawn.",
   startedAt: "2026-11-14T15:10:00Z",
   updatedAt: "2026-11-14T15:14:00Z",
-}
+})
 
 export const claudeSessions = [workingSession, waitingSession, idleSession]
 

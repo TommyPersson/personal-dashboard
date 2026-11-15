@@ -1,25 +1,39 @@
-export type ClaudeSessionStatus = "Working" | "WaitingForInput" | "Idle"
+import { zx } from "@src/infrastructure/framework/schemas/zx.ts"
+import { z } from "zod"
 
-export type ClaudePlanItemStatus = "Pending" | "InProgress" | "Completed"
+export const ClaudeSessionStatusSchema = z.enum(["Working", "WaitingForInput", "Idle"])
 
-export type ClaudePlanItem = {
-  content: string
-  status: ClaudePlanItemStatus
-}
+export type ClaudeSessionStatus = z.infer<typeof ClaudeSessionStatusSchema>
 
-export type ClaudeSession = {
-  id: string
-  project: string | null
-  cwd: string | null
-  canOpenOnWorkstation: boolean
-  prompt: string | null
-  status: ClaudeSessionStatus
-  waitingFor: string | null
-  currentActivity: string | null
-  plan: ClaudePlanItem[]
-  promptStartedAt: string | null
-  promptEndedAt: string | null
-  result: string | null
-  startedAt: string
-  updatedAt: string
-}
+export const ClaudePlanItemStatusSchema = z.enum(["Pending", "InProgress", "Completed"])
+
+export type ClaudePlanItemStatus = z.infer<typeof ClaudePlanItemStatusSchema>
+
+export const ClaudePlanItemSchema = z.object({
+  content: z.string(),
+  status: ClaudePlanItemStatusSchema,
+})
+
+export type ClaudePlanItem = z.infer<typeof ClaudePlanItemSchema>
+
+export const ClaudeSessionSchema = z.object({
+  id: z.string(),
+  project: z.string().nullable(),
+  cwd: z.string().nullable(),
+  canOpenOnWorkstation: z.boolean(),
+  prompt: z.string().nullable(),
+  status: ClaudeSessionStatusSchema,
+  waitingFor: z.string().nullable(),
+  currentActivity: z.string().nullable(),
+  plan: z.array(ClaudePlanItemSchema),
+  promptStartedAt: zx.dateTime().nullable(),
+  promptEndedAt: zx.dateTime().nullable(),
+  result: z.string().nullable(),
+  startedAt: zx.dateTime(),
+  updatedAt: zx.dateTime(),
+})
+
+export type ClaudeSession = z.infer<typeof ClaudeSessionSchema>
+
+/** A session as the backend sends it, with ISO 8601 strings for its timestamps. */
+export type ClaudeSessionDTO = z.input<typeof ClaudeSessionSchema>
