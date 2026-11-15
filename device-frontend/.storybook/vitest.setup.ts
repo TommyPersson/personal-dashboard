@@ -7,7 +7,7 @@ import { afterEach } from "vitest"
 
 import preview from "./preview.tsx"
 
-// Stories render with the same decorators (theme, entity store) as in Storybook.
+// Stories render with the same decorators (theme, query client) as in Storybook.
 setProjectAnnotations(preview)
 
 // The device's time zone, so formatted times don't depend on the machine running the tests.

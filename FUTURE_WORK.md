@@ -107,10 +107,9 @@ WebSocket instead of the backend calling `core.winCtrl.url`.
 
 # TanStack Query migration
 
-All apps use TanStack Query and Zod. The shell (`src/shell`: device lock/unlock and the layout) still uses
-`useEntity`/`useAction`; once it is migrated, `infrastructure/framework/entities` and the `EntityStateContextProvider`
-can be removed. Possible additions along the way: `@tanstack/eslint-plugin-query`, and showing mutation errors (e.g. a
-failed discard) in the widgets, which `useAction` never surfaced either.
+Done: the apps and the shell use TanStack Query and Zod, and the old `useEntity`/`useAction` framework is gone.
+Possible additions: `@tanstack/eslint-plugin-query`, and showing mutation errors (e.g. a failed discard) in the
+widgets, which `useAction` never surfaced either.
 
 Found during the migration, left as they were:
 

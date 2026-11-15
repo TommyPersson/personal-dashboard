@@ -1,6 +1,5 @@
 import { CssBaseline } from "@mui/material"
 import { ThemeProvider } from "@mui/material/styles"
-import { DefaultObjectStore, EntityStateContextProvider } from "@src/infrastructure/framework/entities"
 import { createQueryClient } from "@src/infrastructure/framework/query/queryClient.ts"
 import { fallbackHandlers, logApiMutations } from "@src/storybook/msw.ts"
 import { theme } from "@src/Theme.tsx"
@@ -12,15 +11,15 @@ import React from "react"
 
 import "@src/App.css"
 
-// A fresh entity store and query client per story, so cached state never leaks between stories
-let currentStores: { storyId: string, store: DefaultObjectStore, queryClient: QueryClient } | null = null
+// A fresh query client per story, so cached query data never leaks between stories
+let current: { storyId: string, queryClient: QueryClient } | null = null
 
-function getStoresForStory(storyId: string) {
-  if (currentStores?.storyId !== storyId) {
-    currentStores?.queryClient.clear()
-    currentStores = { storyId, store: new DefaultObjectStore(), queryClient: createQueryClient() }
+function getQueryClientForStory(storyId: string) {
+  if (current?.storyId !== storyId) {
+    current?.queryClient.clear()
+    current = { storyId, queryClient: createQueryClient() }
   }
-  return currentStores
+  return current.queryClient
 }
 
 const preview: Preview = {
@@ -43,19 +42,14 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story, context) => {
-      const { store, queryClient } = getStoresForStory(context.id)
-      return (
-        <QueryClientProvider client={queryClient}>
-          <EntityStateContextProvider store={store}>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <Story />
-            </ThemeProvider>
-          </EntityStateContextProvider>
-        </QueryClientProvider>
-      )
-    },
+    (Story, context) => (
+      <QueryClientProvider client={getQueryClientForStory(context.id)}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Story />
+        </ThemeProvider>
+      </QueryClientProvider>
+    ),
   ],
 }
 

@@ -1,10 +1,8 @@
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { LockDeviceAction } from "@src/shell/actions"
-import { UnlockDeviceAction } from "@src/shell/actions/UnlockDeviceAction.ts"
-import { IsDeviceUnlockedEntity } from "@src/shell/entities"
-import React, { useCallback, useEffect, useState } from "react"
+import { LockDeviceMutation } from "@src/shell/mutations/LockDeviceMutation.ts"
+import { UnlockDeviceMutation } from "@src/shell/mutations/UnlockDeviceMutation.ts"
+import { IsDeviceUnlockedQuery } from "@src/shell/queries/IsDeviceUnlockedQuery.ts"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import React, { useCallback } from "react"
 
 export type AppContextValue = {
   isUnlocked: boolean
@@ -19,7 +17,7 @@ const DefaultAppContextValue: AppContextValue = {
   isUnlocked: false,
   isServerReachable: false,
   lock: () => {},
-  unlock: (pinCode: string) => {},
+  unlock: () => {},
   unlockInProgress: false,
   unlockError: null,
 }
@@ -27,34 +25,27 @@ const DefaultAppContextValue: AppContextValue = {
 export const AppContext = React.createContext<AppContextValue>(DefaultAppContextValue)
 
 export const AppContextProvider = (props: { children: any }) => {
-  const { fetch: refreshIsDeviceUnlocked, ...isDeviceUnlockedEntity }  = useEntity(IsDeviceUnlockedEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const isDeviceUnlockedQuery = useQuery({
+    ...IsDeviceUnlockedQuery,
+    refetchInterval: 2_000,
   })
 
-  const { execute: executeUnlock, ...unlockDeviceAction } = useAction(UnlockDeviceAction)
-  const { execute: executeLock, ...lockDeviceAction } = useAction(LockDeviceAction)
+  const { mutate: unlockMutate, isPending: unlockInProgress, error: unlockError } = useMutation(UnlockDeviceMutation)
+  const { mutate: lockMutate } = useMutation(LockDeviceMutation)
 
-  const lock = useCallback(async () => {
-    isDeviceUnlockedEntity.clear()
-    await executeLock()
-    await refreshIsDeviceUnlocked()
-  }, [executeLock, refreshIsDeviceUnlocked, isDeviceUnlockedEntity.clear])
+  const lock = useCallback(() => lockMutate(), [lockMutate])
+  const unlock = useCallback((pinCode: string) => unlockMutate({ pinCode }), [unlockMutate])
 
-  const unlock = useCallback(async (pinCode: string) => {
-    await executeUnlock({ pinCode })
-    await refreshIsDeviceUnlocked()
-  }, [executeUnlock, refreshIsDeviceUnlocked])
-
-  useInterval(refreshIsDeviceUnlocked, 2_000)
+  const isServerReachable = !isDeviceUnlockedQuery.error
 
   const contextValue = {
-    isServerReachable: !isDeviceUnlockedEntity.error,
-    isUnlocked: isDeviceUnlockedEntity.value ?? false,
+    isServerReachable,
+    // Locked while the server can't be reached, as it can't confirm the device is unlocked.
+    isUnlocked: isServerReachable && (isDeviceUnlockedQuery.data ?? false),
     lock,
     unlock,
-    unlockInProgress: unlockDeviceAction.isInProgress,
-    unlockError: unlockDeviceAction.error,
+    unlockInProgress,
+    unlockError,
   }
 
   return (
