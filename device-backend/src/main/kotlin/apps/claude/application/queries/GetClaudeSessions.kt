@@ -15,7 +15,8 @@ class GetClaudeSessionsQueryHandler @Inject constructor(
 
     override suspend fun handle(query: GetClaudeSessions): GetClaudeSessionsResponseDTO {
         return GetClaudeSessionsResponseDTO(
-            sessions = repository.getAll().map { it.toDTO() },
+            // Newest first, by start rather than last update, so the cards don't move around on the touch screen.
+            sessions = repository.getAll().sortedByDescending { it.state.startedAt }.map { it.toDTO() },
         )
     }
 }

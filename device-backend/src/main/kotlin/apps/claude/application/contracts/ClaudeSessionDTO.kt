@@ -2,6 +2,7 @@ package apps.claude.application.contracts
 
 import apps.claude.domain.ClaudePlanItem
 import apps.claude.domain.ClaudeSession
+import apps.claude.domain.ClaudeSessionStatus
 import apps.claude.domain.ClaudeWorktree
 import java.time.Instant
 
@@ -46,30 +47,32 @@ data class ClaudePlanItemDTO(
 fun ClaudeSession.toDTO() = with(state) {
     ClaudeSessionDTO(
         id = id,
-        project = (worktree?.repositoryDir ?: cwd)?.let(::folderName),
+        project = this@toDTO.project,
         cwd = cwd,
         worktree = worktree?.toDTO(),
         canOpenOnWorkstation = desktopSessionId != null,
-        prompt = prompt,
-        status = status.name,
-        waitingFor = waitingFor,
+        prompt = turn.prompt,
+        status = when (status) {
+            ClaudeSessionStatus.Working -> "Working"
+            is ClaudeSessionStatus.WaitingForInput -> "WaitingForInput"
+            ClaudeSessionStatus.Idle -> "Idle"
+        },
+        waitingFor = (status as? ClaudeSessionStatus.WaitingForInput)?.reason,
         currentActivity = this@toDTO.currentActivity,
-        plan = plan.map { it.toDTO() },
-        promptStartedAt = promptStartedAt,
-        promptEndedAt = promptEndedAt,
-        result = result,
+        plan = turn.plan.map { it.toDTO() },
+        promptStartedAt = turn.startedAt,
+        promptEndedAt = turn.endedAt,
+        result = turn.result,
         startedAt = startedAt,
         updatedAt = updatedAt,
     )
 }
 
 fun ClaudeWorktree.toDTO() = ClaudeWorktreeDTO(
-    name = folderName(path),
+    name = name,
     path = path,
     branch = branch,
 )
-
-private fun folderName(path: String) = path.trimEnd('/', '\\').substringAfterLast('/').substringAfterLast('\\')
 
 fun ClaudePlanItem.toDTO() = ClaudePlanItemDTO(
     content = content,

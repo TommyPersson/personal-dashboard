@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.node.MissingNode
  * `hook_event_name`; events the dashboard doesn't react to become [Other].
  * See https://code.claude.com/docs/en/hooks for the fields of each event.
  *
- * Jackson sets the raw fields every event has after the subclass is constructed; the public properties derived from
- * them are computed on first use, by which time deserialization is done.
+ * Jackson sets the fields that every event, or every [ToolUse] event, has after the subclass is constructed; the public
+ * properties derived from them are computed on first use, by which time deserialization is done.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
@@ -94,29 +94,32 @@ sealed class ClaudeHookEvent {
             get() = prompt?.trimStart()?.let { prompt -> SYSTEM_PROMPT_TAGS.any { prompt.startsWith(it) } } == true
     }
 
-    class PreToolUse(
-        @JsonProperty("tool_name") val toolName: String? = null,
-        @JsonProperty("tool_input") val toolInput: JsonNode = MissingNode.getInstance(),
-        @JsonProperty("tool_use_id") val toolUseId: String? = null,
-    ) : ClaudeHookEvent()
+    /** An event about a single tool call, which the events of its life cycle share [toolUseId] to tell apart. */
+    sealed class ToolUse : ClaudeHookEvent() {
+        @field:JsonProperty("tool_name")
+        var toolName: String? = null
+            private set
 
-    class PermissionRequest(
-        @JsonProperty("tool_name") val toolName: String? = null,
-        @JsonProperty("tool_input") val toolInput: JsonNode = MissingNode.getInstance(),
-        @JsonProperty("tool_use_id") val toolUseId: String? = null,
-    ) : ClaudeHookEvent()
+        @field:JsonProperty("tool_input")
+        var toolInput: JsonNode = MissingNode.getInstance()
+            private set
 
-    class PostToolUse(
-        @JsonProperty("tool_name") val toolName: String? = null,
-        @JsonProperty("tool_input") val toolInput: JsonNode = MissingNode.getInstance(),
-        @JsonProperty("tool_use_id") val toolUseId: String? = null,
-    ) : ClaudeHookEvent()
+        @field:JsonProperty("tool_use_id")
+        var toolUseId: String? = null
+            private set
+    }
 
-    class PostToolUseFailure(
-        @JsonProperty("tool_name") val toolName: String? = null,
-        @JsonProperty("tool_input") val toolInput: JsonNode = MissingNode.getInstance(),
-        @JsonProperty("tool_use_id") val toolUseId: String? = null,
-    ) : ClaudeHookEvent()
+    /** A tool call is about to run. */
+    class PreToolUse : ToolUse()
+
+    /** A tool call waits for the user to allow it. */
+    class PermissionRequest : ToolUse()
+
+    /** A tool call has finished. */
+    class PostToolUse : ToolUse()
+
+    /** A tool call has failed. */
+    class PostToolUseFailure : ToolUse()
 
     class Notification(
         val message: String? = null,

@@ -1,5 +1,8 @@
 package apps.claude.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.Instant
 
 /**
@@ -13,21 +16,10 @@ data class ClaudeSessionState(
     val desktopSessionId: String? = null,
     /** The linked git worktree the session works in; `null` for a main checkout, or when it isn't known yet. */
     val worktree: ClaudeWorktree? = null,
-    /** The latest prompt submitted in the session. */
-    val prompt: String? = null,
     val status: ClaudeSessionStatus = ClaudeSessionStatus.Idle,
-    /** What the session is waiting for while [status] is [ClaudeSessionStatus.WaitingForInput]. */
-    val waitingFor: String? = null,
     /** The tool calls that have started but not finished, oldest first. */
     val runningToolCalls: List<ClaudeToolCall> = emptyList(),
-    /** The task list of the current prompt. */
-    val plan: List<ClaudePlanItem> = emptyList(),
-    /** When the latest prompt was submitted. */
-    val promptStartedAt: Instant? = null,
-    /** When Claude finished its turn on the latest prompt; `null` while it is still on it. */
-    val promptEndedAt: Instant? = null,
-    /** A shortened, plain-text version of Claude's last message on the latest prompt, once its turn has ended. */
-    val result: String? = null,
+    val turn: ClaudeTurn = ClaudeTurn(),
     val startedAt: Instant,
     val updatedAt: Instant,
 )
@@ -39,7 +31,14 @@ data class ClaudeWorktree(
     val branch: String?,
     /** The main checkout's folder; `null` for a bare repository. */
     val repositoryDir: String?,
-)
+) {
+    /** The last part of the worktree's folder. */
+    @get:JsonIgnore
+    val name: String get() = folderName(path)
+}
+
+/** The last part of [path], which may use either kind of slash. */
+internal fun folderName(path: String) = path.trimEnd('/', '\\').substringAfterLast('/').substringAfterLast('\\')
 
 data class ClaudeToolCall(
     /** The hook payload's `tool_use_id`. */
@@ -47,18 +46,21 @@ data class ClaudeToolCall(
     val description: String,
 )
 
-/** The activity while Claude works on a prompt with no tool call running. */
-const val THINKING = "Thinking…"
-
-enum class ClaudeSessionStatus {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(ClaudeSessionStatus.Working::class, name = "Working"),
+    JsonSubTypes.Type(ClaudeSessionStatus.WaitingForInput::class, name = "WaitingForInput"),
+    JsonSubTypes.Type(ClaudeSessionStatus.Idle::class, name = "Idle"),
+)
+sealed interface ClaudeSessionStatus {
     /** Claude is working on a prompt. */
-    Working,
+    data object Working : ClaudeSessionStatus
 
-    /** Claude is blocked on the user: a permission prompt, a question or a plan to approve. */
-    WaitingForInput,
+    /** Claude is blocked on the user, for [reason]: a permission prompt, a question or a plan to approve. */
+    data class WaitingForInput(val reason: String) : ClaudeSessionStatus
 
     /** Claude has finished its turn. */
-    Idle,
+    data object Idle : ClaudeSessionStatus
 }
 
 data class ClaudePlanItem(

@@ -18,8 +18,7 @@ class OpenClaudeSessionCommandHandler @Inject constructor(
 ) : CommandHandler<OpenClaudeSession, Boolean> {
 
     override suspend fun handle(command: OpenClaudeSession): Boolean {
-        val desktopSessionId = repository.getAll().find { it.id == command.sessionId }?.desktopSessionId
-            ?: return false
+        val desktopSessionId = repository.get(command.sessionId)?.desktopSessionId ?: return false
 
         winCtrlFacade.processes.openUrl("claude://code/continue?session=$desktopSessionId")
         // When the app is running behind other windows, Windows' foreground lock stops it from coming to the front

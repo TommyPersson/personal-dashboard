@@ -25,12 +25,16 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
     val pendingEvents: List<ClaudeSessionEvent>
         field = mutableListOf<ClaudeSessionEvent>()
 
+    /** The last part of the session's folder, or of the main checkout's folder for a session in a worktree. */
+    val project: String?
+        get() = (state.worktree?.repositoryDir ?: state.cwd)?.let(::folderName)
+
     /**
      * What Claude is doing while it works: the latest tool call still running, else [THINKING]. Tool calls made
      * together run, and so finish, in parallel, so the activity falls back to the calls still running.
      */
     val currentActivity: String?
-        get() = if (state.status == ClaudeSessionStatus.Working) {
+        get() = if (state.status is ClaudeSessionStatus.Working) {
             state.runningToolCalls.lastOrNull()?.description ?: THINKING
         } else {
             null
@@ -66,9 +70,8 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
             // so the user's prompt, plan and run time are kept.
             state = state.copy(
                 status = ClaudeSessionStatus.Working,
-                waitingFor = null,
                 runningToolCalls = emptyList(),
-                promptEndedAt = null
+                turn = state.turn.copy(endedAt = null),
             )
 
             return
@@ -76,13 +79,8 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
 
         state = state.copy(
             status = ClaudeSessionStatus.Working,
-            waitingFor = null,
-            prompt = event.prompt,
             runningToolCalls = emptyList(),
-            plan = emptyList(),
-            promptStartedAt = now,
-            promptEndedAt = null,
-            result = null,
+            turn = ClaudeTurn.started(event.prompt, now),
         )
     }
 
@@ -90,18 +88,15 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
         val question = ClaudeTools.questionForUser(event.toolName, event.toolInput)
         state = when {
             question != null -> state.copy(
-                status = ClaudeSessionStatus.WaitingForInput,
-                waitingFor = question,
+                status = ClaudeSessionStatus.WaitingForInput(question),
             )
 
             ClaudeTools.isBookkeeping(event.toolName) -> state.copy(
                 status = ClaudeSessionStatus.Working,
-                waitingFor = null,
             )
 
             else -> state.copy(
                 status = ClaudeSessionStatus.Working,
-                waitingFor = null,
                 runningToolCalls = state.runningToolCalls + ClaudeToolCall(
                     event.toolUseId,
                     describeToolCall(event.toolName, event.toolInput)
@@ -113,9 +108,8 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
     private fun handlePostToolUse(event: ClaudeHookEvent.PostToolUse) {
         state = state.copy(
             status = ClaudeSessionStatus.Working,
-            waitingFor = null,
             runningToolCalls = state.runningToolCalls.finish(event.toolUseId),
-            plan = applyPlanUpdate(state.plan, event.toolName, event.toolInput),
+            turn = state.turn.withPlanUpdate(event.toolName, event.toolInput),
         )
     }
 
@@ -123,15 +117,13 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
     private fun handlePostToolUseFailure(event: ClaudeHookEvent.PostToolUseFailure) {
         state = state.copy(
             status = ClaudeSessionStatus.Working,
-            waitingFor = null,
             runningToolCalls = state.runningToolCalls.finish(event.toolUseId),
         )
     }
 
     private fun handlePermissionRequest(event: ClaudeHookEvent.PermissionRequest) {
         state = state.copy(
-            status = ClaudeSessionStatus.WaitingForInput,
-            waitingFor = "Permission: ${describeToolCall(event.toolName, event.toolInput)}",
+            status = ClaudeSessionStatus.WaitingForInput("Permission: ${describeToolCall(event.toolName, event.toolInput)}"),
         )
     }
 
@@ -139,44 +131,31 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
         // "idle_prompt" is sent a while after a turn has ended; the session is already idle then.
         if (event.notificationType != "idle_prompt") {
             state = state.copy(
-                status = ClaudeSessionStatus.WaitingForInput,
-                waitingFor = event.message ?: "Claude needs your attention",
+                status = ClaudeSessionStatus.WaitingForInput(event.message ?: "Claude needs your attention"),
             )
         }
     }
 
-    private fun handleStop(event: ClaudeHookEvent.Stop, now: Instant) {
-        // Only a turn seen in progress has finished: not a repeated `Stop` on an idle session, nor one from a session
-        // first seen through it (e.g. after a backend restart), which has no prompt or result to show.
-        val wasInProgress = state.status != ClaudeSessionStatus.Idle
-
-        state = state.copy(
-            status = ClaudeSessionStatus.Idle,
-            promptEndedAt = state.promptStartedAt?.let { now },
-            result = event.lastAssistantMessage?.let(::summarizeMessage) ?: state.result,
-            waitingFor = null,
-            runningToolCalls = emptyList(),
-        )
-
-        if (wasInProgress) {
-            pendingEvents += ClaudeSessionEvent.TurnEnded(failed = false)
-        }
-    }
+    private fun handleStop(event: ClaudeHookEvent.Stop, now: Instant) =
+        endTurn(event.lastAssistantMessage, failed = false, now)
 
     /** Like [handleStop], for a turn that ended because of an API error. */
-    private fun handleStopFailure(event: ClaudeHookEvent.StopFailure, now: Instant) {
-        val wasInProgress = state.status != ClaudeSessionStatus.Idle
+    private fun handleStopFailure(event: ClaudeHookEvent.StopFailure, now: Instant) =
+        endTurn(event.lastAssistantMessage, failed = true, now)
+
+    private fun endTurn(lastAssistantMessage: String?, failed: Boolean, now: Instant) {
+        // Only a turn seen in progress has finished: not a repeated `Stop` on an idle session, nor one from a session
+        // first seen through it (e.g. after a backend restart), which has no prompt or result to show.
+        val wasInProgress = state.status !is ClaudeSessionStatus.Idle
 
         state = state.copy(
             status = ClaudeSessionStatus.Idle,
-            promptEndedAt = state.promptStartedAt?.let { now },
-            result = event.lastAssistantMessage?.let(::summarizeMessage) ?: state.result,
-            waitingFor = null,
             runningToolCalls = emptyList(),
+            turn = state.turn.ended(now, lastAssistantMessage),
         )
 
         if (wasInProgress) {
-            pendingEvents += ClaudeSessionEvent.TurnEnded(failed = true)
+            pendingEvents += ClaudeSessionEvent.TurnEnded(failed)
         }
     }
 
@@ -193,13 +172,15 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
 
         state = state.copy(
             status = ClaudeSessionStatus.Idle,
-            promptEndedAt = state.promptEndedAt ?: state.promptStartedAt?.let { now },
-            waitingFor = null,
             runningToolCalls = emptyList(),
+            turn = state.turn.ended(now),
         )
     }
 
     companion object {
+        /** The activity while Claude works on a prompt with no tool call running. */
+        const val THINKING = "Thinking…"
+
         /**
          * The session that [event] is the first seen of, or `null` if it doesn't start one: a `SessionEnd`, as there
          * is nothing to show for a session whose process ends before it was seen.

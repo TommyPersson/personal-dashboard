@@ -29,6 +29,24 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
+    fun `sessions stored in a format the backend can't read are dropped`() {
+        dataFile("claude-sessions.json").apply { parentFile.mkdirs() }.writeText(
+            """{"sessions":[{"id":"$SESSION_ID","cwd":null,"status":"Working","startedAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}]}"""
+        )
+
+        When { get("/api/apps/claude/sessions") } Then {
+            statusCode(200)
+            body("sessions", empty<Any>())
+        }
+
+        // And the next event starts the session afresh.
+        postEvent("UserPromptSubmit", "prompt" to "Hello")
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].prompt", equalTo("Hello"))
+        }
+    }
+
+    @Test
     fun `the project is the session's project directory rather than the shell's working directory`() {
         postEvent(
             "PostToolUse",
@@ -198,6 +216,23 @@ class ClaudeIT : IntegrationTest() {
 
         When { get("/api/apps/claude/sessions") } Then {
             body("sessions[0].promptEndedAt", nullValue())
+        }
+    }
+
+    @Test
+    fun `a repeated stop doesn't move the end of the turn`() {
+        postEvent("UserPromptSubmit", "prompt" to "Do things")
+        postEvent("Stop")
+
+        val endedAt = When { get("/api/apps/claude/sessions") } Extract {
+            path<String>("sessions[0].promptEndedAt")
+        }
+
+        Thread.sleep(5)
+        postEvent("Stop")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].promptEndedAt", equalTo(endedAt))
         }
     }
 

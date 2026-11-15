@@ -19,6 +19,7 @@ import framework.guice.bindConfig
 import framework.guice.bindRequestHandler
 import framework.mediator.Mediator
 import utils.JSON
+import java.time.Clock
 
 class CoreGuiceModule : com.google.inject.Module {
     override fun configure(binder: Binder) {
@@ -29,6 +30,7 @@ class CoreGuiceModule : com.google.inject.Module {
         binder.bind(ConfigProvider::class.java)
         binder.bind(WinCtrlFacade::class.java).to(WinCtrlWebServiceFacade::class.java)
         binder.bind(ObjectMapper::class.java).toInstance(JSON.objectMapper)
+        binder.bind(Clock::class.java).toInstance(Clock.systemUTC())
 
         binder.bind(ProcessService::class.java).to(ProcessServiceImpl::class.java)
         binder.bind(NotificationRepository::class.java).to(NotificationRepositoryImpl::class.java)

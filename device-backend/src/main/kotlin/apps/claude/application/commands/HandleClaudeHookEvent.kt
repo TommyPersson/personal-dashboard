@@ -1,6 +1,5 @@
 package apps.claude.application.commands
 
-import apps.claude.application.contracts.ClaudeSessionDTO
 import apps.claude.application.contracts.messages.ClaudeSessionRemovedMessageDTO
 import apps.claude.application.contracts.messages.ClaudeSessionUpdatedMessageDTO
 import apps.claude.application.contracts.toDTO
@@ -26,9 +25,8 @@ class HandleClaudeHookEventCommandHandler @Inject constructor(
     private val messagePublisher: MessagePublisher,
     // A provider, as the mediator is itself built from all request handlers, this one included.
     private val mediator: Provider<Mediator>,
+    private val clock: Clock,
 ) : CommandHandler<HandleClaudeHookEvent, Unit> {
-
-    private val clock = Clock.systemUTC()
 
     override suspend fun handle(command: HandleClaudeHookEvent) {
         val event = command.event
@@ -44,23 +42,22 @@ class HandleClaudeHookEventCommandHandler @Inject constructor(
             return
         }
 
-        val dto = session.toDTO()
-        messagePublisher.publish(ClaudeSessionUpdatedMessageDTO(dto))
+        messagePublisher.publish(ClaudeSessionUpdatedMessageDTO(session.toDTO()))
 
         for (sessionEvent in session.pendingEvents) {
             when (sessionEvent) {
                 is ClaudeSessionEvent.TurnEnded ->
-                    mediator.get().send(PostNotification(turnEndedNotification(dto, sessionEvent, now)))
+                    mediator.get().send(PostNotification(turnEndedNotification(session, sessionEvent, now)))
             }
         }
     }
 
-    private fun turnEndedNotification(session: ClaudeSessionDTO, event: ClaudeSessionEvent.TurnEnded, now: Instant): NotificationDTO {
+    private fun turnEndedNotification(session: ClaudeSession, event: ClaudeSessionEvent.TurnEnded, now: Instant): NotificationDTO {
         val project = session.project ?: "Claude Code"
         return NotificationDTO(
             id = "claude-${session.id}-${now.toEpochMilli()}",
             title = if (event.failed) "Claude stopped with an error in $project" else "Claude finished in $project",
-            description = session.result ?: session.prompt ?: "",
+            description = session.state.turn.result ?: session.state.turn.prompt ?: "",
             thumbnail = null,
             timestamp = now,
             source = NOTIFICATION_SOURCE,

@@ -3,6 +3,8 @@ package apps.claude.domain
 interface ClaudeSessionRepository {
     suspend fun getAll(): List<ClaudeSession>
 
+    suspend fun get(id: String): ClaudeSession?
+
     /**
      * Atomically gives [fn] the session (`null` if there is none) and stores what it returns, which may be the same
      * session after it has handled events. Nothing is stored when it returns `null`, and an
