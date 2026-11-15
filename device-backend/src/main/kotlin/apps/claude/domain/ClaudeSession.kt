@@ -46,28 +46,27 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
             updatedAt = now
         )
 
-        when (event.name) {
-            HookEventName.UserPromptSubmit -> handlePromptSubmitted(event, now)
-            HookEventName.PreToolUse -> handleToolCallStarting(event, now)
-            HookEventName.PostToolUse -> handleToolCallFinished(event, now, succeeded = true)
-            HookEventName.PostToolUseFailure -> handleToolCallFinished(event, now, succeeded = false)
-            HookEventName.PermissionRequest -> handlePermissionRequest(event, now)
-            HookEventName.Notification -> handleNotification(event, now)
-            HookEventName.Stop -> handleTurnEnded(event, now, failed = false)
-            HookEventName.StopFailure -> handleTurnEnded(event, now, failed = true)
-            HookEventName.SessionEnd -> handleSessionEnded(event, now)
-            HookEventName.SessionStart, HookEventName.Other -> Unit
+        when (event) {
+            is ClaudeHookEvent.UserPromptSubmit -> handleUserPromptSubmit(event, now)
+            is ClaudeHookEvent.PreToolUse -> handlePreToolUse(event)
+            is ClaudeHookEvent.PostToolUse -> handlePostToolUse(event)
+            is ClaudeHookEvent.PostToolUseFailure -> handlePostToolUseFailure(event)
+            is ClaudeHookEvent.PermissionRequest -> handlePermissionRequest(event)
+            is ClaudeHookEvent.Notification -> handleNotification(event)
+            is ClaudeHookEvent.Stop -> handleStop(event, now)
+            is ClaudeHookEvent.StopFailure -> handleStopFailure(event, now)
+            is ClaudeHookEvent.SessionEnd -> handleSessionEnd(event, now)
+            is ClaudeHookEvent.SessionStart, is ClaudeHookEvent.Other -> Unit
         }
     }
 
-    private fun handlePromptSubmitted(event: ClaudeHookEvent, now: Instant) {
+    private fun handleUserPromptSubmit(event: ClaudeHookEvent.UserPromptSubmit, now: Instant) {
         if (event.isSystemPrompt) {
             // Claude Code itself submits these, e.g. when a background task finishes: Claude picks the turn up again,
             // so the user's prompt, plan and run time are kept.
             state = state.copy(
                 status = ClaudeSessionStatus.Working,
                 waitingFor = null,
-                updatedAt = now,
                 runningToolCalls = emptyList(),
                 promptEndedAt = null
             )
@@ -78,7 +77,6 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
         state = state.copy(
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            updatedAt = now,
             prompt = event.prompt,
             runningToolCalls = emptyList(),
             plan = emptyList(),
@@ -88,63 +86,66 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
         )
     }
 
-    private fun handleToolCallStarting(event: ClaudeHookEvent, now: Instant) {
+    private fun handlePreToolUse(event: ClaudeHookEvent.PreToolUse) {
         val question = ClaudeTools.questionForUser(event.toolName, event.toolInput)
         state = when {
             question != null -> state.copy(
                 status = ClaudeSessionStatus.WaitingForInput,
                 waitingFor = question,
-                updatedAt = now
             )
 
             ClaudeTools.isBookkeeping(event.toolName) -> state.copy(
                 status = ClaudeSessionStatus.Working,
                 waitingFor = null,
-                updatedAt = now
             )
 
             else -> state.copy(
                 status = ClaudeSessionStatus.Working,
                 waitingFor = null,
-                updatedAt = now,
                 runningToolCalls = state.runningToolCalls + ClaudeToolCall(
                     event.toolUseId,
-                    event.describeToolCall()
+                    describeToolCall(event.toolName, event.toolInput)
                 )
             )
         }
     }
 
-    private fun handleToolCallFinished(event: ClaudeHookEvent, now: Instant, succeeded: Boolean) {
+    private fun handlePostToolUse(event: ClaudeHookEvent.PostToolUse) {
         state = state.copy(
             status = ClaudeSessionStatus.Working,
             waitingFor = null,
-            updatedAt = now,
-            runningToolCalls = state.runningToolCalls.finish(event),
-            plan = if (succeeded) applyPlanUpdate(state.plan, event.toolName, event.toolInput) else state.plan,
+            runningToolCalls = state.runningToolCalls.finish(event.toolUseId),
+            plan = applyPlanUpdate(state.plan, event.toolName, event.toolInput),
         )
     }
 
-    private fun handlePermissionRequest(event: ClaudeHookEvent, now: Instant) {
+    /** A failed call doesn't change the plan. */
+    private fun handlePostToolUseFailure(event: ClaudeHookEvent.PostToolUseFailure) {
+        state = state.copy(
+            status = ClaudeSessionStatus.Working,
+            waitingFor = null,
+            runningToolCalls = state.runningToolCalls.finish(event.toolUseId),
+        )
+    }
+
+    private fun handlePermissionRequest(event: ClaudeHookEvent.PermissionRequest) {
         state = state.copy(
             status = ClaudeSessionStatus.WaitingForInput,
-            waitingFor = "Permission: ${event.describeToolCall()}",
-            updatedAt = now
+            waitingFor = "Permission: ${describeToolCall(event.toolName, event.toolInput)}",
         )
     }
 
-    private fun handleNotification(event: ClaudeHookEvent, now: Instant) {
+    private fun handleNotification(event: ClaudeHookEvent.Notification) {
         // "idle_prompt" is sent a while after a turn has ended; the session is already idle then.
         if (event.notificationType != "idle_prompt") {
             state = state.copy(
                 status = ClaudeSessionStatus.WaitingForInput,
                 waitingFor = event.message ?: "Claude needs your attention",
-                updatedAt = now
             )
         }
     }
 
-    private fun handleTurnEnded(event: ClaudeHookEvent, now: Instant, failed: Boolean) {
+    private fun handleStop(event: ClaudeHookEvent.Stop, now: Instant) {
         // Only a turn seen in progress has finished: not a repeated `Stop` on an idle session, nor one from a session
         // first seen through it (e.g. after a backend restart), which has no prompt or result to show.
         val wasInProgress = state.status != ClaudeSessionStatus.Idle
@@ -155,11 +156,27 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
             result = event.lastAssistantMessage?.let(::summarizeMessage) ?: state.result,
             waitingFor = null,
             runningToolCalls = emptyList(),
-            updatedAt = now
         )
 
         if (wasInProgress) {
-            pendingEvents += ClaudeSessionEvent.TurnEnded(failed)
+            pendingEvents += ClaudeSessionEvent.TurnEnded(failed = false)
+        }
+    }
+
+    /** Like [handleStop], for a turn that ended because of an API error. */
+    private fun handleStopFailure(event: ClaudeHookEvent.StopFailure, now: Instant) {
+        val wasInProgress = state.status != ClaudeSessionStatus.Idle
+
+        state = state.copy(
+            status = ClaudeSessionStatus.Idle,
+            promptEndedAt = state.promptStartedAt?.let { now },
+            result = event.lastAssistantMessage?.let(::summarizeMessage) ?: state.result,
+            waitingFor = null,
+            runningToolCalls = emptyList(),
+        )
+
+        if (wasInProgress) {
+            pendingEvents += ClaudeSessionEvent.TurnEnded(failed = true)
         }
     }
 
@@ -168,7 +185,7 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
      * the desktop app stops the processes of sessions it keeps (reason `other`), so only `/clear` and logging out end
      * one of those. Then nothing can still be running.
      */
-    private fun handleSessionEnded(event: ClaudeHookEvent, now: Instant) {
+    private fun handleSessionEnd(event: ClaudeHookEvent.SessionEnd, now: Instant) {
         if (desktopSessionId == null || event.reason == "clear" || event.reason == "logout") {
             isEnded = true
             return
@@ -179,7 +196,6 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
             promptEndedAt = state.promptEndedAt ?: state.promptStartedAt?.let { now },
             waitingFor = null,
             runningToolCalls = emptyList(),
-            updatedAt = now
         )
     }
 
@@ -189,7 +205,7 @@ class ClaudeSession internal constructor(state: ClaudeSessionState) {
          * is nothing to show for a session whose process ends before it was seen.
          */
         fun startedBy(id: String, event: ClaudeHookEvent, now: Instant): ClaudeSession? {
-            if (event.name == HookEventName.SessionEnd) {
+            if (event is ClaudeHookEvent.SessionEnd) {
                 return null
             }
             return ClaudeSession(ClaudeSessionState(id = id, cwd = event.cwd, startedAt = now, updatedAt = now))
@@ -203,8 +219,6 @@ sealed interface ClaudeSessionEvent {
     data class TurnEnded(val failed: Boolean) : ClaudeSessionEvent
 }
 
-/** Removes [event]'s call, or all of them for a payload without `tool_use_id`, which then can't be told apart. */
-private fun List<ClaudeToolCall>.finish(event: ClaudeHookEvent) =
-    if (event.toolUseId == null) emptyList() else filterNot { it.id == event.toolUseId }
-
-private fun ClaudeHookEvent.describeToolCall(): String = describeToolCall(toolName, toolInput)
+/** Removes the call [toolUseId], or all of them for a payload without one, which then can't be told apart. */
+private fun List<ClaudeToolCall>.finish(toolUseId: String?) =
+    if (toolUseId == null) emptyList() else filterNot { it.id == toolUseId }

@@ -6,7 +6,6 @@ import apps.claude.application.commands.HandleClaudeHookEvent
 import apps.claude.application.commands.OpenClaudeSession
 import apps.claude.application.queries.GetClaudeSessions
 import apps.claude.domain.ClaudeHookEvent
-import com.fasterxml.jackson.databind.JsonNode
 import common.contracts.OkResponseDTO
 import framework.AppModule
 import framework.mediator.Mediator
@@ -25,8 +24,7 @@ class ClaudeAppModule @Inject constructor(
         app.routing {
             // Posted by the Claude Code hook script on the workstation (tools/claude-hooks).
             post("/api/apps/claude/events") {
-                val event = call.receive<JsonNode>()
-                mediator.send(HandleClaudeHookEvent(ClaudeHookEvent(event)))
+                mediator.send(HandleClaudeHookEvent(call.receive<ClaudeHookEvent>()))
                 call.respond(OkResponseDTO())
             }
 
