@@ -153,7 +153,7 @@ The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl.
 
 Shows what Claude Code sessions on the workstation are doing. It is fed by Claude Code hooks on the PC that run
 `tools/claude-hooks/forward-event.mjs`, which POSTs each hook payload to `/api/apps/claude/events`;
-the backend folds the events into per-session state (`apps/claude/domain/ClaudeHookEvent.kt`).
+the backend folds the events into per-session state (`apps/claude/domain/ClaudeSession.kt`, an aggregate whose `handle` takes each event).
 Hook payloads say nothing about git worktrees, so the script adds `git_worktree` itself by asking git, but only on
 `SessionStart`, `UserPromptSubmit` and `Stop` to keep the other hooks cheap; the backend keeps it between those.
 Sessions run by the Claude desktop app carry its `local_…` ID (`CLAUDE_CODE_HOST_SESSION_ID`), so the dashboard can

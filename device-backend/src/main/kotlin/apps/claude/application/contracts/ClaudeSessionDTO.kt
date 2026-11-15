@@ -43,23 +43,25 @@ data class ClaudePlanItemDTO(
     val status: String,
 )
 
-fun ClaudeSession.toDTO() = ClaudeSessionDTO(
-    id = id,
-    project = (worktree?.repositoryDir ?: cwd)?.let(::folderName),
-    cwd = cwd,
-    worktree = worktree?.toDTO(),
-    canOpenOnWorkstation = desktopSessionId != null,
-    prompt = prompt,
-    status = status.name,
-    waitingFor = waitingFor,
-    currentActivity = currentActivity,
-    plan = plan.map { it.toDTO() },
-    promptStartedAt = promptStartedAt,
-    promptEndedAt = promptEndedAt,
-    result = result,
-    startedAt = startedAt,
-    updatedAt = updatedAt,
-)
+fun ClaudeSession.toDTO() = with(state) {
+    ClaudeSessionDTO(
+        id = id,
+        project = (worktree?.repositoryDir ?: cwd)?.let(::folderName),
+        cwd = cwd,
+        worktree = worktree?.toDTO(),
+        canOpenOnWorkstation = desktopSessionId != null,
+        prompt = prompt,
+        status = status.name,
+        waitingFor = waitingFor,
+        currentActivity = this@toDTO.currentActivity,
+        plan = plan.map { it.toDTO() },
+        promptStartedAt = promptStartedAt,
+        promptEndedAt = promptEndedAt,
+        result = result,
+        startedAt = startedAt,
+        updatedAt = updatedAt,
+    )
+}
 
 fun ClaudeWorktree.toDTO() = ClaudeWorktreeDTO(
     name = folderName(path),

@@ -3,8 +3,12 @@ package apps.claude.domain
 interface ClaudeSessionRepository {
     suspend fun getAll(): List<ClaudeSession>
 
-    /** Replaces the session with what [fn] returns (given `null` if there is none), atomically. */
-    suspend fun update(id: String, fn: (ClaudeSession?) -> ClaudeSession): ClaudeSession
+    /**
+     * Atomically gives [fn] the session (`null` if there is none) and stores what it returns, which may be the same
+     * session after it has handled events. Nothing is stored when it returns `null`, and an
+     * [ended][ClaudeSession.isEnded] session is removed.
+     */
+    suspend fun update(id: String, fn: (ClaudeSession?) -> ClaudeSession?): ClaudeSession?
 
     /** Returns whether there was a session to remove. */
     suspend fun remove(id: String): Boolean

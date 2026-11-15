@@ -1,6 +1,7 @@
 package apps.claude.infrastructure
 
 import apps.claude.domain.ClaudeSession
+import apps.claude.domain.ClaudeSessionState
 import apps.claude.domain.ClaudeSessionRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -24,14 +25,26 @@ class ClaudeSessionRepositoryImpl @Inject constructor(
 
     override suspend fun getAll(): List<ClaudeSession> = lock.withLock {
         // Newest first, by start rather than last update, so the cards don't move around on the touch screen.
-        loadStore().values.sortedByDescending { it.startedAt }
+        loadStore().values.sortedByDescending { it.startedAt }.map(::ClaudeSession)
     }
 
-    override suspend fun update(id: String, fn: (ClaudeSession?) -> ClaudeSession): ClaudeSession = lock.withLock {
+    override suspend fun update(id: String, fn: (ClaudeSession?) -> ClaudeSession?): ClaudeSession? = lock.withLock {
         val store = loadStore()
-        val session = fn(store[id])
-        store[id] = session
-        saveStore(store)
+        val existing = store[id]
+        val session = fn(existing?.let(::ClaudeSession))
+
+        val changed = when {
+            session == null -> false
+            session.isEnded -> store.remove(id) != null
+            session.state == existing -> false
+            else -> {
+                store[id] = session.state
+                true
+            }
+        }
+        if (changed) {
+            saveStore(store)
+        }
         session
     }
 
@@ -52,7 +65,7 @@ class ClaudeSessionRepositoryImpl @Inject constructor(
         ids
     }
 
-    private suspend fun loadStore(): MutableMap<String, ClaudeSession> = withContext(Dispatchers.IO) {
+    private suspend fun loadStore(): MutableMap<String, ClaudeSessionState> = withContext(Dispatchers.IO) {
         if (!dataFile.exists()) {
             return@withContext mutableMapOf()
         }
@@ -60,11 +73,11 @@ class ClaudeSessionRepositoryImpl @Inject constructor(
         objectMapper.readValue<DataWrapper>(dataFile).sessions.associateBy { it.id }.toMutableMap()
     }
 
-    private suspend fun saveStore(store: Map<String, ClaudeSession>) = withContext(Dispatchers.IO) {
+    private suspend fun saveStore(store: Map<String, ClaudeSessionState>) = withContext(Dispatchers.IO) {
         objectMapper.writeValue(dataFile, DataWrapper(store.values.toList()))
     }
 
     private data class DataWrapper(
-        val sessions: List<ClaudeSession>,
+        val sessions: List<ClaudeSessionState>,
     )
 }

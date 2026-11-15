@@ -69,5 +69,3 @@ private fun host(url: String) = runCatching { URI(url).host }.getOrNull() ?: url
 
 /** "browser_batch" or "update_plan" → "browser batch", "update plan". */
 private fun humanize(name: String) = name.replace('_', ' ').replace(Regex("([a-z])([A-Z])"), "$1 $2").lowercase()
-
-private fun JsonNode.text(field: String): String? = get(field)?.takeIf { it.isTextual }?.asText()

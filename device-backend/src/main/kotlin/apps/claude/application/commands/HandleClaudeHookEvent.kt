@@ -6,9 +6,8 @@ import apps.claude.application.contracts.messages.ClaudeSessionUpdatedMessageDTO
 import apps.claude.application.contracts.toDTO
 import apps.claude.domain.ClaudeHookEvent
 import apps.claude.domain.ClaudeSession
+import apps.claude.domain.ClaudeSessionEvent
 import apps.claude.domain.ClaudeSessionRepository
-import apps.claude.domain.ClaudeSessionStatus
-import apps.claude.domain.apply
 import common.services.MessagePublisher
 import core.notifications.application.commands.PostNotification
 import core.notifications.application.contracts.NotificationDTO
@@ -34,43 +33,33 @@ class HandleClaudeHookEventCommandHandler @Inject constructor(
     override suspend fun handle(command: HandleClaudeHookEvent) {
         val event = command.event
         val sessionId = event.sessionId ?: return
-
-        if (event.isSessionEnd) {
-            val existing = repository.getAll().find { it.id == sessionId }
-            if (event.endsConversation(event.desktopSessionId ?: existing?.desktopSessionId)) {
-                if (repository.remove(sessionId)) {
-                    messagePublisher.publish(ClaudeSessionRemovedMessageDTO(sessionId))
-                }
-                return
-            }
-            // Only the desktop app's process stopped; there is nothing to show for a session not seen before.
-            if (existing == null) {
-                return
-            }
-        }
-
         val now = clock.instant()
-        var previousStatus: ClaudeSessionStatus? = null
+
         val session = repository.update(sessionId) { existing ->
-            previousStatus = existing?.status
-            (existing ?: ClaudeSession.new(sessionId, event.cwd, now)).apply(event, now)
+            (existing ?: ClaudeSession.startedBy(sessionId, event, now))?.apply { handle(event, now) }
+        } ?: return
+
+        if (session.isEnded) {
+            messagePublisher.publish(ClaudeSessionRemovedMessageDTO(sessionId))
+            return
         }
 
         val dto = session.toDTO()
         messagePublisher.publish(ClaudeSessionUpdatedMessageDTO(dto))
 
-        // Only a turn seen in progress has finished: not a repeated `Stop` on an idle session, nor one from a
-        // session first seen through it (e.g. after a backend restart), which has no prompt or result to show.
-        if (event.isTurnEnd && previousStatus in setOf(ClaudeSessionStatus.Working, ClaudeSessionStatus.WaitingForInput)) {
-            mediator.get().send(PostNotification(turnEndedNotification(dto, event, now)))
+        for (sessionEvent in session.pendingEvents) {
+            when (sessionEvent) {
+                is ClaudeSessionEvent.TurnEnded ->
+                    mediator.get().send(PostNotification(turnEndedNotification(dto, sessionEvent, now)))
+            }
         }
     }
 
-    private fun turnEndedNotification(session: ClaudeSessionDTO, event: ClaudeHookEvent, now: Instant): NotificationDTO {
+    private fun turnEndedNotification(session: ClaudeSessionDTO, event: ClaudeSessionEvent.TurnEnded, now: Instant): NotificationDTO {
         val project = session.project ?: "Claude Code"
         return NotificationDTO(
             id = "claude-${session.id}-${now.toEpochMilli()}",
-            title = if (event.isTurnFailure) "Claude stopped with an error in $project" else "Claude finished in $project",
+            title = if (event.failed) "Claude stopped with an error in $project" else "Claude finished in $project",
             description = session.result ?: session.prompt ?: "",
             thumbnail = null,
             timestamp = now,
