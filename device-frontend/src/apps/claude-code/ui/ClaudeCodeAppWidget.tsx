@@ -25,8 +25,11 @@ import {
 import { ClaudePlanItem, ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
+import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import { useNow } from "@src/infrastructure/hooks/useNow"
+import { DateTime } from "luxon"
 import React, { useCallback, useState } from "react"
 
 import classes from "./ClaudeCodeAppWidget.module.scss"
@@ -92,7 +95,7 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onO
             {session.project ?? "Unknown project"}
           </Typography>
           <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right" }}>
-            {formatTime(session.updatedAt)}
+            <DateTimeText value={session.updatedAt} format={"time"} />
           </Typography>
           <IconButton
             onClick={handleDiscardClicked}
@@ -190,13 +193,13 @@ const PromptDurationIndicator = (props: { session: ClaudeSession }) => {
 
   // The turn can resume without a new prompt (e.g. a background task finishing), so trust the status over the end time.
   const promptEndedAt = !isRunning ? session.promptEndedAt : null
-  const end = !promptEndedAt ? now : new Date(promptEndedAt).getTime()
-  const elapsedMs = end - new Date(session.promptStartedAt).getTime()
+  const end = !promptEndedAt ? DateTime.fromMillis(now) : DateTime.fromISO(promptEndedAt)
+  const elapsed = end.diff(DateTime.fromISO(session.promptStartedAt))
 
   return (
     <Stack direction={"row"} spacing={0.5} sx={{ alignItems: "center", color: "text.secondary" }}>
       <TimerOutlined fontSize={"small"} />
-      <Typography variant={"caption"} className={classes.RunTime}>{formatDuration(elapsedMs)}</Typography>
+      <Typography variant={"caption"} className={classes.RunTime}><DurationText value={elapsed} /></Typography>
     </Stack>
   )
 }
@@ -224,23 +227,4 @@ function getPlanItemIcon(item: ClaudePlanItem) {
     case "Pending":
       return <RadioButtonUncheckedOutlined color={"disabled"} fontSize={"small"} />
   }
-}
-
-function formatTime(timestamp: string) {
-  return new Date(timestamp).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })
-}
-
-function formatDuration(ms: number) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor(totalSeconds / 60) % 60
-  const seconds = totalSeconds % 60
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds.toString().padStart(2, "0")}s`
-  }
-  return `${seconds}s`
 }

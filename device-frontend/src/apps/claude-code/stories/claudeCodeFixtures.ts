@@ -1,10 +1,11 @@
 import { ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
+import { DateTime } from "luxon"
 import { fn } from "storybook/test"
 
 /** Relative to now, so the run time of sessions that are still working looks realistic. */
 function minutesAgo(minutes: number) {
-  return new Date(Date.now() - minutes * 60_000).toISOString()
+  return DateTime.now().minus({ minutes }).toISO()
 }
 
 export const workingSession: ClaudeSession = {

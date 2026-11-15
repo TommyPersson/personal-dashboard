@@ -1,13 +1,15 @@
 import { TimerOutlined } from "@mui/icons-material"
 import { PomodoroDurationSeconds, PomodoroTimerAppState } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
 import { AppBarIcon } from "@src/common/components/AppBarIcon/AppBarIcon.tsx"
+import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { useScrollIntoView } from "@src/infrastructure/utils/hooks.ts"
 import React from "react"
 
 export const PomodoroTimerAppBarIcon = React.memo((props: { state: PomodoroTimerAppState }) => {
   const { state } = props
 
-  const badgeContent = state.remainingSeconds !== PomodoroDurationSeconds ? state.remainingTimeText : null
+  const badgeContent = state.remainingSeconds !== PomodoroDurationSeconds ? <DurationText value={state.remainingTime} format={"clock"} />
+    : null
 
   const handleClick = useScrollIntoView("pomodoroTimerAppWidget")
 

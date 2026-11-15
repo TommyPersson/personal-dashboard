@@ -2,6 +2,7 @@ import { Pause, PlayArrow, Replay, TimerOutlined } from "@mui/icons-material"
 import { Button, Card, CardContent, CircularProgress, Dialog, DialogContent, Stack, Typography } from "@mui/material"
 import { PomodoroTimerAppState } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import React, { useCallback, useEffect, useState } from "react"
 
 import classes from "./PomodoroTimerAppWidget.module.scss"
@@ -54,7 +55,7 @@ const TextualProgressTimer = (props: { state: PomodoroTimerAppState }) => {
       component={"h2"}
       sx={{ fontWeight: "bold", textAlign: "center" }}
     >
-      {state.remainingTimeText}
+      <DurationText value={state.remainingTime} format={"clock"} />
       <Typography variant={"body1"}>remaining</Typography>
     </Typography>
   )
@@ -130,7 +131,7 @@ const AlmostFinishedDialog = (props: { state: PomodoroTimerAppState }) => {
         />
         <Typography
           variant={"h1"}
-          children={state.remainingTimeText}
+          children={<DurationText value={state.remainingTime} format={"clock"} />}
           className={classes.RemainingTimeText}
         />
         <Button

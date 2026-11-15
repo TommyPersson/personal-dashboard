@@ -16,6 +16,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Overridden by -DskipTests, like surefire -->
+        <skipTests>false</skipTests>
     </properties>
 
     <dependencies>
@@ -47,6 +49,18 @@
                         <configuration>
                             <executable>npm</executable>
                             <commandlineArgs>run build</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <commandlineArgs>test</commandlineArgs>
+                            <skip>${skipTests}</skip>
                         </configuration>
                     </execution>
                 </executions>

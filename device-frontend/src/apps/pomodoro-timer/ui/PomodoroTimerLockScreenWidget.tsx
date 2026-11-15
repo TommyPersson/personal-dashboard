@@ -1,6 +1,7 @@
 import { PauseOutlined, PlayArrowOutlined, Replay } from "@mui/icons-material"
 import { Fade, IconButton, Stack, Typography } from "@mui/material"
 import { PomodoroTimerAppState } from "@src/apps/pomodoro-timer/state/PomodoroTimerAppState.ts"
+import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { LockScreenWidgetPortal } from "@src/common/components/LockScreenWidgetPortal/LockScreenIconPortal.tsx"
 import React from "react"
 
@@ -36,7 +37,7 @@ const PomodoroTimerView = (props: { state: PomodoroTimerAppState }) => {
               component={"h2"}
               sx={{ fontWeight: "bold" }}
             >
-              {state.remainingTimeText}
+              <DurationText value={state.remainingTime} format={"clock"} />
             </Typography>
           </Stack>
         </Stack>

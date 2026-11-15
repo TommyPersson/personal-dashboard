@@ -1,12 +1,13 @@
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useSecondTimer } from "@src/shell/infrastructure/Timer.ts"
+import { Duration } from "luxon"
 import { useCallback, useEffect, useState } from "react"
 
 
 export type PomodoroTimerAppState = {
   isRunning: boolean
   remainingSeconds: number
-  remainingTimeText: string
+  remainingTime: Duration
   percentRemaining: number
   startOrResume: () => void
   pause: () => void
@@ -54,17 +55,10 @@ export function usePomodoroTimerAppState(): PomodoroTimerAppState {
   return useDeepEqualMemo(() => ({
     isRunning: isRunning,
     remainingSeconds: remainingSeconds,
-    remainingTimeText: formatTime(remainingSeconds),
+    remainingTime: Duration.fromObject({ seconds: remainingSeconds }),
     percentRemaining: (remainingSeconds / PomodoroDurationSeconds) * 100,
     startOrResume: startOrResume,
     pause: pause,
     reset: reset,
   }), [isRunning, remainingSeconds, startOrResume, pause, reset])
-}
-
-function formatTime(seconds: number) {
-  const minutesPart = Math.floor((seconds / 60)).toString(10).padStart(2, "0")
-  const secondsPart = Math.floor((seconds % 60)).toString(10).padStart(2, "0")
-
-  return `${minutesPart}:${secondsPart}`
 }

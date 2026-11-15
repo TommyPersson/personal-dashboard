@@ -50,7 +50,11 @@ with unit tests, which go in `src/test/kotlin` as usual and are run by surefire.
 
 * Run only the backend tests: `./mvnw -pl device-backend -am verify` at the repository root (skips the frontend build).
 
-The frontend has no automated tests yet.
+The frontend has Vitest component tests (`*.test.tsx` next to the component, jsdom, Testing Library), run with
+`npm test` under `device-frontend`, and by Maven in the `test` phase (skipped with `-DskipTests`). Tests render story variants from
+`composeStories` with `renderStory` (`src/testing`), so a test case usually starts as a story. Setup lives in
+`.storybook/vitest.setup.ts`: it applies the Storybook decorators and fixes Luxon's zone to `Europe/Stockholm`.
+Story loaders (MSW) don't run in tests.
 
 # Deployment Architecture
 
@@ -71,7 +75,8 @@ On Windows, run `mvnw.cmd` from PowerShell: `./mvnw` from Git Bash fails to down
 
 A full build is made using `./mvnw clean install` at the repository root.
 
-The Maven build expects Node and NPM to be available on the system PATH.
+The Maven build expects Node and NPM to be available on the system PATH. It runs `npm ci`, which fails on Windows
+(`EPERM` on `esbuild.exe`) while a Vite dev server or Storybook is running from `device-frontend`.
 
 ## Docker
 
@@ -103,7 +108,8 @@ Both the backend and frontend can be run locally, I have a basic configuration s
 
 * `npm run storybook` under `device-frontend`, at `localhost:6006`. It needs no backend: `/api` is never proxied.
 * Stories live in a `stories/` folder next to each app (`src/apps/<app>/stories`), together with fixtures for the
-  app's state and API payloads. `src/shell/stories` renders the whole app (pin code `1234`).
+  app's state and API payloads. `src/shell/stories` renders the whole app (pin code `1234`). Stories for common
+  components sit next to the component instead (`src/common/components/<Component>/<Component>.stories.tsx`).
 * Widgets take their state as props, so most stories pass a fixture state. Components that load their own data are
   served by MSW handlers given in the `msw` story parameter, grouped by name (`msw: { handlers: { weather: [...] } }`)
   so a story can override one group. Unmocked `/api` requests are answered by fallbacks in `src/storybook/msw.ts`.
