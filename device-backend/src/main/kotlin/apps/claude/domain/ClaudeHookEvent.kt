@@ -39,6 +39,17 @@ class ClaudeHookEvent(private val json: JsonNode) {
 
     val isSessionEnd: Boolean get() = hookEventName == "SessionEnd"
 
+    /** Why the session ended, sent with `SessionEnd`: e.g. `clear`, `logout`, `prompt_input_exit` or `other`. */
+    val reason: String? get() = json.text("reason")
+
+    /**
+     * The `SessionEnd` means the conversation is gone, not just its Claude Code process: always for CLI sessions, but
+     * the desktop app stops the processes of sessions it keeps (reason `other`), so only `/clear` and logging out end
+     * one of those.
+     */
+    fun endsConversation(desktopSessionId: String?): Boolean =
+        desktopSessionId == null || reason == "clear" || reason == "logout"
+
     /** Claude has finished its turn, successfully or not. */
     val isTurnEnd: Boolean get() = hookEventName == "Stop" || isTurnFailure
 
@@ -120,6 +131,15 @@ fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
         "Notification" -> if (event.notificationType == "idle_prompt") session else session.copy(
             status = ClaudeSessionStatus.WaitingForInput,
             waitingFor = event.message ?: "Claude needs your attention",
+        )
+
+        // The process of a session that lives on (see `endsConversation`): nothing can still be running.
+        "SessionEnd" -> session.copy(
+            status = ClaudeSessionStatus.Idle,
+            waitingFor = null,
+            currentActivity = null,
+            runningToolCalls = emptyList(),
+            promptEndedAt = promptEndedAt ?: promptStartedAt?.let { now },
         )
 
         "Stop", "StopFailure" -> session.copy(

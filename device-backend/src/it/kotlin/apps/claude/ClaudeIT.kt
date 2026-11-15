@@ -320,6 +320,38 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
+    fun `desktop app sessions are kept, idle, when only their process ends`() {
+        val desktop = "host_session_id" to "local_cfb3f127-b247-49a7-bec0-9526798df85a"
+        postEvent("UserPromptSubmit", desktop, "prompt" to "Fix the bug", sessionId = "stopped")
+        postEvent("PreToolUse", "tool_name" to "Bash", "tool_input" to mapOf("command" to "ls"), sessionId = "stopped")
+        // The desktop app stops the process of a session it keeps, e.g. one in another project; hook events of the
+        // stopped process may also lack the desktop app's ID.
+        postEvent("SessionEnd", "reason" to "other", sessionId = "stopped")
+
+        postEvent("SessionStart", desktop, sessionId = "cleared")
+        postEvent("SessionEnd", desktop, "reason" to "clear", sessionId = "cleared")
+
+        // Never seen before: nothing to show.
+        postEvent("SessionEnd", desktop, "reason" to "other", sessionId = "unknown")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions.id", contains("stopped"))
+            body("sessions[0].status", equalTo("Idle"))
+            body("sessions[0].currentActivity", nullValue())
+            body("sessions[0].prompt", equalTo("Fix the bug"))
+            body("sessions[0].promptEndedAt", notNullValue())
+        }
+
+        // Resumed in the desktop app: the same session goes on.
+        postEvent("UserPromptSubmit", desktop, "prompt" to "Go on", sessionId = "stopped")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions.id", contains("stopped"))
+            body("sessions[0].status", equalTo("Working"))
+        }
+    }
+
+    @Test
     fun `all sessions can be discarded at once`() {
         postEvent("SessionStart", sessionId = "first")
         postEvent("SessionStart", sessionId = "second")

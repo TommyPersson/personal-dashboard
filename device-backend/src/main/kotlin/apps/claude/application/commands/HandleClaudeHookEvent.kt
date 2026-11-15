@@ -36,10 +36,17 @@ class HandleClaudeHookEventCommandHandler @Inject constructor(
         val sessionId = event.sessionId ?: return
 
         if (event.isSessionEnd) {
-            if (repository.remove(sessionId)) {
-                messagePublisher.publish(ClaudeSessionRemovedMessageDTO(sessionId))
+            val existing = repository.getAll().find { it.id == sessionId }
+            if (event.endsConversation(event.desktopSessionId ?: existing?.desktopSessionId)) {
+                if (repository.remove(sessionId)) {
+                    messagePublisher.publish(ClaudeSessionRemovedMessageDTO(sessionId))
+                }
+                return
             }
-            return
+            // Only the desktop app's process stopped; there is nothing to show for a session not seen before.
+            if (existing == null) {
+                return
+            }
         }
 
         val now = clock.instant()
