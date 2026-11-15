@@ -9,7 +9,7 @@ export const ClaudeCodeLockScreenIcon = React.memo((props: {
 }) => {
   const { state } = props
 
-  if (state.waitingSessions.length <= 0) {
+  if (state.sessionsRequiringInput.length <= 0) {
     return null
   }
 
@@ -19,7 +19,7 @@ export const ClaudeCodeLockScreenIcon = React.memo((props: {
       order={960}
       icon={<SmartToyOutlined />}
       badgeProps={{
-        badgeContent: state.waitingSessions.length,
+        badgeContent: state.sessionsRequiringInput.length,
         color: "warning",
       }}
     />

@@ -76,7 +76,7 @@ export function claudeCodeState(overrides: Partial<ClaudeCodeAppState> = {}): Cl
 
   return {
     sessions,
-    waitingSessions: sessions.filter(it => it.status === "WaitingForInput"),
+    sessionsRequiringInput: sessions.filter(it => it.status === "WaitingForInput"),
     error: null,
     discard: fn(),
     discardAll: fn(),

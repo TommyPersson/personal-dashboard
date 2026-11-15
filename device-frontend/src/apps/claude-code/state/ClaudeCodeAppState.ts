@@ -14,12 +14,10 @@ import { useCallback } from "react"
 
 export type ClaudeCodeAppState = {
   sessions: ClaudeSession[]
-  /** Sessions that are blocked on the user. */
-  waitingSessions: ClaudeSession[]
+  sessionsRequiringInput: ClaudeSession[]
   error: Error | null
   discard: (session: ClaudeSession) => void
   discardAll: () => void
-  /** Opens the session in the Claude desktop app on the workstation. */
   openOnWorkstation: (session: ClaudeSession) => void
 }
 
@@ -56,14 +54,14 @@ export function useClaudeCodeAppState(): ClaudeCodeAppState {
   useInterval(fetchAsync, 60_000)
 
   const sessions: ClaudeSession[] = entity.value ?? EmptyArray
-  const waitingSessions = sessions.filter(it => it.status === "WaitingForInput")
+  const sessionsRequiringInput = sessions.filter(it => it.status === "WaitingForInput")
 
   return useDeepEqualMemo(() => ({
     sessions,
-    waitingSessions,
+    sessionsRequiringInput,
     error: entity.error,
     discard,
     discardAll,
     openOnWorkstation,
-  }), [sessions, waitingSessions, entity.error, discard, discardAll, openOnWorkstation])
+  }), [sessions, sessionsRequiringInput, entity.error, discard, discardAll, openOnWorkstation])
 }

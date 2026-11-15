@@ -11,7 +11,6 @@ export type ClaudeSession = {
   id: string
   project: string | null
   cwd: string | null
-  /** Whether the session can be opened in the Claude desktop app on the workstation. */
   canOpenOnWorkstation: boolean
   prompt: string | null
   status: ClaudeSessionStatus
@@ -20,7 +19,6 @@ export type ClaudeSession = {
   plan: ClaudePlanItem[]
   promptStartedAt: string | null
   promptEndedAt: string | null
-  /** A shortened, plain-text version of Claude's last message on the latest prompt. */
   result: string | null
   startedAt: string
   updatedAt: string

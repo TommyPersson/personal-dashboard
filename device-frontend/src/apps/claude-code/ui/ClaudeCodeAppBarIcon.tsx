@@ -17,7 +17,7 @@ export const ClaudeCodeAppBarIcon = React.memo((props: {
       order={960}
       icon={<SmartToyOutlined />}
       badgeProps={{
-        badgeContent: state.waitingSessions.length,
+        badgeContent: state.sessionsRequiringInput.length,
         color: "warning",
       }}
       onClick={handleClick}
