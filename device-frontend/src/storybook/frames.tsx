@@ -24,12 +24,6 @@ const MountAfterFrame = (props: { children: React.ReactNode }) => {
 const mockAppContext: AppContextValue = {
   isUnlocked: false,
   isServerReachable: true,
-  lock: () => {
-  },
-  unlock: () => {
-  },
-  unlockInProgress: false,
-  unlockError: null,
 }
 
 /** Renders the story inside the real lock screen layout (widget columns 1 & 2, icon bar, pin pad). */

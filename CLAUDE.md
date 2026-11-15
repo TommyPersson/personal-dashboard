@@ -22,9 +22,9 @@ The "desktop dashboard" is an application intended to run on a Raspberry Pi with
 
 ## Frontend data fetching
 
-The frontend loads data with TanStack Query. Each query (`queryOptions`) and mutation (`mutationOptions`) is defined
-in its own file under the app's (or the shell's) `queries/` and `mutations/` (or as part of a command, see below).
-Mutations invalidate the queries they affect in `onSettled`, and state hooks invalidate queries on websocket messages.
+The frontend loads data with TanStack Query. Each query (`queryOptions`) is defined in its own file under the app's (or
+the shell's) `queries/`; mutations are part of commands (see below). Mutations invalidate the queries they affect in
+`onSettled`, and state hooks invalidate queries on websocket messages.
 
 Query functions parse responses with Zod schemas, which live in the app's `models/` and define its types (`z.infer`).
 Timestamps and durations become Luxon `DateTime`/`Duration` there (`zx.dateTime()`/`zx.duration()`), so components
@@ -32,11 +32,12 @@ never parse ISO strings. The dashboard's own schemas go on the `zx` object (`inf
 not on `z`. Story fixtures are written as DTOs and parsed with the same schemas.
 
 User actions are commands (`infrastructure/framework/commands`): a `Command`, defined with `defineCommand` in its own
-file under the app's `commands/`, holds its mutation (`mutationOptions`, defined in place) together with its label,
-icon, tooltip and error title. Anything needing the mutation goes through the command (`Command.mutationOptions`).
-Bind it with `CommandButton` (`common/components`), which shows its pending state and errors, or with `useCommand` for
-anything else, rather than passing bare `mutate` functions around. Command icons are component references, so command
-files stay `.ts`. Migrated so far: `claude-code`; other apps still have `mutations/`.
+file under the app's (or the shell's) `commands/`, holds its mutation (`mutationOptions`, defined in place) together
+with its label, icon, tooltip and error title. Anything needing the mutation goes through the command
+(`Command.mutationOptions`). Widgets bind commands themselves, so app states only carry data: use `CommandButton`
+(`common/components`), which shows the pending state and errors, or `useCommand` with `CommandErrorAlert`/
+`CommandErrorPopover` for controls that aren't plain buttons. Command icons are component references, so command files
+stay `.ts`.
 
 The `QueryClient` comes from `createQueryClient()` (`infrastructure/framework/query`), provided in `main.tsx` and, fresh
 per story, in the Storybook preview (so also in tests).

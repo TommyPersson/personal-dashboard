@@ -1,7 +1,11 @@
 import { Circle, CircleOutlined, LockOpenOutlined } from "@mui/icons-material"
 import { Button, Fade, IconButton, Stack } from "@mui/material"
+import { CommandErrorAlert } from "@src/common/components/CommandError/CommandError.tsx"
+import type { CommandState } from "@src/infrastructure/framework/commands/useCommand.ts"
+import { useCommand } from "@src/infrastructure/framework/commands/useCommand.ts"
 import { useDebounced } from "@src/infrastructure/hooks/useDebounced.ts"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { UnlockDeviceCommand } from "@src/shell/commands/UnlockDeviceCommand.ts"
 import { AppContext } from "@src/shell/state/ShellState.tsx"
 import React, { useCallback, useContext, useEffect, useState } from "react"
 
@@ -51,6 +55,7 @@ export const UnlockKeyPad = (props: {
           {state.keyPadInput[2] != undefined ? <Circle fontSize={"large"} /> : <CircleOutlined fontSize={"large"} />}
           {state.keyPadInput[3] != undefined ? <Circle fontSize={"large"} /> : <CircleOutlined fontSize={"large"} />}
         </Stack>
+        <CommandErrorAlert state={state.unlockCommand} variant={"filled"} />
         <div className={classes.ButtonPanel}>
           <DigitButton digit={"1"} onClick={state.handleKeyPadDigitClick} disabled={state.unlockInProgress} />
           <DigitButton digit={"2"} onClick={state.handleKeyPadDigitClick} disabled={state.unlockInProgress} />
@@ -94,7 +99,7 @@ type UnlockWidgetState = {
   keyPadInput: string
   isKeyPadVisible: boolean
   unlockInProgress: boolean
-  unlock: (input: string) => void
+  unlockCommand: CommandState<{ pinCode: string }, void>
   handleKeyPadDigitClick: (digit: string) => void
   clearKeyPadInput: () => void
   showKeyPad: () => void
@@ -102,7 +107,8 @@ type UnlockWidgetState = {
 
 function useUnlockWidgetState(): UnlockWidgetState {
   const appContext = useContext(AppContext)
-  const unlock = appContext.unlock
+  const unlockCommand = useCommand(UnlockDeviceCommand)
+  const { execute: executeUnlock, reset: resetUnlock } = unlockCommand
 
   const [input, setInput] = useState<string>("")
   const [visible, setVisible] = useState(false)
@@ -117,9 +123,11 @@ function useUnlockWidgetState(): UnlockWidgetState {
   }, 10_000, [setVisible, clearInput])
 
   const handleDigitClick = useCallback((digit: string) => {
+    // A new attempt replaces the error of the last one
+    resetUnlock()
     setInput(s => (s + digit).substring(0, 4))
     delayedHide()
-  }, [setInput, delayedHide])
+  }, [resetUnlock, setInput, delayedHide])
 
   const showKeyPad = useCallback(() => {
     setVisible(true)
@@ -128,9 +136,9 @@ function useUnlockWidgetState(): UnlockWidgetState {
   useEffect(() => {
     if (input.length >= 4) {
       clearInput()
-      unlock(input)
+      executeUnlock({ pinCode: input })
     }
-  }, [input, clearInput, unlock])
+  }, [input, clearInput, executeUnlock])
 
   useEffect(() => {
     delayedHide();
@@ -140,13 +148,19 @@ function useUnlockWidgetState(): UnlockWidgetState {
     setVisible(false)
   }, [appContext.isUnlocked])
 
+  useEffect(() => {
+    if (!visible) {
+      resetUnlock()
+    }
+  }, [visible, resetUnlock])
+
   return useDeepEqualMemo(() => ({
     keyPadInput: input,
     isKeyPadVisible: visible,
-    unlockInProgress: appContext.unlockInProgress,
-    unlock: appContext.unlock,
+    unlockInProgress: unlockCommand.isPending,
+    unlockCommand,
     handleKeyPadDigitClick: handleDigitClick,
     clearKeyPadInput: clearInput,
     showKeyPad: showKeyPad,
-  }), [input, visible, appContext, handleDigitClick, clearInput])
+  }), [input, visible, unlockCommand, handleDigitClick, clearInput, showKeyPad])
 }

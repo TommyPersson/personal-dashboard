@@ -1,19 +1,18 @@
-import { Lock } from "@mui/icons-material"
-import { Box, Divider, IconButton, Stack } from "@mui/material"
+import { Box, Divider, Stack } from "@mui/material"
 import { allAppWidgetProviders } from "@src/apps/AllAppWidgetProviders.ts"
 import { ClockAppBarWidget } from "@src/apps/clock/ui/ClockAppBarWidget.tsx"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
+import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
+import { LockDeviceCommand } from "@src/shell/commands/LockDeviceCommand.ts"
 import { LayoutQuery } from "@src/shell/queries/LayoutQuery.ts"
-import { AppContext } from "@src/shell/state/ShellState.tsx"
 import { useQuery } from "@tanstack/react-query"
-import React, { useContext } from "react"
+import React from "react"
 
 import "../../infrastructure/Timer"
 
 import classes from "./ShellScreen.module.scss"
 
 export const ShellScreen = () => {
-  const appContext = useContext(AppContext)
   const layout = useQuery(LayoutQuery)
 
   return (
@@ -32,9 +31,7 @@ export const ShellScreen = () => {
         </Stack>
       </div>
       <div className={classes.AppBarSlot}>
-        <IconButton size={"large"} onClick={appContext.lock}>
-          <Lock />
-        </IconButton>
+        <CommandButton command={LockDeviceCommand} iconOnly size={"large"} />
         <Box sx={{ flex: 1 }} />
         <div id={"appBarPortal"} className={classes.AppBarPortal}></div>
         <Divider />

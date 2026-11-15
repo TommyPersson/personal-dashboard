@@ -1,7 +1,6 @@
 import { HotKeysData } from "@src/apps/hot-keys/models/HotKeysData.ts"
 import { HotKeysAppState } from "@src/apps/hot-keys/state/HotKeysAppState.ts"
 import { http, HttpResponse } from "msw"
-import { fn } from "storybook/test"
 
 export const hotKeysData: HotKeysData = {
   sections: [
@@ -27,7 +26,6 @@ export const hotKeysData: HotKeysData = {
 export function hotKeysState(overrides: Partial<HotKeysAppState> = {}): HotKeysAppState {
   return {
     sections: hotKeysData.sections,
-    execute: fn(),
     ...overrides,
   }
 }

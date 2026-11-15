@@ -27,14 +27,6 @@ export function mediaControlState(overrides: Partial<MediaControlAppState> = {})
   const status = overrides.status === undefined ? playingStatus : overrides.status
   return {
     status,
-    controls: {
-      canSkipNext: !!status,
-      skipNext: fn(),
-      canSkipPrevious: !!status,
-      skipPrevious: fn(),
-      canPauseOrPlay: !!status,
-      pauseOrPlay: fn(),
-    },
     isMinimized: false,
     toggleMinimized: fn(),
     ...overrides,

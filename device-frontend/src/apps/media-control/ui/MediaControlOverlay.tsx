@@ -1,13 +1,7 @@
-import {
-  PauseOutlined,
-  PlayArrowOutlined,
-  SkipNextOutlined,
-  SkipPreviousOutlined,
-  SouthEastOutlined,
-} from "@mui/icons-material"
+import { SouthEastOutlined } from "@mui/icons-material"
 import { Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
-import { PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
 import { MediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
+import { PlaybackControlButtons } from "@src/apps/media-control/ui/PlaybackControlButtons.tsx"
 import { getThumbnailImageSrc } from "@src/apps/media-control/utils/mediaControlUtils.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
 import React from "react"
@@ -62,33 +56,12 @@ const MediaInfoView = (props: { state: MediaControlAppState }) => {
 }
 
 const PlaybackControlsView = (props: { state: MediaControlAppState }) => {
-  const { status, controls, toggleMinimized } = props.state
-
-  const pauseOrPlayIcon = status?.state === PlaybackState.Playing
-    ? <PauseOutlined />
-    : <PlayArrowOutlined />
+  const { status, toggleMinimized } = props.state
 
   return (
     <CardContent component={Stack} className={classes.PlaybackControlsView}>
       <Stack direction={"row"} spacing={2}>
-        <IconButton
-          size={"large"}
-          children={<SkipPreviousOutlined />}
-          disabled={!controls.canSkipPrevious}
-          onClick={controls.skipPrevious}
-        />
-        <IconButton
-          size={"large"}
-          children={pauseOrPlayIcon}
-          disabled={!controls.canPauseOrPlay}
-          onClick={controls.pauseOrPlay}
-        />
-        <IconButton
-          size={"large"}
-          children={<SkipNextOutlined />}
-          disabled={!controls.canSkipNext}
-          onClick={controls.skipNext}
-        />
+        <PlaybackControlButtons status={status} />
       </Stack>
       <IconButton
         size={"large"}

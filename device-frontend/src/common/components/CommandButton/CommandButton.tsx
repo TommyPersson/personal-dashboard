@@ -1,4 +1,5 @@
-import { Alert, AlertTitle, Button, ButtonProps, IconButton, IconButtonProps, Popover, Tooltip } from "@mui/material"
+import { Button, ButtonProps, IconButton, IconButtonProps, SvgIconProps, Tooltip } from "@mui/material"
+import { CommandErrorPopover } from "@src/common/components/CommandError/CommandError.tsx"
 import type { Command } from "@src/infrastructure/framework/commands/Command.ts"
 import { useCommand } from "@src/infrastructure/framework/commands/useCommand.ts"
 import React, { useRef } from "react"
@@ -12,6 +13,8 @@ type CommonProps<TArgs, TResult> = {
   command: Command<TArgs, TResult>
   onSuccess?: (result: TResult, args: TArgs) => void
   disabled?: boolean
+  /** Replaces the command's icon, e.g. for toggles whose icon follows a state. */
+  icon?: React.ComponentType<SvgIconProps>
 } & CommandArgsProps<TArgs>
 
 export type CommandButtonProps<TArgs, TResult> = CommonProps<TArgs, TResult> & (
@@ -26,7 +29,7 @@ export type CommandButtonProps<TArgs, TResult> = CommonProps<TArgs, TResult> & (
  * Clicks don't propagate, so the button can sit inside clickable areas such as card headers.
  */
 export const CommandButton = <TArgs, TResult>(props: CommandButtonProps<TArgs, TResult>) => {
-  const { command, args, onSuccess, disabled, iconOnly, ...buttonProps } = props
+  const { command, args, onSuccess, disabled, iconOnly, icon, ...buttonProps } = props
 
   const state = useCommand(command, { onSuccess })
   const anchorRef = useRef<HTMLButtonElement | null>(null)
@@ -38,7 +41,7 @@ export const CommandButton = <TArgs, TResult>(props: CommandButtonProps<TArgs, T
     state.execute(args as TArgs)
   }
 
-  const Icon = command.icon
+  const Icon = icon ?? command.icon
 
   const button = iconOnly ? (
     <Tooltip title={command.tooltip ?? command.label}>
@@ -77,19 +80,7 @@ export const CommandButton = <TArgs, TResult>(props: CommandButtonProps<TArgs, T
   return (
     <>
       {button}
-      <Popover
-        open={!!state.error}
-        anchorEl={anchorRef.current}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        onClose={state.reset}
-        // The popover is portalled, but its clicks would still bubble to the button's React ancestors
-        onClick={e => e.stopPropagation()}
-      >
-        <Alert severity={"error"} onClose={state.reset}>
-          <AlertTitle>{command.errorTitle ?? `${command.label} failed`}</AlertTitle>
-          {state.error?.message}
-        </Alert>
-      </Popover>
+      <CommandErrorPopover state={state} anchorEl={anchorRef.current} />
     </>
   )
 }

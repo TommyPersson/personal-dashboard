@@ -1,7 +1,6 @@
 import { RunDeckData } from "@src/apps/run-deck/models/RunDeckData.ts"
 import { RunDeckAppState } from "@src/apps/run-deck/state/RunDeckAppState.ts"
 import { http, HttpResponse } from "msw"
-import { fn } from "storybook/test"
 
 export const runDeckData: RunDeckData = {
   sections: [
@@ -40,7 +39,6 @@ export const runDeckData: RunDeckData = {
 export function runDeckState(overrides: Partial<RunDeckAppState> = {}): RunDeckAppState {
   return {
     sections: runDeckData.sections,
-    runItemAction: fn(),
     ...overrides,
   }
 }

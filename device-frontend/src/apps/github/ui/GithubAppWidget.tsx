@@ -1,4 +1,4 @@
-import { MarkEmailReadOutlined, RefreshOutlined } from "@mui/icons-material"
+import { RefreshOutlined } from "@mui/icons-material"
 import { Button, Chip, List, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography } from "@mui/material"
 import {
   CommentDiscussionIcon,
@@ -8,9 +8,11 @@ import {
   RepoIcon,
   TagIcon,
 } from "@primer/octicons-react"
+import { MarkAllGithubNotificationsAsReadCommand } from "@src/apps/github/commands/MarkAllGithubNotificationsAsReadCommand.ts"
 import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
 import { GithubAppState } from "@src/apps/github/state/GithubAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
 import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import React from "react"
@@ -35,10 +37,9 @@ export const GithubAppWidget = React.memo((props: { state: GithubAppState }) => 
                 onClick={state.refresh}
                 children={"Refresh"}
               />
-              <Button
-                startIcon={<MarkEmailReadOutlined />}
-                onClick={state.markAllAsRead}
-                children={"Mark all as read"}
+              <CommandButton
+                command={MarkAllGithubNotificationsAsReadCommand}
+                disabled={state.notifications.length === 0}
               />
             </>
           )}

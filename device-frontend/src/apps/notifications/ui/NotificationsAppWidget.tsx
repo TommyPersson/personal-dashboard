@@ -1,19 +1,20 @@
 import {
-  Close,
   ExpandLessOutlined,
   ExpandMoreOutlined,
   NotificationsOffOutlined,
   NotificationsOutlined,
 } from "@mui/icons-material"
-import { Badge, Box, Button, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
+import { Badge, Box, Card, CardContent, IconButton, Slide, Stack, Typography } from "@mui/material"
+import { ClearNotificationsCommand, DismissNotificationCommand } from "@src/apps/notifications/commands/DismissNotificationCommand.ts"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
 import { NotificationsAppState, useNotificationsAppState } from "@src/apps/notifications/state/NotificationsAppState.ts"
 import { NotificationsToastOverlay } from "@src/apps/notifications/ui/NotificationsToastOverlay.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
 import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import classNames from "classnames"
-import React, { CSSProperties, useCallback } from "react"
+import React, { CSSProperties } from "react"
 import { TransitionGroup } from "react-transition-group"
 
 import classes from "./NotificationsAppWidget.module.scss"
@@ -24,10 +25,9 @@ export const NotificationsAppWidget = () => {
 
   const rightContent = (
     <Stack direction={"row"} sx={{ gap: 2 }}>
-      <Button
-        onClick={state.clear}
-        children={"Clear"}
-        startIcon={<Close />}
+      <CommandButton
+        command={ClearNotificationsCommand}
+        args={{ notificationIds: state.notifications.map(it => it.id) }}
         style={{ justifySelf: "right" }}
       />
     </Stack>
@@ -66,10 +66,7 @@ export const NotificationsAppWidget = () => {
             icon={widgetIcon}
             rightContent={rightContent}
           />
-          <NotificationsList
-            notifications={state.notifications}
-            onDismiss={state.dismiss}
-          />
+          <NotificationsList notifications={state.notifications} />
           <Box sx={{ flex: 1 }} />
           <Stack direction={"row"}>
             <ToggleMinimizedButton state={state} />
@@ -104,9 +101,8 @@ const ToggleMinimizedButton = (props: { state: NotificationsAppState }) => {
 
 const NotificationsList = (props: {
   notifications: Notification[]
-  onDismiss: (notification: Notification) => void
 }) => {
-  const { notifications, onDismiss } = props
+  const { notifications } = props
 
   if (notifications.length === 0) {
     return (
@@ -122,7 +118,7 @@ const NotificationsList = (props: {
     <TransitionGroup component={Stack} spacing={2}>
       {notifications.map(it => (
         <Slide direction={"right"} key={it.id}>
-          <NotificationCard notification={it} onDismiss={onDismiss} />
+          <NotificationCard notification={it} />
         </Slide>
       ))}
     </TransitionGroup>
@@ -131,22 +127,18 @@ const NotificationsList = (props: {
 
 const NotificationCard = React.forwardRef((props: {
   notification: Notification
-  onDismiss: (notification: Notification) => void,
   style?: CSSProperties
 }, ref) => {
-  const { notification, style, onDismiss } = props
-
-  const handleDismissClicked = useCallback(() => {
-    onDismiss(notification)
-  }, [notification, onDismiss])
+  const { notification, style } = props
 
   return (
     <Card ref={ref as any} style={style}>
       <CardContent style={{ position: "relative" }}>
-        <IconButton
+        <CommandButton
+          command={DismissNotificationCommand}
+          args={{ notificationId: notification.id }}
+          iconOnly
           style={{ position: "absolute", right: 4, top: 4 }}
-          onClick={handleDismissClicked}
-          children={<Close />}
         />
         <Typography
           children={notification.source}

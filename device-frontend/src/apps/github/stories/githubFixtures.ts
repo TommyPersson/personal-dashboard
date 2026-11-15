@@ -56,7 +56,6 @@ export const githubNotifications = githubNotificationDTOs.map(it => GithubNotifi
 export function githubState(overrides: Partial<GithubAppState> = {}): GithubAppState {
   return {
     notifications: githubNotifications,
-    markAllAsRead: fn(),
     refresh: fn(),
     ...overrides,
   }

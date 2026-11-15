@@ -1,7 +1,6 @@
-import { PauseOutlined, PlayArrowOutlined, SkipNextOutlined, SkipPreviousOutlined } from "@mui/icons-material"
-import { Fade, IconButton, Stack, Typography } from "@mui/material"
-import { PlaybackState } from "@src/apps/media-control/models/MediaControlStatus.ts"
+import { Fade, Stack, Typography } from "@mui/material"
 import { MediaControlAppState } from "@src/apps/media-control/state/MediaControlAppState.ts"
+import { PlaybackControlButtons } from "@src/apps/media-control/ui/PlaybackControlButtons.tsx"
 import { getThumbnailImageSrc } from "@src/apps/media-control/utils/mediaControlUtils.ts"
 import { LockScreenWidgetPortal } from "@src/common/components/LockScreenWidgetPortal/LockScreenIconPortal.tsx"
 import React from "react"
@@ -56,32 +55,9 @@ const MediaInfoView = (props: { state: MediaControlAppState }) => {
 
 
 const PlaybackControlsView = (props: { state: MediaControlAppState }) => {
-  const { status, controls, toggleMinimized } = props.state
-
-  const pauseOrPlayIcon = status?.state === PlaybackState.Playing
-    ? <PauseOutlined />
-    : <PlayArrowOutlined />
-
   return (
     <Stack direction={"row"} className={classes.PlaybackControlsView}>
-      <IconButton
-        size={"large"}
-        children={<SkipPreviousOutlined />}
-        disabled={!controls.canSkipPrevious}
-        onClick={controls.skipPrevious}
-      />
-      <IconButton
-        size={"large"}
-        children={pauseOrPlayIcon}
-        disabled={!controls.canPauseOrPlay}
-        onClick={controls.pauseOrPlay}
-      />
-      <IconButton
-        size={"large"}
-        children={<SkipNextOutlined />}
-        disabled={!controls.canSkipNext}
-        onClick={controls.skipNext}
-      />
+      <PlaybackControlButtons status={props.state.status} />
     </Stack>
   )
 }

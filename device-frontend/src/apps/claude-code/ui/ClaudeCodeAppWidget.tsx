@@ -1,7 +1,6 @@
 import { CheckCircleOutlined, RadioButtonUncheckedOutlined, SmartToyOutlined, TimerOutlined } from "@mui/icons-material"
 import {
   Alert,
-  AlertTitle,
   Card,
   CardActionArea,
   CardContent,
@@ -22,6 +21,7 @@ import { ClaudePlanItem, ClaudeSession } from "@src/apps/claude-code/models/Clau
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
+import { CommandErrorAlert } from "@src/common/components/CommandError/CommandError.tsx"
 import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
@@ -105,17 +105,7 @@ const SessionCard = (props: { session: ClaudeSession }) => {
           aria-label={OpenClaudeSessionOnWorkstationCommand.label}
         >
           <Stack spacing={1}>
-            {openOnWorkstation.error && (
-              <Alert
-                severity={"error"}
-                onClose={openOnWorkstation.reset}
-                // Inside the action area, so closing it would otherwise open the session again
-                onClick={e => e.stopPropagation()}
-              >
-                <AlertTitle>{OpenClaudeSessionOnWorkstationCommand.errorTitle}</AlertTitle>
-                {openOnWorkstation.error.message}
-              </Alert>
-            )}
+            <CommandErrorAlert state={openOnWorkstation} />
 
             {session.prompt && (
               <Typography variant={"body2"} className={classes.Prompt}>{session.prompt}</Typography>
