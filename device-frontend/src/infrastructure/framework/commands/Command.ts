@@ -3,8 +3,14 @@ import type { UseMutationOptions } from "@tanstack/react-query"
 import type React from "react"
 
 /**
- * A user-facing action: a mutation together with how it is presented (label, icon, tooltip, ...), so every button that
- * runs it looks and behaves the same. Bind it to the UI with `CommandButton`, or with `useCommand` for anything else.
+ * A user-facing action: a mutation together with how it is presented (label, icon, tooltip, ...), so every control
+ * that runs it looks and behaves the same. Bind it to the UI with `CommandButton`, or with `useCommand` for anything
+ * else.
+ *
+ * The presentation is deliberately part of the command, so the same command can be offered by different kinds of
+ * controls (a button today; a list item or menu item later), each using the properties as suits it, e.g. a menu item
+ * shows the label next to the icon and needs no tooltip. Keep the properties about what the command is, not about
+ * how one control lays it out.
  *
  * `TArgs` are the mutation's variables (`void` for commands without arguments).
  */

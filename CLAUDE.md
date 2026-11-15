@@ -36,11 +36,13 @@ file under the app's (or the shell's) `commands/`, holds its mutation (`mutation
 with its label, icon, tooltip and error title. Anything needing the mutation goes through the command
 (`Command.mutationOptions`). Widgets bind commands themselves, so app states only carry data: use `CommandButton`
 (`common/components`), which shows the pending state and errors, or `useCommand` with `CommandErrorAlert`/
-`CommandErrorPopover` for controls that aren't plain buttons. Command icons are component references, so command files
-stay `.ts`.
+`CommandErrorPopover` for controls that aren't plain buttons. Presentation belongs to the command so other kinds of
+controls (e.g. list or menu items) can offer the same commands. Command icons are component references, so command
+files stay `.ts`.
 
 The `QueryClient` comes from `createQueryClient()` (`infrastructure/framework/query`), provided in `main.tsx` and, fresh
-per story, in the Storybook preview (so also in tests).
+per story, in the Storybook preview (and fresh per test). Its structural sharing also keeps equal Luxon values, so
+refetched data that didn't change keeps its identity.
 
 ## Frontend UI Concept
 
@@ -76,7 +78,11 @@ The frontend has Vitest component tests (`*.test.tsx` next to the component, jsd
 `npm test` under `device-frontend`, and by Maven in the `test` phase (skipped with `-DskipTests`). Tests render story variants from
 `composeStories` with `renderStory` (`src/testing`), so a test case usually starts as a story. Setup lives in
 `.storybook/vitest.setup.ts`: it applies the Storybook decorators and fixes Luxon's zone to `Europe/Stockholm`.
-Story loaders (MSW) don't run in tests.
+Story loaders and the stories' `msw` parameters aren't used in tests. Instead, an MSW server (`src/testing/msw.ts`)
+answers the API with handlers each suite registers in `beforeEach`, usually through an app's API stub in
+`src/apps/<app>/testing/` that keeps the stubbed backend's state for tests to arrange and assert on (see
+`NotificationsApiStub`). A request without a handler fails the test. MSW is v3: the option is `onUnhandledFrame`, not
+`onUnhandledRequest`.
 
 # Deployment Architecture
 

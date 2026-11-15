@@ -1,4 +1,4 @@
-import { OperationErrorData } from "@src/infrastructure/framework/errors"
+import { apiError } from "@src/testing/apiError.ts"
 import { http, HttpResponse } from "msw"
 import type { SetupWorker } from "msw/browser"
 // Types `parameters.msw` for CSF 3 stories
@@ -22,11 +22,7 @@ import { action } from "storybook/actions"
  * ```
  */
 
-/** An error response in the shape the backend uses, so `ApiClient` turns it into an `OperationError`. */
-export function apiError(status: number, errorCode: string, errorMessage: string) {
-  const body: OperationErrorData = { requestId: "storybook", errorCode, errorMessage }
-  return HttpResponse.json(body, { status })
-}
+export { apiError }
 
 /**
  * Lowest priority handlers, active in every story: unmocked `GET`s answer 404 and unmocked mutations answer
