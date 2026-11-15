@@ -1,12 +1,12 @@
-import { CalendarEventsEntity } from "@src/apps/calendar/entities/CalendarEventsEntity.ts"
 import { CalendarEvent } from "@src/apps/calendar/models/CalendarEvent.ts"
-import { CurrentTimeEntity } from "@src/apps/clock/entities/CurrentTimeEntity.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
+import { CalendarEventsQuery } from "@src/apps/calendar/queries/CalendarEventsQuery.ts"
+import { CurrentTimeQuery } from "@src/apps/clock/queries/CurrentTimeQuery.ts"
 import { OperationError } from "@src/infrastructure/framework/errors"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useQuery } from "@tanstack/react-query"
 import { DateTime } from "luxon"
+import { useCallback } from "react"
 
 export type CalendarAppState = {
   events: CalendarEvent[]
@@ -16,23 +16,25 @@ export type CalendarAppState = {
 }
 
 export function useCalendarState(): CalendarAppState {
-  const currentTimeEntity = useEntity(CurrentTimeEntity)
+  // Kept fresh by the clock app.
+  const currentTimeQuery = useQuery(CurrentTimeQuery)
 
-  const currentTime = currentTimeEntity.value ?? DateTime.now()
+  const currentTime = currentTimeQuery.data ?? DateTime.now()
   const minTime = currentTime.startOf("day")
   const maxTime = currentTime.plus({ days: 14 }).endOf("day")
 
-  const entity = useEntity(CalendarEventsEntity(minTime, maxTime), {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const eventsQuery = useQuery({
+    ...CalendarEventsQuery(minTime, maxTime),
+    refetchInterval: 5_000,
   })
 
-  useInterval(entity.fetchAsync, 5_000)
+  const { refetch } = eventsQuery
+  const refresh = useCallback(() => void refetch(), [refetch])
 
   return useDeepEqualMemo(() => ({
-    events: entity.value ?? EmptyArray,
+    events: eventsQuery.data ?? EmptyArray,
     currentTime: currentTime,
-    error: entity.error as OperationError,
-    refresh: entity.fetchAsync,
-  }), [entity.value, currentTime.valueOf(), entity.error, entity.fetchAsync])
+    error: eventsQuery.error as OperationError | null,
+    refresh,
+  }), [eventsQuery.data, currentTime.valueOf(), eventsQuery.error, refresh])
 }

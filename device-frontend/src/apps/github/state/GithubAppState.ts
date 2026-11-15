@@ -1,11 +1,9 @@
-import { MarkAllNotificationsAsRead } from "@src/apps/github/actions/MarkAllNotificationsAsRead.ts"
-import { GithubNotificationsEntity } from "@src/apps/github/entities/GithubNotificationsEntity.ts"
 import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { MarkAllGithubNotificationsAsReadMutation } from "@src/apps/github/mutations/MarkAllGithubNotificationsAsReadMutation.ts"
+import { GithubNotificationsQuery } from "@src/apps/github/queries/GithubNotificationsQuery.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 
 export type GithubAppState = {
@@ -15,25 +13,23 @@ export type GithubAppState = {
 }
 
 export function useGithubState(): GithubAppState {
-  const entity = useEntity(GithubNotificationsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...GithubNotificationsQuery,
+    refetchInterval: 5 * 60_000,
   })
 
-  const markAllAsReadAction = useAction(MarkAllNotificationsAsRead)
+  const { mutate: markAllAsReadMutate } = useMutation(MarkAllGithubNotificationsAsReadMutation)
 
-  const markAllAsRead = useCallback(async () => {
-    await markAllAsReadAction.execute()
-    entity.fetchAsync()
-  }, [markAllAsReadAction.execute, entity.fetchAsync])
+  const markAllAsRead = useCallback(() => markAllAsReadMutate(), [markAllAsReadMutate])
 
-  useInterval(entity.fetchAsync, 5 * 60_000)
+  const { refetch } = query
+  const refresh = useCallback(() => void refetch(), [refetch])
 
-  const notifications: GithubNotification[] = entity.value ?? EmptyArray
+  const notifications: GithubNotification[] = query.data ?? EmptyArray
 
   return useDeepEqualMemo(() => ({
     notifications,
     markAllAsRead,
-    refresh: entity.fetchAsync,
-  }), [notifications, markAllAsRead, entity.fetchAsync])
+    refresh,
+  }), [notifications, markAllAsRead, refresh])
 }

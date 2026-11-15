@@ -2,6 +2,7 @@ import { Card, CardContent, Slide, Stack, Typography } from "@mui/material"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
 import { useNotificationsToastState } from "@src/apps/notifications/state/NotificationToastsState.ts"
 import { AppAreaOverlayPortal } from "@src/common/components/AppAreaOverlayPortal/AppAreaOverlayPortal.tsx"
+import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { TransitionGroup } from "react-transition-group"
 
 import classes from "./NotificationsToastOverlay.module.scss"
@@ -56,7 +57,7 @@ const NotificationToastCardContent = (props: {
           <Typography
             variant={"caption"}
             color={"text.secondary"}
-            children={new Date(notification.timestamp).toLocaleString("sv-SE")}
+            children={<DateTimeText value={notification.timestamp} />}
           />
         </Stack>
       </CardContent>

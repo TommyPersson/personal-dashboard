@@ -1,12 +1,10 @@
-import { RunItemActionAction } from "@src/apps/run-deck/actions"
-import { RunDeckDataEntity } from "@src/apps/run-deck/entities/RunDeckDataEntity.ts"
 import { Item, Section } from "@src/apps/run-deck/models/RunDeckData.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { RunItemActionMutation } from "@src/apps/run-deck/mutations/RunItemActionMutation.ts"
+import { RunDeckDataQuery } from "@src/apps/run-deck/queries/RunDeckDataQuery.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
-import { useCallback, useMemo } from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useCallback } from "react"
 
 export type RunDeckAppState = {
   sections: Section[]
@@ -14,24 +12,21 @@ export type RunDeckAppState = {
 }
 
 export function useRunDeckAppState(): RunDeckAppState {
-  const entity = useEntity(RunDeckDataEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...RunDeckDataQuery,
+    refetchInterval: 5000,
   })
 
-  const runItemActionAction = useAction(RunItemActionAction)
+  const { mutate: runItemActionMutate } = useMutation(RunItemActionMutation)
 
-  useInterval(entity.fetchAsync, 5000)
-
-  const sections = entity.value?.sections ?? EmptyArray
+  const sections = query.data?.sections ?? EmptyArray
 
   const runItemAction = useCallback((item: Item) => {
-    runItemActionAction.executeAsync({ itemId: item.id })
-  }, [runItemActionAction])
-
+    runItemActionMutate({ itemId: item.id })
+  }, [runItemActionMutate])
 
   return useDeepEqualMemo(() => ({
     sections,
-    runItemAction: runItemAction,
+    runItemAction,
   }), [sections, runItemAction])
 }

@@ -1,7 +1,8 @@
-import { Notification } from "@src/apps/notifications/models/Notification.ts"
+import { NotificationDTO, NotificationSchema } from "@src/apps/notifications/models/Notification.ts"
 import { http, HttpResponse } from "msw"
 
-export const notifications: Notification[] = [
+/** As the backend sends them, also in websocket messages. */
+export const notificationDTOs: NotificationDTO[] = [
   {
     id: "n1",
     title: "Build failed",
@@ -28,6 +29,8 @@ export const notifications: Notification[] = [
   },
 ]
 
+export const notifications = notificationDTOs.map(it => NotificationSchema.parse(it))
+
 export const notificationsHandlers = [
-  http.get("/api/notifications", () => HttpResponse.json({ items: notifications })),
+  http.get("/api/notifications", () => HttpResponse.json({ items: notificationDTOs })),
 ]

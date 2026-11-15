@@ -1,7 +1,6 @@
-import { CurrentTimeEntity } from "@src/apps/clock/entities/CurrentTimeEntity.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { CurrentTimeQuery } from "@src/apps/clock/queries/CurrentTimeQuery.ts"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useQuery } from "@tanstack/react-query"
 import { DateTime } from "luxon"
 
 
@@ -10,14 +9,12 @@ export type ClockAppState = {
 }
 
 export function useClockAppState(): ClockAppState {
-  const entity = useEntity(CurrentTimeEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...CurrentTimeQuery,
+    refetchInterval: 5000,
   })
 
-  useInterval(entity.fetchAsync, 5000)
-
-  const time = entity.value ?? DateTime.now()
+  const time = query.data ?? DateTime.now()
 
   return useDeepEqualMemo(() => ({
     time: time,

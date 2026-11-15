@@ -1,9 +1,10 @@
-import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
+import { GithubNotificationDTO, GithubNotificationSchema } from "@src/apps/github/models/GithubNotification.ts"
 import { GithubAppState } from "@src/apps/github/state/GithubAppState.ts"
 import { http, HttpResponse } from "msw"
 import { fn } from "storybook/test"
 
-export const githubNotifications: GithubNotification[] = [
+/** As the backend sends them. */
+export const githubNotificationDTOs: GithubNotificationDTO[] = [
   {
     id: 1,
     unread: true,
@@ -50,6 +51,8 @@ export const githubNotifications: GithubNotification[] = [
   },
 ]
 
+export const githubNotifications = githubNotificationDTOs.map(it => GithubNotificationSchema.parse(it))
+
 export function githubState(overrides: Partial<GithubAppState> = {}): GithubAppState {
   return {
     notifications: githubNotifications,
@@ -60,5 +63,5 @@ export function githubState(overrides: Partial<GithubAppState> = {}): GithubAppS
 }
 
 export const githubHandlers = [
-  http.get("/api/apps/github/notifications", () => HttpResponse.json({ notifications: githubNotifications })),
+  http.get("/api/apps/github/notifications", () => HttpResponse.json({ notifications: githubNotificationDTOs })),
 ]

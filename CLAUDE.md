@@ -22,8 +22,8 @@ The "desktop dashboard" is an application intended to run on a Raspberry Pi with
 
 ## Frontend data fetching
 
-The frontend is moving from its own `useEntity`/`useAction` hooks (`infrastructure/framework/entities`) to TanStack
-Query, one app at a time; `claude-code` is migrated. Like the old entities and actions, each query (`queryOptions`) and
+The apps use TanStack Query; only the shell (`src/shell`) still uses the old `useEntity`/`useAction` hooks
+(`infrastructure/framework/entities`). Like the old entities and actions, each query (`queryOptions`) and
 mutation (`mutationOptions`) is defined in its own file under the app's `queries/` and `mutations/`. Mutations
 invalidate the queries they affect in `onSettled`, and the state hook invalidates queries on websocket messages.
 

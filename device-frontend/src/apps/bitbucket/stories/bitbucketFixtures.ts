@@ -1,4 +1,8 @@
-import { BitbucketPullRequest, Participant } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
+import {
+  BitbucketPullRequestDTO,
+  BitbucketPullRequestSchema,
+  Participant,
+} from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
 import { BitbucketAppState } from "@src/apps/bitbucket/state/BitbucketAppState.ts"
 import { http, HttpResponse } from "msw"
 import { fn } from "storybook/test"
@@ -7,7 +11,7 @@ const reviewer = (name: string, status: Participant["status"]): Participant => (
 
 let nextId = 1
 
-function pullRequest(overrides: Partial<BitbucketPullRequest>): BitbucketPullRequest {
+function pullRequest(overrides: Partial<BitbucketPullRequestDTO>): BitbucketPullRequestDTO {
   const id = nextId++
   return {
     id,
@@ -33,7 +37,8 @@ function pullRequest(overrides: Partial<BitbucketPullRequest>): BitbucketPullReq
   }
 }
 
-export const pullRequests: BitbucketPullRequest[] = [
+/** As the backend sends them. */
+export const pullRequestDTOs: BitbucketPullRequestDTO[] = [
   pullRequest({ title: "Add retry to calendar sync", numComments: 4, numOpenTasks: 2 }),
   pullRequest({ title: "Bump Kotlin to 2.3", toRepository: "backend-libs", userHasApproved: true }),
   pullRequest({
@@ -54,6 +59,8 @@ export const pullRequests: BitbucketPullRequest[] = [
   pullRequest({ title: "Add hot-key sections", state: "MERGED", reviewers: [reviewer("You", "APPROVED")] }),
 ]
 
+export const pullRequests = pullRequestDTOs.map(it => BitbucketPullRequestSchema.parse(it))
+
 export function bitbucketState(overrides: Partial<BitbucketAppState> = {}): BitbucketAppState {
   return {
     pullRequests,
@@ -64,5 +71,5 @@ export function bitbucketState(overrides: Partial<BitbucketAppState> = {}): Bitb
 }
 
 export const bitbucketHandlers = [
-  http.get("/api/apps/bitbucket/pull-requests", () => HttpResponse.json({ pullRequests })),
+  http.get("/api/apps/bitbucket/pull-requests", () => HttpResponse.json({ pullRequests: pullRequestDTOs })),
 ]

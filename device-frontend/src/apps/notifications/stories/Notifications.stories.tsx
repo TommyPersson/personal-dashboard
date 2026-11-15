@@ -1,5 +1,5 @@
 import { NewNotificationMessage } from "@src/apps/notifications/messages"
-import { notifications, notificationsHandlers } from "@src/apps/notifications/stories/notificationsFixtures.ts"
+import { notificationDTOs, notifications, notificationsHandlers } from "@src/apps/notifications/stories/notificationsFixtures.ts"
 import { NotificationsAppWidget } from "@src/apps/notifications/ui/NotificationsAppWidget.tsx"
 import { NotificationsToastOverlay } from "@src/apps/notifications/ui/NotificationsToastOverlay.tsx"
 import { withAppArea, withAppSlot } from "@src/storybook/frames.tsx"
@@ -47,7 +47,7 @@ export const AppWidgetEmpty: Story = {
 /** Toasts are driven by websocket messages, which are simulated here with `window.postMessage`. */
 const ToastOverlayWithMessages = () => {
   useEffect(() => {
-    const handles = notifications.map((notification, i) => setTimeout(() => {
+    const handles = notificationDTOs.map((notification, i) => setTimeout(() => {
       window.postMessage({ type: NewNotificationMessage.type, notification }, "*")
     }, 300 + i * 400))
     return () => handles.forEach(clearTimeout)

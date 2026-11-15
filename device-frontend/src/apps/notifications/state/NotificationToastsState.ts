@@ -3,7 +3,7 @@ import {
   NewNotificationMessageData, NotificationDismissedMessage,
   NotificationDismissedMessageData,
 } from "@src/apps/notifications/messages"
-import { Notification } from "@src/apps/notifications/models/Notification.ts"
+import { Notification, NotificationSchema } from "@src/apps/notifications/models/Notification.ts"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
 import { useCallback, useState } from "react"
@@ -17,7 +17,8 @@ export function useNotificationsToastState(): NotificationToastsState {
   const [notifications, setNotifications] = useState<Notification[]>([])
 
   const handleNewNotification = useCallback((message: NewNotificationMessageData) => {
-    setNotifications(s => [message.notification, ...s])
+    const notification = NotificationSchema.parse(message.notification)
+    setNotifications(s => [notification, ...s])
   }, [setNotifications])
 
   const handleNotificationDismissed = useCallback((message: NotificationDismissedMessageData) => {

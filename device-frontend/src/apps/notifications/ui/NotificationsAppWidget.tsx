@@ -10,6 +10,7 @@ import { Notification } from "@src/apps/notifications/models/Notification.ts"
 import { NotificationsAppState, useNotificationsAppState } from "@src/apps/notifications/state/NotificationsAppState.ts"
 import { NotificationsToastOverlay } from "@src/apps/notifications/ui/NotificationsToastOverlay.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import classNames from "classnames"
 import React, { CSSProperties, useCallback } from "react"
@@ -162,7 +163,7 @@ const NotificationCard = React.forwardRef((props: {
             style={{ display: "block" }}
           />}
         <Typography
-          children={new Date(notification.timestamp).toLocaleString("sv-SE")}
+          children={<DateTimeText value={notification.timestamp} />}
           variant={"caption"}
           color={"text.secondary"}
         />

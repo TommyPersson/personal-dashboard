@@ -12,10 +12,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material"
-import { CurrentWeather, DailyForecast, HourlyForecast } from "@src/apps/weather/modes/WeatherData.ts"
+import { CurrentWeather, DailyForecast, HourlyForecast } from "@src/apps/weather/models/WeatherData.ts"
 import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { WeatherIcon } from "@src/apps/weather/ui/components/WeatherIcon.tsx"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { DateTime } from "luxon"
 import React, { useMemo } from "react"
 
 import classes from "./WeatherAppWidget.module.scss"
@@ -114,7 +115,7 @@ const Next48HoursCard = (props: { forecasts: HourlyForecast[] }) => {
       </CardContent>
       <Stack className={classes.HourlyForecastColumns} direction={"row"}>
         {forecasts.map(it => (
-          <HourlyForecastColumn key={it.date + it.time} forecast={it} />
+          <HourlyForecastColumn key={it.time.toISO()} forecast={it} />
         ))}
       </Stack>
     </Card>
@@ -126,7 +127,7 @@ const HourlyForecastColumn = (props: { forecast: HourlyForecast }) => {
 
   return (
     <Stack className={classes.HourlyForecastColumn}>
-      <Typography variant={"caption"}>{forecast.time.substring(0, 5)}</Typography>
+      <Typography variant={"caption"}>{forecast.time.toFormat("HH:mm")}</Typography>
       <WeatherIcon iconName={forecast.weatherIconName} className={classes.WeatherIcon} />
       <Typography variant={"body2"}>{forecast.temperature}°</Typography>
       <WaterDropOutlined className={classes.HumidityIcon} sx={{ mt: 1 }} />
@@ -146,7 +147,7 @@ const ComingDaysForecastCard = (props: { forecasts: DailyForecast[] }) => {
       <Table size="small" className={classes.DailyForecastTable}>
         <TableBody>
           {forecasts.map(it => (
-            <DailyForecastRow key={it.date} forecast={it} />
+            <DailyForecastRow key={it.date.toISODate()} forecast={it} />
           ))}
         </TableBody>
       </Table>
@@ -161,7 +162,7 @@ type WeeklyForecastRowProps = {
 const DailyForecastRow = (props: WeeklyForecastRowProps) => {
   const { forecast } = props
 
-  const day = useMemo(() => formatDay(new Date(forecast.date)), [forecast.date])
+  const day = useMemo(() => formatDay(forecast.date), [forecast.date])
 
   return (
     <TableRow className={classes.DailyForecastRow}>
@@ -178,10 +179,10 @@ const DailyForecastRow = (props: WeeklyForecastRowProps) => {
   )
 }
 
-export function formatDay(date: Date): string {
-  return date.toLocaleDateString("en-US", { weekday: "long" })
+export function formatDay(date: DateTime): string {
+  return date.setLocale("en-US").toFormat("cccc")
 }
 
-export function formatTime(date: Date): string {
-  return date.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" })
+export function formatTime(date: DateTime): string {
+  return date.toFormat("HH:mm")
 }

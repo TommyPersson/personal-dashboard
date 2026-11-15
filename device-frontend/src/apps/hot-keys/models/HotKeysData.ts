@@ -1,15 +1,24 @@
+import { z } from "zod"
 
-export type HotKeysData = {
-  sections: HotKeySection[]
-}
+export const HotKeySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  keys: z.string(),
+})
 
-export type HotKeySection = {
-  name: string
-  hotKeys: HotKey[]
-}
+export type HotKey = z.infer<typeof HotKeySchema>
 
-export type HotKey = {
-  id: string
-  name: string
-  keys: string
-}
+export const HotKeySectionSchema = z.object({
+  name: z.string(),
+  hotKeys: z.array(HotKeySchema),
+})
+
+export type HotKeySection = z.infer<typeof HotKeySectionSchema>
+
+export const HotKeysDataSchema = z.object({
+  sections: z.array(HotKeySectionSchema),
+})
+
+export type HotKeysData = z.infer<typeof HotKeysDataSchema>
+
+export type HotKeysDataDTO = z.input<typeof HotKeysDataSchema>

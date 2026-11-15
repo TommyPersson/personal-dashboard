@@ -11,6 +11,7 @@ import {
 import { GithubNotification } from "@src/apps/github/models/GithubNotification.ts"
 import { GithubAppState } from "@src/apps/github/state/GithubAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
 import React from "react"
 
@@ -57,15 +58,13 @@ export const GithubAppWidget = React.memo((props: { state: GithubAppState }) => 
 const NotificationListItem = (props: { notification: GithubNotification }) => {
   const { notification } = props
 
-  const date = new Date(notification.updatedAt)
-
   return (
     <ListItemButton divider={true}>
       <ListItemIcon>{getTypeIcon(notification)}</ListItemIcon>
       <ListItemText
         primary={(
           <>
-            <Typography variant={"caption"}>{date.toLocaleString("sv-SE")}</Typography><br />
+            <Typography variant={"caption"}><DateTimeText value={notification.updatedAt} /></Typography><br />
             {notification.title}
           </>
         )}

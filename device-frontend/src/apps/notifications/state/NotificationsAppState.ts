@@ -1,13 +1,11 @@
-import { DismissNotificationAction } from "@src/apps/notifications/actions"
-import { NotificationsEntity } from "@src/apps/notifications/entities/NotificationsEntity.ts"
 import { NewNotificationMessage, NotificationDismissedMessage } from "@src/apps/notifications/messages"
 import { Notification } from "@src/apps/notifications/models/Notification.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { DismissNotificationMutation } from "@src/apps/notifications/mutations/DismissNotificationMutation.ts"
+import { NotificationsQuery, NotificationsQueryKey } from "@src/apps/notifications/queries/NotificationsQuery.ts"
 import { useMessageListener } from "@src/infrastructure/hooks/useMessageListener.tsx"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useState } from "react"
 
 export type NotificationsAppState = {
@@ -19,26 +17,27 @@ export type NotificationsAppState = {
 }
 
 export function useNotificationsAppState(): NotificationsAppState {
-  const entity = useEntity(NotificationsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const queryClient = useQueryClient()
+
+  const query = useQuery({
+    ...NotificationsQuery,
+    refetchInterval: 5000,
   })
 
-  const dismissAction = useAction(DismissNotificationAction)
+  const { mutate: dismissMutate } = useMutation(DismissNotificationMutation)
 
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const items = entity.value ?? EmptyArray
+  const items = query.data ?? EmptyArray
   const count = items.length
-
 
   const toggleMinimized = useCallback(() => {
     setIsMinimized(s => !s)
   }, [setIsMinimized])
 
   const dismiss = useCallback((notification: Notification) => {
-    dismissAction.executeAsync({ notificationId: notification.id })
-  }, [dismissAction])
+    dismissMutate({ notificationId: notification.id })
+  }, [dismissMutate])
 
   const clear = useCallback(() => {
     for (const item of items) {
@@ -52,10 +51,12 @@ export function useNotificationsAppState(): NotificationsAppState {
     }
   }, [count, setIsMinimized])
 
-  useInterval(entity.fetchAsync, 5000)
+  const invalidateNotifications = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: NotificationsQueryKey })
+  }, [queryClient])
 
-  useMessageListener(NewNotificationMessage, entity.fetchAsync)
-  useMessageListener(NotificationDismissedMessage, entity.fetchAsync)
+  useMessageListener(NewNotificationMessage, invalidateNotifications)
+  useMessageListener(NotificationDismissedMessage, invalidateNotifications)
 
   return useDeepEqualMemo(() => ({
     notifications: items,

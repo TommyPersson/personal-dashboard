@@ -1,4 +1,4 @@
-import { WeatherData } from "@src/apps/weather/modes/WeatherData.ts"
+import { WeatherDataDTO, WeatherDataSchema } from "@src/apps/weather/models/WeatherData.ts"
 import { WeatherAppState } from "@src/apps/weather/state/WeatherAppState.ts"
 import { DateTime } from "luxon"
 import { http, HttpResponse } from "msw"
@@ -8,7 +8,8 @@ const icons = ["01d", "02d", "03d", "04d", "09d", "10d", "11d", "13d", "50d"]
 
 const today = DateTime.now().startOf("hour")
 
-export const weatherData: WeatherData = {
+/** As the backend sends it. */
+export const weatherDataDTO: WeatherDataDTO = {
   cityName: "Stockholm",
   currentWeather: {
     temperature: 14,
@@ -27,12 +28,11 @@ export const weatherData: WeatherData = {
       temperature: Math.round(12 + 5 * Math.sin(i / 4)),
       temperatureFeelsLike: Math.round(10 + 5 * Math.sin(i / 4)),
       weatherIconName: icons[i % icons.length].replace("d", isNight ? "n" : "d"),
-      humidityPercent: String(50 + (i * 7) % 40),
+      humidityPercent: 50 + (i * 7) % 40,
     }
   }),
   dailyForecasts: new Array(7).fill(0).map((_, i) => ({
     date: today.plus({ days: i + 1 }).toISODate()!,
-    temperature: 13 + (i % 3),
     temperatureLow: 7 + (i % 3),
     temperatureHigh: 16 + (i % 4),
     weatherIconName: icons[(i * 2) % icons.length],
@@ -40,16 +40,18 @@ export const weatherData: WeatherData = {
   })),
 }
 
+export const weatherData = WeatherDataSchema.parse(weatherDataDTO)
+
 export function weatherState(overrides: Partial<WeatherAppState> = {}): WeatherAppState {
   return {
     data: weatherData,
     isLoading: false,
-    lastFetchedAt: new Date(),
+    lastFetchedAt: DateTime.now(),
     refresh: fn(),
     ...overrides,
   }
 }
 
 export const weatherHandlers = [
-  http.get("/api/apps/weather/data", () => HttpResponse.json(weatherData)),
+  http.get("/api/apps/weather/data", () => HttpResponse.json(weatherDataDTO)),
 ]

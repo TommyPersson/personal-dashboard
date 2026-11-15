@@ -1,12 +1,11 @@
-import { PauseOrPlayAction, SkipNextAction, SkipPreviousAction } from "@src/apps/media-control/actions"
-import { MediaControlStatusEntity } from "@src/apps/media-control/entities/MediaControlStatusEntity.ts"
 import { MediaControlStatus } from "@src/apps/media-control/models/MediaControlStatus.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
-import { delay } from "@src/infrastructure/utils"
+import { PauseOrPlayMutation } from "@src/apps/media-control/mutations/PauseOrPlayMutation.ts"
+import { SkipNextMutation } from "@src/apps/media-control/mutations/SkipNextMutation.ts"
+import { SkipPreviousMutation } from "@src/apps/media-control/mutations/SkipPreviousMutation.ts"
+import { MediaControlStatusQuery } from "@src/apps/media-control/queries/MediaControlStatusQuery.ts"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export type MediaControlAppState = {
   status: MediaControlStatus | null
@@ -24,48 +23,28 @@ export type PlaybackControls = {
   pauseOrPlay: () => void
 }
 
-const refreshAfterActionDelayMs = 1_000
-
 export function useMediaControlAppState(): MediaControlAppState {
-  const entity = useEntity(MediaControlStatusEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...MediaControlStatusQuery,
+    refetchInterval: 1_000,
   })
 
-  const status = entity.value
+  const status = query.data ?? null
   const previousStatusRef = useRef(status)
 
-  const refreshEntity = entity.fetchAsync
+  const { mutate: skipNextMutate, isPending: isSkipNextPending } = useMutation(SkipNextMutation)
+  const { mutate: skipPreviousMutate, isPending: isSkipPreviousPending } = useMutation(SkipPreviousMutation)
+  const { mutate: pauseOrPlayMutate, isPending: isPauseOrPlayPending } = useMutation(PauseOrPlayMutation)
 
-  const { execute: executeSkipNext, ...skipNextAction } = useAction(SkipNextAction)
-  const { execute: executeSkipPrevious, ...skipPreviousAction } = useAction(SkipPreviousAction)
-  const { execute: executePauseOrPlay, ...pauseOrPlayAction } = useAction(PauseOrPlayAction)
-
-  const handleSkipNext = useCallback(async () => {
-    await executeSkipNext()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executeSkipNext, refreshEntity])
-
-  const handleSkipPrevious = useCallback(async () => {
-    await executeSkipPrevious()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executeSkipPrevious, refreshEntity])
-
-  const handlePauseOrPlay = useCallback(async () => {
-    await executePauseOrPlay()
-    await delay(refreshAfterActionDelayMs)
-    refreshEntity()
-  }, [executePauseOrPlay, refreshEntity])
+  const handleSkipNext = useCallback(() => skipNextMutate(), [skipNextMutate])
+  const handleSkipPrevious = useCallback(() => skipPreviousMutate(), [skipPreviousMutate])
+  const handlePauseOrPlay = useCallback(() => pauseOrPlayMutate(), [pauseOrPlayMutate])
 
   const [isMinimized, setIsMinimized] = useState(false)
 
   const toggleMinimized = useCallback(() => {
     setIsMinimized(s => !s)
   }, [setIsMinimized])
-
-  useInterval(refreshEntity, 1_000)
 
   useEffect(() => {
     if (!status) {
@@ -79,14 +58,24 @@ export function useMediaControlAppState(): MediaControlAppState {
   return useDeepEqualMemo((): MediaControlAppState => ({
     status,
     controls: {
-      canSkipNext: Boolean(status?.controls?.isSkipNextEnabled) && !skipNextAction.isInProgress,
+      canSkipNext: Boolean(status?.controls?.isSkipNextEnabled) && !isSkipNextPending,
       skipNext: handleSkipNext,
-      canSkipPrevious: Boolean(status?.controls?.isSkipNextEnabled) && !skipPreviousAction.isInProgress,
+      canSkipPrevious: Boolean(status?.controls?.isSkipNextEnabled) && !isSkipPreviousPending,
       skipPrevious: handleSkipPrevious,
-      canPauseOrPlay: Boolean(status?.controls?.isSkipNextEnabled) && !pauseOrPlayAction.isInProgress,
+      canPauseOrPlay: Boolean(status?.controls?.isSkipNextEnabled) && !isPauseOrPlayPending,
       pauseOrPlay: handlePauseOrPlay,
     },
     isMinimized,
     toggleMinimized,
-  }), [status, handleSkipNext, handleSkipPrevious, handlePauseOrPlay, isMinimized, toggleMinimized])
+  }), [
+    status,
+    isSkipNextPending,
+    isSkipPreviousPending,
+    isPauseOrPlayPending,
+    handleSkipNext,
+    handleSkipPrevious,
+    handlePauseOrPlay,
+    isMinimized,
+    toggleMinimized,
+  ])
 }

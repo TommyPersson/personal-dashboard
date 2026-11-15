@@ -107,7 +107,14 @@ WebSocket instead of the backend calling `core.winCtrl.url`.
 
 # TanStack Query migration
 
-The `claude-code` app uses TanStack Query; the other apps and the shell still use `useEntity`/`useAction`. Once they
-are migrated, `infrastructure/framework/entities` and the `EntityStateContextProvider` can be removed. Possible
-additions along the way: `@tanstack/eslint-plugin-query`, and showing mutation errors (e.g. a failed discard) in the
-widgets, which `useAction` never surfaced either.
+All apps use TanStack Query and Zod. The shell (`src/shell`: device lock/unlock and the layout) still uses
+`useEntity`/`useAction`; once it is migrated, `infrastructure/framework/entities` and the `EntityStateContextProvider`
+can be removed. Possible additions along the way: `@tanstack/eslint-plugin-query`, and showing mutation errors (e.g. a
+failed discard) in the widgets, which `useAction` never surfaced either.
+
+Found during the migration, left as they were:
+
+* Media control: `canSkipPrevious` and `canPauseOrPlay` check `isSkipNextEnabled` instead of `isSkipPreviousEnabled`
+  and `isPauseOrPlayEnabled`.
+* Run deck: the backend gives items new random IDs on every request (`RunDeckDataDTO.fromConfig`), so the data never
+  compares equal between the 5-second refetches.

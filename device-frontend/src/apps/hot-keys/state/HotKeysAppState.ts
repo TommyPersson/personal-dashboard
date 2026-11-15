@@ -1,12 +1,10 @@
-import { PerformHotKeyAction } from "@src/apps/hot-keys/actions"
-import { HotKeysDataEntity } from "@src/apps/hot-keys/entities/HotKeysDataEntity.ts"
 import { HotKey, HotKeySection } from "@src/apps/hot-keys/models/HotKeysData.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useAction } from "@src/infrastructure/framework/entities/useAction.tsx"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { PerformHotKeyMutation } from "@src/apps/hot-keys/mutations/PerformHotKeyMutation.ts"
+import { HotKeysDataQuery } from "@src/apps/hot-keys/queries/HotKeysDataQuery.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
-import { useCallback, useMemo } from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useCallback } from "react"
 
 export type HotKeysAppState = {
   sections: HotKeySection[]
@@ -14,20 +12,18 @@ export type HotKeysAppState = {
 }
 
 export function useHotKeysAppState(): HotKeysAppState {
-  const entity = useEntity(HotKeysDataEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...HotKeysDataQuery,
+    refetchInterval: 5000,
   })
 
-  const sendKeysAction = useAction(PerformHotKeyAction)
+  const { mutate: performHotKey } = useMutation(PerformHotKeyMutation)
 
-  useInterval(entity.fetchAsync, 5000)
-
-  const sections = entity.value?.sections ?? EmptyArray
+  const sections = query.data?.sections ?? EmptyArray
 
   const execute = useCallback((hotKey: HotKey) => {
-    sendKeysAction.executeAsync({ hotKeyId: hotKey.id })
-  }, [sendKeysAction])
+    performHotKey({ hotKeyId: hotKey.id })
+  }, [performHotKey])
 
   return useDeepEqualMemo(() => ({
     sections,

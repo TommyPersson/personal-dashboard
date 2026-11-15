@@ -1,9 +1,9 @@
-import { BitbucketPullRequestsEntity } from "@src/apps/bitbucket/entities/BitbucketPullRequestsEntity.ts"
 import { BitbucketPullRequest } from "@src/apps/bitbucket/models/BitbucketPullRequest.ts"
-import { useEntity } from "@src/infrastructure/framework/entities"
-import { useInterval } from "@src/infrastructure/hooks/useInterval.ts"
+import { BitbucketPullRequestsQuery } from "@src/apps/bitbucket/queries/BitbucketPullRequestsQuery.ts"
 import { EmptyArray } from "@src/infrastructure/utils"
 import { useDeepEqualMemo } from "@src/infrastructure/utils/hooks.ts"
+import { useQuery } from "@tanstack/react-query"
+import { useCallback } from "react"
 
 export type BitbucketAppState = {
   pullRequests: BitbucketPullRequest[]
@@ -12,18 +12,19 @@ export type BitbucketAppState = {
 }
 
 export function useBitbucketAppState(): BitbucketAppState {
-  const entity = useEntity(BitbucketPullRequestsEntity, {
-    fetchOnMount: true,
-    clearOnFetch: false,
+  const query = useQuery({
+    ...BitbucketPullRequestsQuery,
+    refetchInterval: 60_000,
   })
 
-  useInterval(entity.fetchAsync, 60_000)
+  const { refetch } = query
+  const refresh = useCallback(() => void refetch(), [refetch])
 
-  const pullRequests: BitbucketPullRequest[] = entity.value ?? EmptyArray
+  const pullRequests: BitbucketPullRequest[] = query.data ?? EmptyArray
 
   return useDeepEqualMemo(() => ({
     pullRequests,
-    error: entity.error,
-    refresh: entity.fetchAsync,
-  }), [pullRequests, entity.error])
+    error: query.error,
+    refresh,
+  }), [pullRequests, query.error, refresh])
 }
