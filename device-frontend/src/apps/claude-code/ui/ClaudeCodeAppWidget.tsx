@@ -1,4 +1,7 @@
-import { CheckCircleOutlined, RadioButtonUncheckedOutlined, SmartToyOutlined, TimerOutlined } from "@mui/icons-material"
+import {
+  CheckCircleOutlined,
+  ForkRightOutlined,
+  RadioButtonUncheckedOutlined, SmartToyOutlined, TimerOutlined } from "@mui/icons-material"
 import {
   Alert,
   Card,
@@ -17,7 +20,7 @@ import {
 import { DiscardAllClaudeSessionsCommand } from "@src/apps/claude-code/commands/DiscardAllClaudeSessionsCommand.ts"
 import { DiscardClaudeSessionCommand } from "@src/apps/claude-code/commands/DiscardClaudeSessionCommand.ts"
 import { OpenClaudeSessionOnWorkstationCommand } from "@src/apps/claude-code/commands/OpenClaudeSessionOnWorkstationCommand.ts"
-import { ClaudePlanItem, ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
+import { ClaudePlanItem, ClaudeSession, ClaudeWorktree } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
 import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
@@ -77,10 +80,11 @@ const SessionCard = (props: { session: ClaudeSession }) => {
           role={"button"}
           aria-expanded={expanded}
         >
-          <Typography variant={"subtitle1"} sx={{ fontWeight: 500 }} noWrap>
+          <Typography variant={"subtitle1"} sx={{ fontWeight: 500, flexShrink: 0 }} noWrap>
             {session.project ?? "Unknown project"}
           </Typography>
-          <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right" }}>
+          {session.worktree && <WorktreeIndicator worktree={session.worktree} />}
+          <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right", flexShrink: 0 }}>
             <DateTimeText value={session.updatedAt} format={"time"} />
           </Typography>
           <CommandButton
@@ -163,6 +167,23 @@ const SessionCardBody = (props: {
     <CardActionArea component={"div"} onClick={props.onClick} aria-label={props["aria-label"]}>
       {content}
     </CardActionArea>
+  )
+}
+
+/** The branch of the worktree the session works in, or the worktree's name when its HEAD is detached. */
+const WorktreeIndicator = (props: { worktree: ClaudeWorktree }) => {
+  const { worktree } = props
+
+  return (
+    <Stack
+      direction={"row"}
+      spacing={0.5}
+      sx={{ alignItems: "center", color: "text.secondary", minWidth: 0 }}
+      title={worktree.path}
+    >
+      <ForkRightOutlined fontSize={"small"} />
+      <Typography variant={"caption"} noWrap>{worktree.branch ?? worktree.name}</Typography>
+    </Stack>
   )
 }
 

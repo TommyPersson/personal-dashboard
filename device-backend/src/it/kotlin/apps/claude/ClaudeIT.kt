@@ -43,6 +43,37 @@ class ClaudeIT : IntegrationTest() {
     }
 
     @Test
+    fun `a session in a worktree shows it, with the main checkout as its project, until the hook finds none`() {
+        postEvent(
+            "UserPromptSubmit",
+            "project_dir" to "C:\\work\\personal-dashboard\\.claude\\worktrees\\brave-otter",
+            "git_worktree" to mapOf(
+                "path" to "C:/work/personal-dashboard/.claude/worktrees/brave-otter",
+                "branch" to "claude/brave-otter",
+                "repository_dir" to "C:/work/personal-dashboard",
+            ),
+        )
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].project", equalTo("personal-dashboard"))
+            body("sessions[0].worktree.name", equalTo("brave-otter"))
+            body("sessions[0].worktree.branch", equalTo("claude/brave-otter"))
+            body("sessions[0].worktree.path", equalTo("C:/work/personal-dashboard/.claude/worktrees/brave-otter"))
+        }
+
+        // Only some events carry the worktree; the others keep it.
+        postEvent("PreToolUse", "tool_name" to "Bash")
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].worktree.name", equalTo("brave-otter"))
+        }
+
+        postEvent("Stop", "git_worktree" to null)
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions[0].worktree", nullValue())
+        }
+    }
+
+    @Test
     fun `the desktop app's task list is folded from its updates`() {
         postEvent("UserPromptSubmit", "prompt" to "Do things")
         postToolUse(
@@ -368,7 +399,7 @@ class ClaudeIT : IntegrationTest() {
     private fun postToolUse(toolName: String, toolInput: Map<String, Any>) =
         postEvent("PostToolUse", "tool_name" to toolName, "tool_input" to toolInput)
 
-    private fun postEvent(hookEventName: String, vararg fields: Pair<String, Any>, sessionId: String = SESSION_ID) {
+    private fun postEvent(hookEventName: String, vararg fields: Pair<String, Any?>, sessionId: String = SESSION_ID) {
         val event = mapOf(
             "session_id" to sessionId,
             "cwd" to "C:\\work\\personal-dashboard",

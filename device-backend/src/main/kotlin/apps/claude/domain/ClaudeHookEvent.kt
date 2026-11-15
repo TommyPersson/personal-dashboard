@@ -15,6 +15,19 @@ class ClaudeHookEvent(private val json: JsonNode) {
     val cwd: String? get() = json.text("project_dir") ?: json.text("cwd")
     /** The Claude desktop app's ID for the session, added by the hook script; anything but a `local_…` ID is ignored. */
     val desktopSessionId: String? get() = json.text("host_session_id")?.takeIf { DESKTOP_SESSION_ID.matches(it) }
+    /**
+     * Whether the hook script looked up the session's git worktree, which it only does for some events: then
+     * [worktree] is `null` when the session isn't in a linked worktree.
+     */
+    val hasWorktreeInfo: Boolean get() = json.has("git_worktree")
+    val worktree: ClaudeWorktree?
+        get() = json["git_worktree"]?.takeIf { it.isObject }?.let { worktree ->
+            ClaudeWorktree(
+                path = worktree.text("path") ?: return null,
+                branch = worktree.text("branch"),
+                repositoryDir = worktree.text("repository_dir"),
+            )
+        }
     val toolName: String? get() = json.text("tool_name")
     val toolInput: JsonNode get() = json["tool_input"] ?: MissingNode.getInstance()
     val toolUseId: String? get() = json.text("tool_use_id")
@@ -38,7 +51,12 @@ class ClaudeHookEvent(private val json: JsonNode) {
 
 /** Folds [event] into the session's state. */
 fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
-    val session = copy(cwd = event.cwd ?: cwd, desktopSessionId = event.desktopSessionId ?: desktopSessionId, updatedAt = now)
+    val session = copy(
+        cwd = event.cwd ?: cwd,
+        desktopSessionId = event.desktopSessionId ?: desktopSessionId,
+        worktree = if (event.hasWorktreeInfo) event.worktree else worktree,
+        updatedAt = now,
+    )
 
     return when (event.hookEventName) {
         // Claude Code itself submits these, e.g. when a background task finishes: Claude picks the turn up again,

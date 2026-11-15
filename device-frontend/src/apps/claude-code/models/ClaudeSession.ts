@@ -16,10 +16,19 @@ export const ClaudePlanItemSchema = z.object({
 
 export type ClaudePlanItem = z.infer<typeof ClaudePlanItemSchema>
 
+export const ClaudeWorktreeSchema = z.object({
+  name: z.string(),
+  path: z.string(),
+  branch: z.string().nullable(),
+})
+
+export type ClaudeWorktree = z.infer<typeof ClaudeWorktreeSchema>
+
 export const ClaudeSessionSchema = z.object({
   id: z.string(),
   project: z.string().nullable(),
   cwd: z.string().nullable(),
+  worktree: ClaudeWorktreeSchema.nullable(),
   canOpenOnWorkstation: z.boolean(),
   prompt: z.string().nullable(),
   status: ClaudeSessionStatusSchema,

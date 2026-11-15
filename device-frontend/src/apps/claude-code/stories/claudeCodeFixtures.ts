@@ -13,7 +13,13 @@ function minutesAgo(minutes: number) {
 export const workingSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-working",
   project: "personal-dashboard",
-  cwd: "C:\\work\\personal-dashboard",
+  cwd: "C:\\work\\personal-dashboard\\.claude\\worktrees\\brave-otter-4f2a",
+  // A desktop app session in its own worktree.
+  worktree: {
+    name: "brave-otter-4f2a",
+    path: "C:/work/personal-dashboard/.claude/worktrees/brave-otter-4f2a",
+    branch: "claude/claude-code-app",
+  },
   canOpenOnWorkstation: true,
   prompt: "Add an app that shows what my Claude Code sessions are doing, updated live over the websocket.",
   status: "Working",
@@ -37,6 +43,7 @@ export const waitingSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-waiting",
   project: "winctrl",
   cwd: "C:\\work\\winctrl",
+  worktree: null,
   canOpenOnWorkstation: true,
   prompt: "Clean up the build output",
   status: "WaitingForInput",
@@ -57,6 +64,7 @@ export const idleSession: ClaudeSession = ClaudeSessionSchema.parse({
   id: "session-idle",
   project: "dotfiles",
   cwd: "C:\\Users\\me\\dotfiles",
+  worktree: null,
   // A CLI session: the desktop app doesn't run it, so it can't be opened there.
   canOpenOnWorkstation: false,
   prompt: "Why does my prompt show the wrong git branch?",

@@ -8,6 +8,8 @@ data class ClaudeSession(
     val cwd: String?,
     /** The Claude desktop app's ID for the session; `null` for sessions it doesn't run, such as the CLI's. */
     val desktopSessionId: String? = null,
+    /** The linked git worktree the session works in; `null` for a main checkout, or when it isn't known yet. */
+    val worktree: ClaudeWorktree? = null,
     /** The latest prompt submitted in the session. */
     val prompt: String?,
     val status: ClaudeSessionStatus,
@@ -44,6 +46,15 @@ data class ClaudeSession(
         )
     }
 }
+
+data class ClaudeWorktree(
+    /** The worktree's root folder. */
+    val path: String,
+    /** The branch checked out in it; `null` when its HEAD is detached. */
+    val branch: String?,
+    /** The main checkout's folder; `null` for a bare repository. */
+    val repositoryDir: String?,
+)
 
 data class ClaudeToolCall(
     /** The hook payload's `tool_use_id`. */
