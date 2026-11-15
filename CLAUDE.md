@@ -120,6 +120,8 @@ The WinCtrl companion app is located at https://github.com/TommyPersson/winctrl.
 Shows what Claude Code sessions on the workstation are doing. It is fed by Claude Code hooks on the PC that run
 `tools/claude-hooks/forward-event.mjs`, which POSTs each hook payload to `/api/apps/claude/events`;
 the backend folds the events into per-session state (`apps/claude/domain/ClaudeHookEvent.kt`).
+Sessions run by the Claude desktop app carry its `local_…` ID (`CLAUDE_CODE_HOST_SESSION_ID`), so the dashboard can
+open them on the PC through WinCtrl with the desktop app's (undocumented) `claude://code/continue?session=` link.
 
 The hooks are packaged as the `personal-dashboard` plugin (`tools/claude-hooks`, listed by the repository's
 `.claude-plugin/marketplace.json`). Its "Dashboard backend URLs" option (default `http://localhost:8080`; several

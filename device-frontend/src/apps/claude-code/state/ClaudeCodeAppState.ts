@@ -1,5 +1,6 @@
 import { DiscardAllClaudeSessions } from "@src/apps/claude-code/actions/DiscardAllClaudeSessions.ts"
 import { DiscardClaudeSession } from "@src/apps/claude-code/actions/DiscardClaudeSession.ts"
+import { OpenClaudeSessionOnWorkstation } from "@src/apps/claude-code/actions/OpenClaudeSessionOnWorkstation.ts"
 import { ClaudeSessionsEntity } from "@src/apps/claude-code/entities/ClaudeSessionsEntity.ts"
 import { ClaudeSessionRemovedMessage, ClaudeSessionUpdatedMessage } from "@src/apps/claude-code/messages/ClaudeSessionMessages.ts"
 import { ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
@@ -18,6 +19,8 @@ export type ClaudeCodeAppState = {
   error: Error | null
   discard: (session: ClaudeSession) => void
   discardAll: () => void
+  /** Opens the session in the Claude desktop app on the workstation. */
+  openOnWorkstation: (session: ClaudeSession) => void
 }
 
 export function useClaudeCodeAppState(): ClaudeCodeAppState {
@@ -41,6 +44,12 @@ export function useClaudeCodeAppState(): ClaudeCodeAppState {
     fetchAsync()
   }, [executeDiscardAll, fetchAsync])
 
+  const { execute: executeOpenOnWorkstation } = useAction(OpenClaudeSessionOnWorkstation)
+
+  const openOnWorkstation = useCallback((session: ClaudeSession) => {
+    executeOpenOnWorkstation({ sessionId: session.id })
+  }, [executeOpenOnWorkstation])
+
   // Updates arrive over the websocket; the interval only catches up after the websocket has reconnected.
   useMessageListener(ClaudeSessionUpdatedMessage, fetchAsync)
   useMessageListener(ClaudeSessionRemovedMessage, fetchAsync)
@@ -55,5 +64,6 @@ export function useClaudeCodeAppState(): ClaudeCodeAppState {
     error: entity.error,
     discard,
     discardAll,
-  }), [sessions, waitingSessions, entity.error, discard, discardAll])
+    openOnWorkstation,
+  }), [sessions, waitingSessions, entity.error, discard, discardAll, openOnWorkstation])
 }

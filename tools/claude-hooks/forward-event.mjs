@@ -31,6 +31,9 @@ process.stdin.on("end", async () => {
     const event = JSON.parse(input)
     // `cwd` follows the shell's working directory; the project directory is the session's folder.
     event.project_dir = process.env.CLAUDE_PROJECT_DIR
+    // The Claude desktop app's own ID for the session (`local_…`), which its `claude://` links take. Only set for
+    // sessions run by the desktop app.
+    event.host_session_id = process.env.CLAUDE_CODE_HOST_SESSION_ID
     delete event.tool_response
     if (event.tool_input) {
       event.tool_input = truncateStrings(event.tool_input)

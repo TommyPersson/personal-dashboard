@@ -1,5 +1,7 @@
 package apps.claude
 
+import com.github.tomakehurst.wiremock.client.WireMock
+
 import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.Then
@@ -331,6 +333,31 @@ class ClaudeIT : IntegrationTest() {
             body("items[0].title", equalTo("Claude stopped with an error in personal-dashboard"))
             body("items[0].description", equalTo("Try again"))
         }
+    }
+
+    @Test
+    fun `desktop app sessions are opened on the workstation through WinCtrl`() {
+        postEvent("SessionStart", "host_session_id" to "local_cfb3f127-b247-49a7-bec0-9526798df85a")
+        // Later events keep the ID, and an ID the desktop app wouldn't accept is ignored.
+        postEvent("UserPromptSubmit", "prompt" to "Hello")
+        postEvent("SessionStart", "host_session_id" to "local_x&evil=1", sessionId = "bad-id")
+        postEvent("SessionStart", sessionId = "cli")
+
+        When { get("/api/apps/claude/sessions") } Then {
+            body("sessions.find { it.id == '$SESSION_ID' }.canOpenOnWorkstation", equalTo(true))
+            body("sessions.find { it.id == 'bad-id' }.canOpenOnWorkstation", equalTo(false))
+            body("sessions.find { it.id == 'cli' }.canOpenOnWorkstation", equalTo(false))
+        }
+
+        When { post("/api/apps/claude/sessions/$SESSION_ID/actions/open-on-workstation") } Then { statusCode(200) }
+        When { post("/api/apps/claude/sessions/cli/actions/open-on-workstation") } Then { statusCode(404) }
+        When { post("/api/apps/claude/sessions/unknown/actions/open-on-workstation") } Then { statusCode(404) }
+
+        winCtrl.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/api/processes/actions/open-url")))
+        winCtrl.verify(
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/processes/actions/open-url"))
+                .withRequestBody(WireMock.equalTo("claude://code/continue?session=local_cfb3f127-b247-49a7-bec0-9526798df85a"))
+        )
     }
 
     private fun postToolUse(toolName: String, toolInput: Map<String, Any>) =

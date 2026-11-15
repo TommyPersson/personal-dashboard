@@ -13,6 +13,8 @@ data class ClaudeSessionDTO(
     /** The last part of the session's working directory. */
     val project: String?,
     val cwd: String?,
+    /** Whether the session can be opened in the Claude desktop app on the workstation. */
+    val canOpenOnWorkstation: Boolean,
     val prompt: String?,
     val status: String,
     val waitingFor: String?,
@@ -35,6 +37,7 @@ fun ClaudeSession.toDTO() = ClaudeSessionDTO(
     id = id,
     project = cwd?.trimEnd('/', '\\')?.substringAfterLast('/')?.substringAfterLast('\\'),
     cwd = cwd,
+    canOpenOnWorkstation = desktopSessionId != null,
     prompt = prompt,
     status = status.name,
     waitingFor = waitingFor,

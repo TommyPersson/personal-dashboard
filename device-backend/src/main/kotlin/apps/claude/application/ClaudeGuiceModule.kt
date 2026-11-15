@@ -3,6 +3,7 @@ package apps.claude.application
 import apps.claude.application.commands.DiscardAllClaudeSessionsCommandHandler
 import apps.claude.application.commands.DiscardClaudeSessionCommandHandler
 import apps.claude.application.commands.HandleClaudeHookEventCommandHandler
+import apps.claude.application.commands.OpenClaudeSessionCommandHandler
 import apps.claude.application.queries.GetClaudeSessionsQueryHandler
 import apps.claude.domain.ClaudeSessionRepository
 import apps.claude.infrastructure.ClaudeSessionRepositoryImpl
@@ -17,6 +18,7 @@ class ClaudeGuiceModule : Module {
         binder.bindRequestHandler<HandleClaudeHookEventCommandHandler>()
         binder.bindRequestHandler<DiscardClaudeSessionCommandHandler>()
         binder.bindRequestHandler<DiscardAllClaudeSessionsCommandHandler>()
+        binder.bindRequestHandler<OpenClaudeSessionCommandHandler>()
         binder.bindRequestHandler<GetClaudeSessionsQueryHandler>()
         binder.bind(ClaudeSessionRepository::class.java).to(ClaudeSessionRepositoryImpl::class.java)
     }

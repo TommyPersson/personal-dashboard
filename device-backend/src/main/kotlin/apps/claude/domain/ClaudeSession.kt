@@ -6,6 +6,8 @@ import java.time.Instant
 data class ClaudeSession(
     val id: String,
     val cwd: String?,
+    /** The Claude desktop app's ID for the session; `null` for sessions it doesn't run, such as the CLI's. */
+    val desktopSessionId: String? = null,
     /** The latest prompt submitted in the session. */
     val prompt: String?,
     val status: ClaudeSessionStatus,

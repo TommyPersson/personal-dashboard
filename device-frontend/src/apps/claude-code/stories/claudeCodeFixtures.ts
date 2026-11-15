@@ -11,6 +11,7 @@ export const workingSession: ClaudeSession = {
   id: "session-working",
   project: "personal-dashboard",
   cwd: "C:\\work\\personal-dashboard",
+  canOpenOnWorkstation: true,
   prompt: "Add an app that shows what my Claude Code sessions are doing, updated live over the websocket.",
   status: "Working",
   waitingFor: null,
@@ -33,6 +34,7 @@ export const waitingSession: ClaudeSession = {
   id: "session-waiting",
   project: "winctrl",
   cwd: "C:\\work\\winctrl",
+  canOpenOnWorkstation: true,
   prompt: "Clean up the build output",
   status: "WaitingForInput",
   waitingFor: "Permission: Delete the build directory",
@@ -52,6 +54,8 @@ export const idleSession: ClaudeSession = {
   id: "session-idle",
   project: "dotfiles",
   cwd: "C:\\Users\\me\\dotfiles",
+  // A CLI session: the desktop app doesn't run it, so it can't be opened there.
+  canOpenOnWorkstation: false,
   prompt: "Why does my prompt show the wrong git branch?",
   status: "Idle",
   waitingFor: null,
@@ -76,6 +80,7 @@ export function claudeCodeState(overrides: Partial<ClaudeCodeAppState> = {}): Cl
     error: null,
     discard: fn(),
     discardAll: fn(),
+    openOnWorkstation: fn(),
     ...overrides,
   }
 }

@@ -11,6 +11,8 @@ export type ClaudeSession = {
   id: string
   project: string | null
   cwd: string | null
+  /** Whether the session can be opened in the Claude desktop app on the workstation. */
+  canOpenOnWorkstation: boolean
   prompt: string | null
   status: ClaudeSessionStatus
   waitingFor: string | null

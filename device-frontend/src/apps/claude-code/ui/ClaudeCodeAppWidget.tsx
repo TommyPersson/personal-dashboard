@@ -9,6 +9,7 @@ import {
   Alert,
   Button,
   Card,
+  CardActionArea,
   CardContent,
   Chip,
   CircularProgress,
@@ -49,7 +50,12 @@ export const ClaudeCodeAppWidget = React.memo((props: { state: ClaudeCodeAppStat
         />
         {state.sessions.length > 0 ? (
           state.sessions.map(it => (
-            <SessionCard key={it.id} session={it} onDiscard={() => state.discard(it)} />
+            <SessionCard
+              key={it.id}
+              session={it}
+              onDiscard={() => state.discard(it)}
+              onOpenOnWorkstation={() => state.openOnWorkstation(it)}
+            />
           ))
         ) : (
           <EmptyState icon={<SmartToyOutlined />} description={"No active sessions"} />
@@ -59,79 +65,96 @@ export const ClaudeCodeAppWidget = React.memo((props: { state: ClaudeCodeAppStat
   )
 })
 
-const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void }) => {
-  const { session, onDiscard } = props
+const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onOpenOnWorkstation: () => void }) => {
+  const { session, onDiscard, onOpenOnWorkstation } = props
   const [expanded, setExpanded] = useState(true)
 
   return (
     <Card variant={"outlined"} className={classes.SessionCard}>
-      <CardContent>
-        <Stack>
-          <Stack
-            direction={"row"}
-            spacing={1}
-            sx={{ alignItems: "center" }}
-            className={classes.Header}
-            onClick={() => setExpanded(it => !it)}
-            role={"button"}
-            aria-expanded={expanded}
+      <CardContent sx={{ pb: expanded ? 1 : undefined }}>
+        <Stack
+          direction={"row"}
+          spacing={1}
+          sx={{ alignItems: "center" }}
+          className={classes.Header}
+          onClick={() => setExpanded(it => !it)}
+          role={"button"}
+          aria-expanded={expanded}
+        >
+          <Typography variant={"subtitle1"} sx={{ fontWeight: 500 }} noWrap>
+            {session.project ?? "Unknown project"}
+          </Typography>
+          <StatusChip session={session} />
+          <RunTime session={session} />
+          <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right" }}>
+            {formatTime(session.updatedAt)}
+          </Typography>
+          <IconButton
+            onClick={e => {
+              e.stopPropagation()
+              onDiscard()
+            }}
+            aria-label={"Discard session"}
+            edge={"end"}
           >
-            <Typography variant={"subtitle1"} sx={{ fontWeight: 500 }} noWrap>
-              {session.project ?? "Unknown project"}
-            </Typography>
-            <StatusChip session={session} />
-            <RunTime session={session} />
-            <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right" }}>
-              {formatTime(session.updatedAt)}
-            </Typography>
-            <IconButton
-              onClick={e => {
-                e.stopPropagation()
-                onDiscard()
-              }}
-              aria-label={"Discard session"}
-              edge={"end"}
-            >
-              <CloseOutlined />
-            </IconButton>
-          </Stack>
-
-          <Collapse in={expanded}>
-            <Stack spacing={1} sx={{ pt: 1 }}>
-              {session.prompt && (
-                <Typography variant={"body2"} className={classes.Prompt}>{session.prompt}</Typography>
-              )}
-
-              {session.status === "WaitingForInput" && (
-                <Alert severity={"warning"} variant={"filled"}>
-                  <strong>Waiting for response</strong>
-                  {session.waitingFor && <><br />{session.waitingFor}</>}
-                </Alert>
-              )}
-
-              {session.plan.length > 0 && (
-                <List dense disablePadding>
-                  {session.plan.map((it, i) => <PlanItem key={i} item={it} />)}
-                </List>
-              )}
-
-              {session.status === "Idle" && session.result && (
-                <Typography variant={"body2"} color={"text.secondary"} className={classes.Result}>
-                  {session.result}
-                </Typography>
-              )}
-
-              {session.currentActivity && (
-                <Stack direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
-                  <CircularProgress size={14} />
-                  <Typography variant={"caption"} color={"text.secondary"} noWrap>{session.currentActivity}</Typography>
-                </Stack>
-              )}
-            </Stack>
-          </Collapse>
+            <CloseOutlined />
+          </IconButton>
         </Stack>
       </CardContent>
+
+      <Collapse in={expanded}>
+        {/* The header toggles the card; the body opens the session on the PC, when the desktop app runs it. */}
+        <SessionCardBody onClick={session.canOpenOnWorkstation ? onOpenOnWorkstation : undefined}>
+          <Stack spacing={1}>
+            {session.prompt && (
+              <Typography variant={"body2"} className={classes.Prompt}>{session.prompt}</Typography>
+            )}
+
+            {session.status === "WaitingForInput" && (
+              <Alert severity={"warning"} variant={"filled"}>
+                <strong>Waiting for response</strong>
+                {session.waitingFor && <><br />{session.waitingFor}</>}
+              </Alert>
+            )}
+
+            {session.plan.length > 0 && (
+              <List dense disablePadding>
+                {session.plan.map((it, i) => <PlanItem key={i} item={it} />)}
+              </List>
+            )}
+
+            {session.status === "Idle" && session.result && (
+              <Typography variant={"body2"} color={"text.secondary"} className={classes.Result}>
+                {session.result}
+              </Typography>
+            )}
+
+            {session.currentActivity && (
+              <Stack direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
+                <CircularProgress size={14} />
+                <Typography variant={"caption"} color={"text.secondary"} noWrap>{session.currentActivity}</Typography>
+              </Stack>
+            )}
+          </Stack>
+        </SessionCardBody>
+      </Collapse>
     </Card>
+  )
+}
+
+/** The card's content below the header, clickable (with the card's ripple) when given [onClick]. */
+const SessionCardBody = (props: { onClick?: () => void, children: React.ReactNode }) => {
+  const content = <CardContent sx={{ pt: 0 }}>{props.children}</CardContent>
+
+  if (!props.onClick) {
+    return content
+  }
+
+  // A div rather than the default button, as the content has lists and other block elements.
+  return (
+    <CardActionArea component={"div"} onClick={props.onClick} aria-label={"Open session on the PC"}>
+      {content}
+    </CardActionArea>
   )
 }
 

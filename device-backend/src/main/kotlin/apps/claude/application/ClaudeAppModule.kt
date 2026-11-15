@@ -3,12 +3,14 @@ package apps.claude.application
 import apps.claude.application.commands.DiscardAllClaudeSessions
 import apps.claude.application.commands.DiscardClaudeSession
 import apps.claude.application.commands.HandleClaudeHookEvent
+import apps.claude.application.commands.OpenClaudeSession
 import apps.claude.application.queries.GetClaudeSessions
 import apps.claude.domain.ClaudeHookEvent
 import com.fasterxml.jackson.databind.JsonNode
 import common.contracts.OkResponseDTO
 import framework.AppModule
 import framework.mediator.Mediator
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -40,6 +42,14 @@ class ClaudeAppModule @Inject constructor(
             post("/api/apps/claude/sessions/{id}/actions/discard") {
                 mediator.send(DiscardClaudeSession(call.parameters.getOrFail("id")))
                 call.respond(OkResponseDTO())
+            }
+
+            post("/api/apps/claude/sessions/{id}/actions/open-on-workstation") {
+                if (mediator.send(OpenClaudeSession(call.parameters.getOrFail("id")))) {
+                    call.respond(OkResponseDTO())
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
     }

@@ -13,6 +13,8 @@ class ClaudeHookEvent(private val json: JsonNode) {
     val hookEventName: String? get() = json.text("hook_event_name")
     /** The session's folder: the project directory the hook script adds, or else the current working directory. */
     val cwd: String? get() = json.text("project_dir") ?: json.text("cwd")
+    /** The Claude desktop app's ID for the session, added by the hook script; anything but a `local_…` ID is ignored. */
+    val desktopSessionId: String? get() = json.text("host_session_id")?.takeIf { DESKTOP_SESSION_ID.matches(it) }
     val toolName: String? get() = json.text("tool_name")
     val toolInput: JsonNode get() = json["tool_input"] ?: MissingNode.getInstance()
     val toolUseId: String? get() = json.text("tool_use_id")
@@ -36,7 +38,7 @@ class ClaudeHookEvent(private val json: JsonNode) {
 
 /** Folds [event] into the session's state. */
 fun ClaudeSession.apply(event: ClaudeHookEvent, now: Instant): ClaudeSession {
-    val session = copy(cwd = event.cwd ?: cwd, updatedAt = now)
+    val session = copy(cwd = event.cwd ?: cwd, desktopSessionId = event.desktopSessionId ?: desktopSessionId, updatedAt = now)
 
     return when (event.hookEventName) {
         // Claude Code itself submits these, e.g. when a background task finishes: Claude picks the turn up again,
@@ -227,5 +229,8 @@ internal fun summarizeMessage(message: String): String? {
     val cut = text.substring(0, MAX_RESULT_LENGTH)
     return cut.substring(0, cut.lastIndexOf(' ').takeIf { it > MAX_RESULT_LENGTH / 2 } ?: cut.length).trimEnd() + "…"
 }
+
+/** What the desktop app accepts in its `claude://code/continue?session=` links. */
+private val DESKTOP_SESSION_ID = Regex("^local_[A-Za-z0-9-]{1,64}$")
 
 private fun JsonNode.text(field: String): String? = get(field)?.takeIf { it.isTextual }?.asText()
