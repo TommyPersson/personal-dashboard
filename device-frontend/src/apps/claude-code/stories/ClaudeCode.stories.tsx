@@ -3,7 +3,9 @@ import { ClaudeCodeAppBarIcon } from "@src/apps/claude-code/ui/ClaudeCodeAppBarI
 import { ClaudeCodeAppWidget } from "@src/apps/claude-code/ui/ClaudeCodeAppWidget.tsx"
 import { ClaudeCodeLockScreenIcon } from "@src/apps/claude-code/ui/ClaudeCodeLockScreenIcon.tsx"
 import { withAppBar, withAppSlot, withLockScreen } from "@src/storybook/frames.tsx"
+import { apiError } from "@src/storybook/msw.ts"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { http } from "msw"
 
 const meta = {
   title: "Apps/Claude Code",
@@ -40,6 +42,19 @@ export const AppWidgetLongResult: Story = {
     }),
   },
   decorators: [withAppSlot],
+}
+
+/** Discarding and opening on the PC fail, showing the commands' errors. */
+export const AppWidgetActionsFailing: Story = {
+  args: { state: claudeCodeState({ sessions: [workingSession] }) },
+  decorators: [withAppSlot],
+  parameters: {
+    msw: {
+      handlers: {
+        claude: http.post("/api/apps/claude/sessions/*", () => apiError(503, "WINCTRL_UNAVAILABLE", "WinCtrl is not responding")),
+      },
+    },
+  },
 }
 
 export const AppWidgetEmpty: Story = {

@@ -1,19 +1,12 @@
-import {
-  CheckCircleOutlined,
-  CloseOutlined,
-  RadioButtonUncheckedOutlined,
-  SmartToyOutlined,
-  TimerOutlined,
-} from "@mui/icons-material"
+import { CheckCircleOutlined, RadioButtonUncheckedOutlined, SmartToyOutlined, TimerOutlined } from "@mui/icons-material"
 import {
   Alert,
-  Button,
+  AlertTitle,
   Card,
   CardActionArea,
   CardContent,
   CircularProgress,
   Collapse,
-  IconButton,
   LinearProgress,
   List,
   ListItem,
@@ -22,12 +15,17 @@ import {
   Stack,
   Typography,
 } from "@mui/material"
+import { DiscardAllClaudeSessionsCommand } from "@src/apps/claude-code/commands/DiscardAllClaudeSessionsCommand.ts"
+import { DiscardClaudeSessionCommand } from "@src/apps/claude-code/commands/DiscardClaudeSessionCommand.ts"
+import { OpenClaudeSessionOnWorkstationCommand } from "@src/apps/claude-code/commands/OpenClaudeSessionOnWorkstationCommand.ts"
 import { ClaudePlanItem, ClaudeSession } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { AppWidget, AppWidgetHeader } from "@src/common/components/AppWidget/AppWidget.tsx"
+import { CommandButton } from "@src/common/components/CommandButton/CommandButton.tsx"
 import { DateTimeText } from "@src/common/components/DateTimeText/DateTimeText.tsx"
 import { DurationText } from "@src/common/components/DurationText/DurationText.tsx"
 import { EmptyState } from "@src/common/components/EmptyState/EmptyState.tsx"
+import { useCommand } from "@src/infrastructure/framework/commands/useCommand.ts"
 import { useNow } from "@src/infrastructure/hooks/useNow"
 import React, { useCallback, useState } from "react"
 
@@ -43,23 +41,11 @@ export const ClaudeCodeAppWidget = React.memo((props: { state: ClaudeCodeAppStat
           title={"Claude Code"}
           icon={<SmartToyOutlined />}
           rightContent={
-            <Button
-              onClick={state.discardAll}
-              disabled={state.sessions.length === 0}
-              startIcon={<CloseOutlined />}
-              children={"Clear"}
-            />
+            <CommandButton command={DiscardAllClaudeSessionsCommand} disabled={state.sessions.length === 0} />
           }
         />
         {state.sessions.length > 0 ? (
-          state.sessions.map(it => (
-            <SessionCard
-              key={it.id}
-              session={it}
-              onDiscard={() => state.discard(it)}
-              onOpenOnWorkstation={() => state.openOnWorkstation(it)}
-            />
-          ))
+          state.sessions.map(it => <SessionCard key={it.id} session={it} />)
         ) : (
           <EmptyState icon={<SmartToyOutlined />} description={"No active sessions"} />
         )}
@@ -68,15 +54,16 @@ export const ClaudeCodeAppWidget = React.memo((props: { state: ClaudeCodeAppStat
   )
 })
 
-const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onOpenOnWorkstation: () => void }) => {
-  const { session, onDiscard, onOpenOnWorkstation } = props
+const SessionCard = (props: { session: ClaudeSession }) => {
+  const { session } = props
   const [expanded, setExpanded] = useState(true)
 
-  const handleBodyClicked = session.canOpenOnWorkstation ? onOpenOnWorkstation : undefined
-  const handleDiscardClicked = useCallback((e: React.MouseEvent<any>) => {
-    e.stopPropagation()
-    onDiscard()
-  }, [onDiscard])
+  const openOnWorkstation = useCommand(OpenClaudeSessionOnWorkstationCommand)
+  const { execute: executeOpenOnWorkstation } = openOnWorkstation
+
+  const handleBodyClicked = useCallback(() => {
+    executeOpenOnWorkstation({ sessionId: session.id })
+  }, [executeOpenOnWorkstation, session.id])
 
   return (
     <Card variant={"outlined"} className={classes.SessionCard}>
@@ -96,13 +83,12 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onO
           <Typography variant={"caption"} color={"text.secondary"} sx={{ flex: 1, textAlign: "right" }}>
             <DateTimeText value={session.updatedAt} format={"time"} />
           </Typography>
-          <IconButton
-            onClick={handleDiscardClicked}
-            aria-label={"Discard session"}
+          <CommandButton
+            command={DiscardClaudeSessionCommand}
+            args={{ sessionId: session.id }}
+            iconOnly
             edge={"end"}
-          >
-            <CloseOutlined />
-          </IconButton>
+          />
         </Stack>
 
         {session.status !== "Idle" && (
@@ -114,8 +100,23 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onO
       </CardContent>
 
       <Collapse in={expanded}>
-        <SessionCardBody onClick={handleBodyClicked}>
+        <SessionCardBody
+          onClick={session.canOpenOnWorkstation ? handleBodyClicked : undefined}
+          aria-label={OpenClaudeSessionOnWorkstationCommand.label}
+        >
           <Stack spacing={1}>
+            {openOnWorkstation.error && (
+              <Alert
+                severity={"error"}
+                onClose={openOnWorkstation.reset}
+                // Inside the action area, so closing it would otherwise open the session again
+                onClick={e => e.stopPropagation()}
+              >
+                <AlertTitle>{OpenClaudeSessionOnWorkstationCommand.errorTitle}</AlertTitle>
+                {openOnWorkstation.error.message}
+              </Alert>
+            )}
+
             {session.prompt && (
               <Typography variant={"body2"} className={classes.Prompt}>{session.prompt}</Typography>
             )}
@@ -140,7 +141,11 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onO
             )}
 
             <Stack direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
-              {session.currentActivity && <CurrentActivityIndicator session={session} />}
+              {openOnWorkstation.isPending ? (
+                <ActivityIndicator text={"Opening on the PC…"} />
+              ) : session.currentActivity && (
+                <ActivityIndicator text={session.currentActivity} />
+              )}
               <div style={{ flex: 1 }} />
               <PromptDurationIndicator session={session} />
             </Stack>
@@ -153,6 +158,7 @@ const SessionCard = (props: { session: ClaudeSession, onDiscard: () => void, onO
 
 const SessionCardBody = (props: {
   onClick?: () => void,
+  "aria-label": string,
   children: React.ReactNode
 }) => {
   const content = (
@@ -164,18 +170,18 @@ const SessionCardBody = (props: {
   }
 
   return (
-    <CardActionArea component={"div"} onClick={props.onClick} aria-label={"Open session on the PC"}>
+    <CardActionArea component={"div"} onClick={props.onClick} aria-label={props["aria-label"]}>
       {content}
     </CardActionArea>
   )
 }
 
-const CurrentActivityIndicator = (props: { session: ClaudeSession }) => {
+const ActivityIndicator = (props: { text: string }) => {
   return (
     <>
       <CircularProgress size={14} />
       <Typography variant={"caption"} color={"text.secondary"} noWrap>
-        {props.session.currentActivity}
+        {props.text}
       </Typography>
     </>
   )

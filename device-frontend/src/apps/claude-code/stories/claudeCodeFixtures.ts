@@ -1,7 +1,6 @@
 import { ClaudeSession, ClaudeSessionSchema } from "@src/apps/claude-code/models/ClaudeSession.ts"
 import { ClaudeCodeAppState } from "@src/apps/claude-code/state/ClaudeCodeAppState.ts"
 import { DateTime } from "luxon"
-import { fn } from "storybook/test"
 
 /** Relative to now, so the run time of sessions that are still working looks realistic. */
 function minutesAgo(minutes: number) {
@@ -82,9 +81,6 @@ export function claudeCodeState(overrides: Partial<ClaudeCodeAppState> = {}): Cl
     sessions,
     sessionsRequiringInput: sessions.filter(it => it.status === "WaitingForInput"),
     error: null,
-    discard: fn(),
-    discardAll: fn(),
-    openOnWorkstation: fn(),
     ...overrides,
   }
 }
